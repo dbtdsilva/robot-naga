@@ -4,6 +4,20 @@
 #include "rmi-mr32.h"
 
 
+//minimum distances of micro rato (avoid hit)
+#define MIN_DIST_LEFT 20 //cm
+#define MIN_DIST_RIGHT 20 //
+#define MIN_DIST_FRONT 30 //
+
+//velocities to control motors
+#define VEL_CONTORNAR 30 //em pw 
+#define VEL_MIN 10 
+#define VEL_MIN_PESO 30 //definido com o peso em chão liso 
+#define VEL_MIN_RUGOSO 40 //campo de futebol- alcatifa
+#define VEL_MAX 35
+#define RANGE (VEL_MAX- VEL_MIN)/4
+
+
 double getRealDistance(double d);
 int parseSensors();
 
@@ -11,12 +25,22 @@ struct Avoid {
    //ainda nao sei o que vai ser preciso
 } ; 
 
+//guarda o buffer e retir a mediana
+int medianF(int newValue);
+int medianL(int newValue);
+int medianR(int newValue);
+
 extern Avoid distanceSensors;
 
 int parseSensors(){
 	if (tick20ms==1){
 		tick20ms = 0;
 		readAnalogSensors();
+		
+		double dist_front = medianF(getRealDistance(analogSensors.obstSensFront));
+		double dist_left = medianL(getRealDistance(analogSensors.obstSensLeft));
+		double dist_right = medianR(getRealDistance(analogSensors.obstSensRight));
+
 		//verify---------------------------------
 		/*int left_wall=0, right_wall= 0, front_wall = 0;
 		double tmp;

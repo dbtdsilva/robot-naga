@@ -13,6 +13,7 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 #define GROUND_HISTORY     100
 // Increase velocity when moving forward
 #define STATIC_INCREASE    0
+#define BASE_SPEED         60
 
 // LAP Configuration
 #define NUMBER_OF_LAPS     2
@@ -27,12 +28,13 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 #define DEBUG_VERBOSE
 #ifdef DEBUG_VERBOSE
 //   #define DEBUG_BLUETOOTH
-   #ifdef DEBUG_BLUETOOTH
-      #include "bluetooth_comm.h"
-   #endif
 //   #define DEBUG_PID
 //   #define DEBUG_POSITION 
 //   #define DEBUG_OBSTACLE
+#endif
+
+#ifdef DEBUG_BLUETOOTH
+   #include "bluetooth_comm.h"
 #endif
 
 int ground_records_stored = 0;
@@ -138,9 +140,11 @@ int main(void)
          if (left && center && right && number_of_cycles >= LAP_MIN_CYCLES &&
                abs(current_position.x - start_position.x) <= LAP_DIFF_X &&
                abs(current_position.y - current_position.y) <= LAP_DIFF_Y) {
-            printf("Lap finished!\n");
-            laps_finished++;
 
+            laps_finished++;
+#ifdef DEBUG_VERBOSE
+            printf("\n\n> LAP FINISHED! <\n\n");
+#endif
 #ifdef LAP_INVERT_EVEN
             if (laps_finished % 2 != 0)
                rotateRel(100, -M_PI);
@@ -263,14 +267,14 @@ void follow_line()
    velocity_increment += integral_error;
    velocity_increment += derivative_error;
 
+#ifdef DEBUG_PID
+   printf("Increment: %6.2f, P: %6.2f, I: %6.2f, D: %6.2f, Others: %4.2f - %4.2f (%d)\n", 
+      velocity_increment, propotional_error, integral_error,
+      derivative_error, error, median_sum, elements_weight);
+#endif
 
-   //printf("Increment: %6.2f, P: %6.2f, I: %6.2f, D: %6.2f, Others: %4.2f - %4.2f (%d)\n", 
-   //   velocity_increment, propotional_error, integral_error, derivative_error, error, sum, nelements);
-
-   int static_increment = 0;
-   //if (error == 0)
-   //   static_increment = 40;
-   setVel2(60 + velocity_increment + static_increment, 60 - velocity_increment + static_increment);
+   setVel2(BASE_SPEED + velocity_increment + STATIC_INCREASE, 
+           BASE_SPEED - velocity_increment + STATIC_INCREASE);
 }
 
 void walk_rotate(double deltaAngle)

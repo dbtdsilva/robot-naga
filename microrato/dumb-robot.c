@@ -128,7 +128,7 @@ int main(void)
 
          int k;
          bool left = false, center = false, right = false;
-         for (k = 0; k < 5; k++) {
+         for (k = 0; k < 20; k++) {
             if (ground_buffer[k][G_ML])
                left = true;
             if (ground_buffer[k][G_C])
@@ -140,8 +140,7 @@ int main(void)
          number_of_cycles++;
          if (left && center && right && number_of_cycles >= LAP_MIN_CYCLES &&
                abs(current_position.x - start_position.x) <= LAP_DIFF_X &&
-               abs(current_position.y - current_position.y) <= LAP_DIFF_Y) {
-
+               abs(current_position.y - start_position.y) <= LAP_DIFF_Y) {
             laps_finished++;
 #ifdef DEBUG_VERBOSE
             printf("\n\n> LAP FINISHED! <\n\n");
@@ -150,6 +149,10 @@ int main(void)
             if (laps_finished % 2 != 0)
                rotateRel(100, -M_PI);
 #endif
+            setRobotPos(0, 0, 0);
+            start_position.x = 0;
+            start_position.y = 0;
+            start_position.rot = 0;
             number_of_cycles = 0;
             if (laps_finished >= NUMBER_OF_LAPS)
                break;

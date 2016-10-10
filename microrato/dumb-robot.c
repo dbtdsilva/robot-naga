@@ -18,8 +18,8 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 // LAP Configuration
 #define NUMBER_OF_LAPS     2
 #define LAP_MIN_CYCLES     1000
-#define LAP_DIFF_Y         250
-#define LAP_DIFF_X         250
+#define LAP_DIFF_Y         150
+#define LAP_DIFF_X         150
 #define LAP_BUFFER_CHECK   5
 // Comment next line to prevent rotate on even laps
 #define LAP_INVERT_EVEN
@@ -28,6 +28,7 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 #define DEBUG_VERBOSE
 #ifdef DEBUG_VERBOSE
 //   #define DEBUG_BLUETOOTH
+   #define DEBUG_GROUND
 //   #define DEBUG_PID
 //   #define DEBUG_POSITION 
 //   #define DEBUG_OBSTACLE
@@ -177,10 +178,16 @@ void read_ground_sensors(int iterations) {
    }
 
    for (i = iterations - 1; i >= 0; i--) {
-      ground_sensor = readLineSensors(20);
+      ground_sensor = readLineSensors(40);
 
-      if (COLOR_LINE == WHITE) 
+      if (COLOR_LINE == WHITE)
          ground_sensor =~ ground_sensor;
+
+
+#ifdef DEBUG_GROUND
+      printInt(ground_sensor & 0x0000001F, 2 | 5 << 16);   // System call
+      printf("\n");
+#endif
 
       ground_buffer[i][G_ML] = ((ground_sensor & 0x00000010) >> 4);
       ground_buffer[i][G_L] = ((ground_sensor & 0x00000008) >> 3);
@@ -210,7 +217,7 @@ void follow_line()
             }
          }
       }
-      if (left > GROUND_HISTORY * 5 || right > GROUND_HISTORY * 5) {
+      if (left > GROUND_HISTORY * 4 || right > GROUND_HISTORY * 4) {
          if (left > right) {
             ground_state = LOST_LEFT;
          } else {
@@ -228,7 +235,7 @@ void follow_line()
    } else {
       ground_state = CENTERED;
       if (ground_buffer[0][G_ML]) {
-         sum -= 3.0;
+         sum -= 4.0;
          nelements+= 2;
       }
 
@@ -247,7 +254,7 @@ void follow_line()
       }
 
       if (ground_buffer[0][G_MR]) {
-         sum += 3.0;
+         sum += 4.0;
          nelements+=2;
       }
    }

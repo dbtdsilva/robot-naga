@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "rmi-mr32.h"
-
+#include "avoid.h"
+#include <stdbool.h>
 
 //minimum distances of micro rato (avoid hit)
 #define MIN_DIST_LEFT 20 //cm
@@ -18,96 +19,194 @@
 #define RANGE (VEL_MAX- VEL_MIN)/4
 
 
-double getRealDistance(double d);
-int parseSensors();
+#define FIND 0
+#define R_LEFT 1
+#define R_RIGHT 2
+#define MIN_DIST 25
 
-struct Avoid {
-   //ainda nao sei o que vai ser preciso
-} ; 
 
-//guarda o buffer e retir a mediana
-int medianF(int newValue);
-int medianL(int newValue);
-int medianR(int newValue);
 
-extern Avoid distanceSensors;
+
+
+
+//iniciate
+Avoid avoid_obst;
+
+int C_state = 0, N_state = 0;
+
 
 int parseSensors(){
-	if (tick20ms==1){
-		tick20ms = 0;
-		readAnalogSensors();
+	avoid_obst.STOP = false;
+	if (tick40ms==1){
+		tick40ms = 0;
+		readAnalogSensors(); //update das variaveis
+		                     //
+		                     ////ver quanto tempo demora a ter isto????????
+		                     
+		//Máquina de estados interna
+		//Está à procura de obstáculos:
+		if(C_state == FIND){
+			int sum ;
+			if (( sum= bla(analogSensors.obstSensFront ,analogSensors.obstSensLeft, analogSensors.obstSensRight) )!= 0){
+				avoid_obst.ON = true;
+
+				//choose ...
+				if (sum == 0)
+					N_state = FIND;
+
+				else if ( sum == 6 || sum == 7){
+				 //order = STOP;
+				 //o que fazer???????
+				}
+				else if(sum == 2 || sum==3){
+					avoid_obst.angle = compute_angleL( analogSensors.obstSensFront ,analogSensors.obstSensLeft, analogSensors.obstSensRight );
+					N_state = R_LEFT;
+				}
+					
+				 
+				else if(sum==4 || sum== 5 || sum == 1){
+
+					N_state = R_RIGHT;
+				}
+					
+				 
+			}
 		
-		double dist_front = medianF(getRealDistance(analogSensors.obstSensFront));
-		double dist_left = medianL(getRealDistance(analogSensors.obstSensLeft));
-		double dist_right = medianR(getRealDistance(analogSensors.obstSensRight));
+		}else if(C_state == R_LEFT){
+			avoid_obst.angle = compute_angleL( analogSensors.obstSensFront ,analogSensors.obstSensLeft, analogSensors.obstSensRight );
+			printf("left %f -- %d, %d, %d\n", avoid_obst.angle, analogSensors.obstSensFront ,analogSensors.obstSensLeft, analogSensors.obstSensRight );
+		}else if(C_state == R_RIGHT){
+			//avoid_obst.angle = compute_angleR( analogSensors.obstSensFront ,analogSensors.obstSensLeft, analogSensors.obstSensRight );
+			printf("right\n" );
+			N_state = FIND;
 
-		//verify---------------------------------
-		/*int left_wall=0, right_wall= 0, front_wall = 0;
-		double tmp;
-
-		if((tmp = getRealDistance(analogSensors.obstSensLeft)) <= MIN_DIST_LEFT)
-		 left_wall = 4;
-		//printf("%f\n",tmp );
-		if((tmp =getRealDistance(analogSensors.obstSensRight)) <= MIN_DIST_RIGHT)
-		 right_wall = 2;
-		//rintf("%f\n",tmp );
-		if((tmp = getRealDistance(analogSensors.obstSensFront)) <= MIN_DIST_FRONT) //analogSensors.obstSensFront
-		 front_wall = 1;
-
-		//printf("%f\n",tmp );
-
-		int sum = left_wall + right_wall + front_wall;
-
-		if (sum == 0){
-		 //printf("WALK\n"); //não há obstaculos
-
-		 avoid.overwrite = false;
-		 avoid.turnLeft = false;
-		 avoid.turnRight = false;
 		}
-		else if (sum == 1 || sum ==3 || sum == 5 || sum == 6 || sum == 7){
-		 //order = STOP;
-		 //printf("STOP\n");
-		 setVel2(0,0);
-		 avoid.overwrite = true;
-		 avoid.turnLeft = false;
-		 avoid.turnRight = false;
-		}
-		else if(sum == 2){
-		 //order = TURN_LEFT; 
-		 //printf("TURN_LEFT\n");
 
-		 //*leftMotor = *rightMotor = 0.0;
-		 avoid.overwrite = false;
-		 avoid.turnLeft = true;
-		 avoid.turnRight = false;
-		}
-		else if(sum==4){ // 4
-		 //order = TURN_RIGHT;
-		 //printf("TURN_RIGHT\n");
-		 //*leftMotor = *rightMotor = 0.0;
-		 avoid.turnRight = true;
-		 avoid.overwrite = false;
-		 avoid.turnLeft = false;
-		}
+		C_state = N_state;
 		
-*/
+
 	}
 	return 0;
 }
 
 
 //-------------auxiliares--------------------------
+double map(double x, double in_min, double in_max, double out_min, double out_max){
+    //printf("%f %f ", out_min, out_max);
+    if(x < in_min )
+    	return out_min;
+    if(x> in_max)
+    	return out_max;
 
-/*
-	get distance in cm from the edge of microRato until object
-	return cm
-*/
-double getRealDistance(double d){
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
 
-	if (d <155) // a partir daqui é ruido
-		return 80; //cm
+
+int bla(double front, double left, double right){
+
+	int sum = 0;
+	if(front <= MIN_DIST )
+		sum+=1;
+
+	if(left <= MIN_DIST )
+		sum+=4;
+
+	if(right <= MIN_DIST )
+		sum+=2;
+
+	return sum;
+}
+
+double compute_angleL(double front, double left, double right){
+
+	double angle;
+	int sum=0;
+		//ver se o left mais pequeno deveria ser precedente
+		if(front < MIN_DIST)
+			sum+=1;
+		if(right< MIN_DIST)
+			sum+=2;
+		if(left <=30 && left >=20)
+			sum+= 4;
+		else if(left <20)
+			sum+=  8;
+		else //left > 30
+		    sum+= 16;
+
 	
-	return 6200/(d-80);
+		if(sum==1 || sum==5 || sum==9 || sum==17){
+			avoid_obst.angle = (-M_PI*45)/180;
+		}
+		else if(sum==4){
+			avoid_obst.angle = 0;
+		}
+		else if(sum==8){
+			avoid_obst.angle = map(left, 0 , MIN_DIST , -M_PI*30/180 ,0 );
+		}
+		else if(sum==16){
+			avoid_obst.angle = map(left, 40 , 80 , 0 , M_PI*45 /180 );
+		}
+		else if(sum== 6){
+			avoid_obst.angle = M_PI*10/180;
+		}
+		else if(sum==11 || sum== 7 || sum==10){
+			avoid_obst.angle = 0;
+			avoid_obst.STOP = true;
+		}
+		else if(sum==18 || sum==19){
+			avoid_obst.angle = map(left, 40 , 80 , 10 , M_PI*55 /180 );	
+		}
+		
+			//case 3 2:
+			//algo esta mal
+			
+		/*
+
+		//.....
+		if(front < 60)
+			angle = map(front, 30 , 60 , -M_PI*30 /180 , 0);
+		else if(right <30 && left<30){
+			avoid_obst.STOP = true;
+			return -1;
+		}
+			
+		else{
+			if(left < 40)
+				angle = map(left, 0 , 40 , -M_PI*20/180 ,0 );
+			else
+				angle = map(left, 40 , 80 , 0 , M_PI*45 /180 );
+		}
+			*/
+		
+
+	return avoid_obst.angle;
+
+
+}
+
+double compute_angleR(double front, double left, double right){
+
+	double angle;
+
+		//ver se o left mais pequeno deveria ser precedente
+		//.....
+		if(front < 60)
+			angle = map(front, 30 , 60 , M_PI*30 /180 , 0);
+		else if(right <30 && left<30){
+			avoid_obst.STOP = true;
+			return -1;
+		}
+			
+		else{
+			if(left < 40)
+				angle = map(left, 0 , 40 , M_PI*20/180 ,0 );
+			else
+				angle = map(left, 40 , 80 , 0 , -M_PI*45 /180 );
+		}
+			
+		
+
+	return angle;
+
 
 }

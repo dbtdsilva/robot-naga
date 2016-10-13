@@ -142,7 +142,7 @@ const signed int KI_num=1, KI_den=1;    // Integral constant
 
 // ***************************************************************************
 #define DIM_BAT_ARRAY	   128            // Dimension of the battery voltage array
-#define MEDIAN_SIZE	   7              // Median buffer size for obstacle sensor filtering              
+#define MEDIAN_SIZE	   11             // Median buffer size for obstacle sensor filtering              
 #define AVERAGE_SIZE	   4              // Average buffer size for obstacle sensor filtering              
 
 // ****************************************************************************
@@ -347,14 +347,15 @@ void sort(int *array, int size)
 int median(int sensor, int newValue)
 {
    static int buf[3][MEDIAN_SIZE];
-   static int i = 0;
+   static int i[3] = {0, 0, 0};
    int aux[MEDIAN_SIZE];
-   int j;
+   int j, k;
 
    sensor = sensor > 2 ? 2 : sensor;
+   k = i[sensor];
 
-   buf[sensor][i] = newValue;
-   i = (i + 1) % MEDIAN_SIZE;
+   buf[sensor][k] = newValue;
+   i[sensor] = (k + 1) % MEDIAN_SIZE;
 
    for(j=0; j < MEDIAN_SIZE; j++)
       aux[j] = buf[sensor][j];
@@ -366,14 +367,16 @@ int median(int sensor, int newValue)
 int average(int sensor, int newValue)
 {
    static int buf[3][AVERAGE_SIZE];
+   static int i[3] = {0, 0, 0};
    static int soma[3];
-   static int i = 0;
+   int k;
    
    sensor = sensor > 2 ? 2 : sensor;
+   k = i[sensor];
 
-   soma[sensor] = soma[sensor] - buf[sensor][i] + newValue;
-   buf[sensor][i] = newValue;
-   i = (i + 1) % AVERAGE_SIZE;
+   soma[sensor] = soma[sensor] - buf[sensor][k] + newValue;
+   buf[sensor][k] = newValue;
+   i[sensor] = (k + 1) % AVERAGE_SIZE;
    return soma[sensor] / AVERAGE_SIZE;
 }
 

@@ -16,19 +16,19 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 #define BASE_SPEED         60
 
 // LAP Configuration
-#define NUMBER_OF_LAPS     2
+#define NUMBER_OF_LAPS     3
 #define LAP_MIN_CYCLES     1000
-#define LAP_DIFF_Y         150
-#define LAP_DIFF_X         150
-#define LAP_BUFFER_CHECK   5
+#define LAP_DIFF_Y         175
+#define LAP_DIFF_X         175
+#define LAP_BUFFER_CHECK   20
 // Comment next line to prevent rotate on even laps
-#define LAP_INVERT_EVEN
+#define LAP_TURN           2
 
 // Feel free to comment any defines to disable debug
 #define DEBUG_VERBOSE
 #ifdef DEBUG_VERBOSE
-//   #define DEBUG_BLUETOOTH
-   #define DEBUG_GROUND
+   #define DEBUG_BLUETOOTH
+//   #define DEBUG_GROUND
 //   #define DEBUG_PID
 //   #define DEBUG_POSITION 
 //   #define DEBUG_OBSTACLE
@@ -38,6 +38,7 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
    #include "bluetooth_comm.h"
 #endif
 
+int ground_gain = 40;
 int ground_records_stored = 0;
 bool ground_buffer[GROUND_HISTORY][5];
 
@@ -53,7 +54,7 @@ typedef struct {
 } Position;
 Position start_position, current_position;
 
-int line_KP = 15, line_KI = 0, line_KD = 0.4;
+int line_KP = 19, line_KI = 0, line_KD = 0;
 static double previous_error, error = 0, integral_error = 0;
 
 void rotateRel_basic(int speed, double deltaAngle);
@@ -63,6 +64,8 @@ void sort_array(int *array, int size);
 void read_ground_sensors(int iterations);
 int median_array(int sensor, int newValue);
 void follow_line();
+void dodge_obstacle();
+void calibrate_ground_sensors();
 
 int last_ground_sensor;
 int number_of_cycles;
@@ -80,12 +83,12 @@ int main(void)
    setVel2(0, 0);
 
    printf("RMI, Robot %d\n\n", ROBOT);
-   
 
    while (true) {
       readAnalogSensors();          // Fill in "analogSensors" structure
       printf("Battery Level: %d\n", analogSensors.array[BATTERY]);
 
+      //calibrate_ground_sensors();
       while (!startButton());
 
       enableGroundSens();
@@ -94,11 +97,19 @@ int main(void)
       ground_state = CENTERED;
       getRobotPos(&start_position.x, &start_position.y, &start_position.rot);
       number_of_cycles = 0;
-      laps_finished = 0;
+      laps_finished = 0;      
 
       while (!stopButton()) {
          readAnalogSensors();          // Fill in "analogSensors" structure
          read_ground_sensors(1);
+
+         
+         if (analogSensors.obstSensFront < 24) {
+            current_state = OBSTACLE;
+         } else {
+            current_state = FOLLOW_LINE;
+         }
+         
 
 #ifdef DEBUG_OBSTACLE
          printf("L = %03d, C = %03d, R = %03d\n", analogSensors.obstSensLeft, 
@@ -112,6 +123,7 @@ int main(void)
                follow_line();
                break;
             case OBSTACLE:
+               dodge_obstacle();
                break;
             default:
                break;
@@ -128,7 +140,7 @@ int main(void)
 
          int k;
          bool left = false, center = false, right = false;
-         for (k = 0; k < 20; k++) {
+         for (k = 0; k < LAP_BUFFER_CHECK; k++) {
             if (ground_buffer[k][G_ML])
                left = true;
             if (ground_buffer[k][G_C])
@@ -145,10 +157,8 @@ int main(void)
 #ifdef DEBUG_VERBOSE
             printf("\n\n> LAP FINISHED! <\n\n");
 #endif
-#ifdef LAP_INVERT_EVEN
-            if (laps_finished % 2 != 0)
+            if (laps_finished == LAP_TURN)
                rotateRel(100, -M_PI);
-#endif
             setRobotPos(0, 0, 0);
             start_position.x = 0;
             start_position.y = 0;
@@ -181,7 +191,7 @@ void read_ground_sensors(int iterations) {
    }
 
    for (i = iterations - 1; i >= 0; i--) {
-      ground_sensor = readLineSensors(40);
+      ground_sensor = readLineSensors(ground_gain);
 
       if (COLOR_LINE == WHITE)
          ground_sensor =~ ground_sensor;
@@ -198,6 +208,37 @@ void read_ground_sensors(int iterations) {
       ground_buffer[i][G_R] = ((ground_sensor & 0x00000002) >> 1);
       ground_buffer[i][G_MR] = (ground_sensor & 0x00000001);
    }
+}
+
+void calibrate_ground_sensors()
+{
+   int i;
+   bool calibrated;
+   printf("Started calibration\n");
+   do {
+      calibrated = true;
+      for (i = 0; i < GROUND_HISTORY; i++) {
+         read_ground_sensors(1);
+      }
+
+      for (i = 0; i < GROUND_HISTORY; i++) {
+         if (ground_buffer[i][G_R] != COLOR_LINE ||
+            ground_buffer[i][G_C] != COLOR_LINE) {
+            calibrated = false;
+            ground_gain--;
+            break;
+         }
+      }
+
+      //printf("ground_gain: %d\n", ground_gain);      
+   } while (!calibrated);
+
+   while (1) {}
+}
+
+void dodge_obstacle()
+{
+   setVel2(0,0);
 }
 
 void follow_line() 
@@ -226,6 +267,7 @@ void follow_line()
          } else {
             ground_state = LOST_RIGHT;
          }
+         printf("left: %5d, right: %5d\n", left, right);
       }
 
       if (ground_state == LOST_RIGHT) {
@@ -238,7 +280,7 @@ void follow_line()
    } else {
       ground_state = CENTERED;
       if (ground_buffer[0][G_ML]) {
-         sum -= 4.0;
+         sum -= 3.0;
          nelements+= 2;
       }
 
@@ -257,7 +299,7 @@ void follow_line()
       }
 
       if (ground_buffer[0][G_MR]) {
-         sum += 4.0;
+         sum += 3.0;
          nelements+=2;
       }
    }

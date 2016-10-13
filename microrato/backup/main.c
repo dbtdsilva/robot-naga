@@ -74,31 +74,31 @@ int main(void){
 
 avoid_obst.ON = false;
 avoid_obst.STOP = false;
-	
+   
 
-	initPIC32();
+   initPIC32();
 
-	#ifdef DEBUG_BLUETOOTH
-	   configBTUart(3, 115200); // Configure Bluetooth UART
-	   bt_on();     // enable bluetooth channel; printf
-	#endif
+   #ifdef DEBUG_BLUETOOTH
+      configBTUart(3, 115200); // Configure Bluetooth UART
+      bt_on();     // enable bluetooth channel; printf
+   #endif
 
-	closedLoopControl( true );
-	setVel2(0, 0);
-	enableObstSens();
-	
-	while(!startButton());
-	
+   closedLoopControl( true );
+   setVel2(0, 0);
+   enableObstSens();
+   
+   while(!startButton());
+   
 
-	int a = readCoreTimer();
+   int a = readCoreTimer();
     readAnalogSensors();          // Fill in "analogSensors" structure
     //printf("Battery Level: %d\n", analogSensors.array[BATTERY]);
     printf("%d\n", readCoreTimer()-a );
 
-	
-	EnableInterrupts();
-	avoid_obst.angle = 0;
-	enableGroundSens();
+   
+   EnableInterrupts();
+   avoid_obst.angle = 0;
+   enableGroundSens();
       enableObstSens();
       current_state = START;
       ground_state = CENTERED;
@@ -106,47 +106,47 @@ avoid_obst.STOP = false;
       number_of_cycles = 0;
       laps_finished = 0;
 
-	while(!stopButton()){
+   while(!stopButton()){
 
-		read_ground_sensors(1);
-	
-		parseSensors();
-		if(avoid_obst.STOP)
-			setVel2(0,0);
+      read_ground_sensors(1);
+   
+      parseSensors();
+      if(avoid_obst.STOP)
+         setVel2(0,0);
 
-		if(avoid_obst.ON){
-			//printf("angle %f\n", avoid_obst.angle);
-			walk_rotate(avoid_obst.angle); //PID
-			
+      if(avoid_obst.ON){
+         //printf("angle %f\n", avoid_obst.angle);
+         walk_rotate(avoid_obst.angle); //PID
+         
 
-		}
-		
+      }
+      
 
-		
+      
 
 
 
-		switch(current_state) {
+      switch(current_state) {
             case START:
                current_state = FOLLOW_LINE;
                break;
             case FOLLOW_LINE:
                
                if(avoid_obst.ON){
-					//printf("angle %f\n", avoid_obst.angle);
-					setVel2(0,0);
-					current_state = OBSTACLE;
+               //printf("angle %f\n", avoid_obst.angle);
+               setVel2(0,0);
+               current_state = OBSTACLE;
 
-				}else
-					follow_line();
+            }else
+               follow_line();
                break;
             case OBSTACLE:
-            	if(ground_buffer[0][G_ML] | ground_buffer[0][G_L] |  ground_buffer[0][G_C] | 
-            		ground_buffer[0][G_R] |  ground_buffer[0][G_MR]){
-            		current_state = FOLLOW_LINE;
-            		avoid_obst.ON = false;
-            	}
-            		
+               if(ground_buffer[0][G_ML] | ground_buffer[0][G_L] |  ground_buffer[0][G_C] | 
+                  ground_buffer[0][G_R] |  ground_buffer[0][G_MR]){
+                  current_state = FOLLOW_LINE;
+                  avoid_obst.ON = false;
+               }
+                  
 
                break;
             default:

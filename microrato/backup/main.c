@@ -111,15 +111,7 @@ avoid_obst.STOP = false;
       read_ground_sensors(1);
    
       parseSensors();
-      if(avoid_obst.STOP)
-         setVel2(0,0);
-
-      if(avoid_obst.ON){
-         //printf("angle %f\n", avoid_obst.angle);
-         walk_rotate(avoid_obst.angle); //PID
-         
-
-      }
+    
       
 
       
@@ -133,18 +125,25 @@ avoid_obst.STOP = false;
             case FOLLOW_LINE:
                
                if(avoid_obst.ON){
-               //printf("angle %f\n", avoid_obst.angle);
-               setVel2(0,0);
-               current_state = OBSTACLE;
+                  //printf("angle %f\n", avoid_obst.angle);
+                  //setVel2(0,0);
+                  current_state = OBSTACLE;
+                  //  avoid_obst.ON = true;
 
-            }else
-               follow_line();
+               }else
+                  follow_line();
+
+
                break;
+
             case OBSTACLE:
                if(ground_buffer[0][G_ML] | ground_buffer[0][G_L] |  ground_buffer[0][G_C] | 
                   ground_buffer[0][G_R] |  ground_buffer[0][G_MR]){
+                  
                   current_state = FOLLOW_LINE;
                   avoid_obst.ON = false;
+                  setVel2(10,10); //para ele virar para a direita
+
                }
                   
 
@@ -402,8 +401,8 @@ void follow_line()
       derivative_error, error, median_sum, elements_weight);
 #endif
 
-   setVel2(BASE_SPEED + velocity_increment + STATIC_INCREASE, 
-           BASE_SPEED - velocity_increment + STATIC_INCREASE);
+   //setVel2(BASE_SPEED + velocity_increment + STATIC_INCREASE, 
+     //      BASE_SPEED - velocity_increment + STATIC_INCREASE);
 }
 
 void walk_rotate(double deltaAngle)
@@ -413,11 +412,11 @@ void walk_rotate(double deltaAngle)
    double error;
    int cmdVel;
    
-   int kp = 15;
+   int kp = 10;
    //int ki = 0;
    //int kd = 0;
    getRobotPos(&x, &y, &t);
-   
+   printf(" walk_rotate--");
    targetAngle = normalizeAngle(t + deltaAngle);
    error = normalizeAngle(targetAngle - t);
    
@@ -427,7 +426,7 @@ void walk_rotate(double deltaAngle)
 
    cmdVel = kp * error;
 
-   setVel2(40 - cmdVel, 40 + cmdVel); //walks 40 minimum
+   setVel2(30 - cmdVel, 30 + cmdVel); //walks 40 minimum
 }
 
 #define KP_ROT 40

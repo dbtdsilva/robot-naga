@@ -21,7 +21,8 @@
 
 #define FIND 0
 #define R_LEFT 1
-#define R_RIGHT 2
+
+
 #define MIN_DIST 35
 
 
@@ -64,10 +65,12 @@ int parseSensors(){
 
 			printf(" F:%d, L:%d, R:%d\n", analogSensors.obstSensFront ,analogSensors.obstSensLeft, analogSensors.obstSensRight );
 			
-			if (analogSensors.obstSensFront <= MIN_DIST-10 || analogSensors.obstSensRight  <= MIN_DIST-10 ||
-						analogSensors.obstSensLeft  <= MIN_DIST-10 ){
+			if (analogSensors.obstSensFront <= MIN_DIST-10
+			// || analogSensors.obstSensRight  <= MIN_DIST-10 ||
+						//analogSensors.obstSensLeft  <= MIN_DIST-10
+			 ){
 
-				sum= bla(analogSensors.obstSensFront , analogSensors.obstSensRight,analogSensors.obstSensLeft) ;
+				//sum= bla(analogSensors.obstSensFront , analogSensors.obstSensRight,analogSensors.obstSensLeft) ;
 				avoid_obst.ON = true;
 		
 				//setVel2(0,0);
@@ -75,6 +78,8 @@ int parseSensors(){
 				
 
 				N_state = R_LEFT; // 
+				
+				setVel2(10, 0); //começar a virar para a esquerda
 				
 				 
 			}
@@ -90,7 +95,7 @@ int parseSensors(){
 			if(avoid_obst.ON == false)
 				N_state = FIND;
 			else{
-				
+
 				N_state = R_LEFT;
 
 				double leftMotor, rightMotor;

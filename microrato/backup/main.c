@@ -69,13 +69,14 @@ int last_ground_sensor;
 int number_of_cycles;
 int laps_finished;
 
+int last_detection;
 
 int main(void){
 
 avoid_obst.ON = false;
 avoid_obst.STOP = false;
    
-
+      int tmp_detection;
    initPIC32();
 
    #ifdef DEBUG_BLUETOOTH
@@ -94,6 +95,12 @@ avoid_obst.STOP = false;
     readAnalogSensors();          // Fill in "analogSensors" structure
     //printf("Battery Level: %d\n", analogSensors.array[BATTERY]);
     printf("%d\n", readCoreTimer()-a );
+   int i;
+   for(i = 0; i< 7;i++){
+      readAnalogSensors();
+      waitTick40ms();
+   }
+
 
    
    EnableInterrupts();
@@ -106,6 +113,7 @@ avoid_obst.STOP = false;
       number_of_cycles = 0;
       laps_finished = 0;
 
+
    while(!stopButton()){
 
       read_ground_sensors(1);
@@ -114,7 +122,7 @@ avoid_obst.STOP = false;
     
       
 
-      
+      getRobotPos(&current_position.x, &current_position.y, &current_position.rot);
 
 
 
@@ -128,6 +136,7 @@ avoid_obst.STOP = false;
                   //printf("angle %f\n", avoid_obst.angle);
                   //setVel2(0,0);
                   current_state = OBSTACLE;
+                  last_detection = 1;
                   //  avoid_obst.ON = true;
 
                }else
@@ -137,21 +146,26 @@ avoid_obst.STOP = false;
                break;
 
             case OBSTACLE:
-               if(ground_buffer[0][G_ML] | ground_buffer[0][G_L] |  ground_buffer[0][G_C] | 
-                  ground_buffer[0][G_R] |  ground_buffer[0][G_MR]){
+               
+         
+               tmp_detection = (ground_buffer[0][G_ML] | ground_buffer[0][G_L] |  ground_buffer[0][G_C] | 
+                  ground_buffer[0][G_R] |  ground_buffer[0][G_MR]);
+
+               if( tmp_detection ==1 && last_detection == 0 ){
                   
                   current_state = FOLLOW_LINE;
                   avoid_obst.ON = false;
                   setVel2(10,10); //para ele virar para a direita
 
                }
+               last_detection = tmp_detection;
                   
 
                break;
             default:
                break;
          }
-         getRobotPos(&current_position.x, &current_position.y, &current_position.rot);
+         
 
          int k;
          bool left = false, center = false, right = false;
@@ -400,9 +414,9 @@ void follow_line()
       velocity_increment, propotional_error, integral_error,
       derivative_error, error, median_sum, elements_weight);
 #endif
-
-   //setVel2(BASE_SPEED + velocity_increment + STATIC_INCREASE, 
-     //      BASE_SPEED - velocity_increment + STATIC_INCREASE);
+   if(!avoid_obst.ON)
+      setVel2(BASE_SPEED + velocity_increment + STATIC_INCREASE, 
+           BASE_SPEED - velocity_increment + STATIC_INCREASE);
 }
 
 void walk_rotate(double deltaAngle)

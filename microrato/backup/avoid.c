@@ -217,7 +217,7 @@ printf("sum %d  ", sum);
 	{
 		//waitTick20ms() ;
 		int vel = map(dist_left,80,35, 25 , 5); 
-		*rightMotor = 20 + vel;
+		*rightMotor = 30 + vel;
 		*leftMotor = 20; //continuam a andar ate serem corrigidos novamente
 	}
 

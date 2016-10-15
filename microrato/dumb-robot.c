@@ -18,9 +18,9 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 // LAP Configuration
 #define NUMBER_OF_LAPS     3
 #define LAP_MIN_CYCLES     1000
-#define LAP_DIFF_Y         125
-#define LAP_DIFF_X         125
-#define LAP_BUFFER_CHECK   20
+#define LAP_DIFF_Y         100
+#define LAP_DIFF_X         100
+#define LAP_BUFFER_CHECK   30
 // Comment next line to prevent rotate on even laps
 #define LAP_TURN           2
 
@@ -78,16 +78,16 @@ int following_wall_cycles;
 void follow_wall() {
    double aa = 0;
    if (analogSensors.obstSensLeft > 25) {
-      aa -= 5.0;   
+      aa -= 3.0;   
    } else if (analogSensors.obstSensLeft > 22) {
-      aa -= 2.0;
+      aa -= 1.0;
    } else if (analogSensors.obstSensLeft < 17) {
-      aa += 2.0;
+      aa += 3.0;
    } else if (analogSensors.obstSensLeft < 20) {
-      aa += 5.0;
+      aa += 1.0;
    }
    
-   double propotional_error = 3.0 * aa;
+   double propotional_error = 8.0 * aa;
 
 
    double velocity_increment = 0;
@@ -287,15 +287,17 @@ void dodge_obstacle()
       current_obstacle_state = FOLLOWING_WALL;
       confirm_wall = 0;
    } else if (current_obstacle_state == FOLLOWING_WALL) {
-      if (analogSensors.obstSensLeft > 40) {
+      if (analogSensors.obstSensLeft > 60) {
          confirm_wall++;
       }
 
       if (confirm_wall >= 10) {
+         led(1,0);
          setVel2(0, 0);
          current_obstacle_state = CORNER;
          blank_cycles = 0;
       } else {
+         led(1,1);
          follow_wall();
       }
    } else if (current_obstacle_state == CORNER) {
@@ -309,10 +311,11 @@ void dodge_obstacle()
       }
    } else if (current_obstacle_state == FINISHING_ZONE) {
       blank_cycles++;
-      if (blank_cycles >= 25) {
+      if (blank_cycles >= 35) {
          current_obstacle_state = NOT_WALL;
          current_state = FOLLOW_LINE;
          rotateRel(40, -M_PI / 2);
+         led(3, 0);
       }
    }
 

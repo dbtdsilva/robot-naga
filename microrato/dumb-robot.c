@@ -147,9 +147,6 @@ int main(void)
          readAnalogSensors();          // Fill in "analogSensors" structure
          read_ground_sensors(1);
 
-         //follow_wall();
-         //continue;
-
          if (old != current_obstacle_state) {
             printf("%d\n", current_obstacle_state);
             old = current_obstacle_state;   
@@ -177,15 +174,6 @@ int main(void)
             following_wall_cycles = 0;
             printf("Found wall!\n");
          }
-
-         /*if (analogSensors.obstSensFront < 20 && current_state != OBSTACLE) {
-            
-         }*/
-         /*if (analogSensors.obstSensFront < 24 && current_state != OBSTACLE &&
-               forget_obstacle_cycles >= 200) {
-            current_state = OBSTACLE;
-            obstacle_found_rotation = current_position.rot;
-         }*/
          
 
 #ifdef DEBUG_OBSTACLE
@@ -345,17 +333,6 @@ void dodge_obstacle()
       rotateRel(30, -M_PI / 2);
       next_obstacle_state = FOLLOWING_WALL;
       confirm_wall = 0;
-
-   /*   if (analogSensors.obstSensLeft > 15) {
-         setVel2(30, -30);
-      } else {
-         confirm_wall++;
-         setVel2(0,0);
-         if (analogSensors.obstSensLeft <= 12) {
-            next_obstacle_state = FOLLOWING_WALL;
-            confirm_wall = 0;
-         }
-      }*/
    } else if (current_obstacle_state == FOLLOWING_WALL) {
       if (analogSensors.obstSensLeft > 40) {
          confirm_wall++;
@@ -378,80 +355,6 @@ void dodge_obstacle()
       }
    }
    update_obstacle_state();
-
-   /*following_wall_cycles++;
-   if (analogSensors.obstSensFront > 25 && current_obstacle_state == FIRST_CENTER) {
-      current_state = FOLLOW_LINE;
-      next_obstacle_state = NOT_WALL;
-   }
-
-   if (analogSensors.obstSensFront <= 25) {
-      is_it_wall_cycles++;
-      setVel2(30, -30);
-
-      if (is_it_wall_cycles >= 10 && current_obstacle_state == FIRST_CENTER) {
-         printf("IT IS A WALL!\n");
-         next_obstacle_state = CENTER;
-      }
-   } else if (analogSensors.obstSensLeft > 0 && analogSensors.obstSensLeft < 30) {
-      next_obstacle_state = FOLLOWING_WALL;
-      follow_wall();
-   } else {
-      next_obstacle_state = CORNER;
-      setVel2(30, 30);
-   }
-
-   if (next_obstacle_state == CORNER && current_obstacle_state == FOLLOWING_WALL) {
-      blank_cycles = 0;
-   }
-
-   if (following_wall_cycles > 600 && (current_obstacle_state == FOLLOWING_WALL || current_obstacle_state == CORNER)) {
-      int sum = 0, i, k;
-      for (i = 0; i < 5; i++) {
-         for (k = 0; k < 10; k++) {
-            sum = ground_buffer[k][i] == COLOR_LINE ? sum + 1 : sum;
-         }
-      }
-      if (sum > 15)
-         current_state = FOLLOW_LINE;
-   }*/
-   //if (current_obstacle_state == FOLLOWING_WALL || current_obstacle_state == CORNER)
-
-   /*if (last_current != current_position.rot && state >= 4) {
-      last_current = current_position.rot;
-      printf("%6.2f --- %6.2f\n", current_position.rot, obstacle_found_rotation);
-   }
-
-   if (state % 2 == 0) {
-      
-      } else {
-         count_cycles_obstacle++;
-         if (count_cycles_obstacle >= 400) {
-            state++;
-         }
-         setVel2(15, 15);
-      }
-   } else {
-      rotateRel(30, M_PI / 2);
-      state++;
-         count_cycles_obstacle = 0;
-   }
-
-   if (state >= 4) {
-      int i, j;
-      int sum = 0;
-      for (i = 0; i < 5; i++) {
-         for (j = 0; j < 20; j++) {
-            sum = ground_buffer[j][i] == COLOR_LINE ? sum + 1 : sum;
-         }
-      }
-
-      if (sum >= 7) {
-         forget_obstacle_cycles = 0;
-         current_state = FOLLOW_LINE;
-      }
-   }
-   //printf("Dodging...\n");*/
 }
 
 void follow_line() 
@@ -540,30 +443,6 @@ void follow_line()
    double base_speed_modifier = careful_movement ? (BASE_SPEED + STATIC_INCREASE) / 2 : BASE_SPEED + STATIC_INCREASE;
    setVel2(base_speed_modifier + velocity_increment, 
            base_speed_modifier - velocity_increment);
-}
-
-void walk_rotate(double deltaAngle)
-{
-   double x, y, t;
-   double targetAngle;
-   double error;
-   int cmdVel;
-   
-   int kp = 15;
-   //int ki = 0;
-   //int kd = 0;
-   getRobotPos(&x, &y, &t);
-   
-   targetAngle = normalizeAngle(t + deltaAngle);
-   error = normalizeAngle(targetAngle - t);
-   
-      
-   getRobotPos(&x, &y, &t);
-   error = normalizeAngle(targetAngle - t);
-
-   cmdVel = kp * error;
-
-   setVel2(40 - cmdVel, 40 + cmdVel); //walks 40 minimum
 }
 
 #define KP_ROT 40

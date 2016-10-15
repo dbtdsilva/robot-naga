@@ -38,13 +38,13 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
    #include "bluetooth_comm.h"
 #endif
 
-int ground_gain = 40;
+int ground_gain = 30;
 int ground_records_stored = 0;
 bool ground_buffer[GROUND_HISTORY][5];
 
 typedef enum {START, FOLLOW_LINE, OBSTACLE} State;
 typedef enum {CENTERED, LOST_LEFT, LOST_RIGHT} GroundState;
-typedef enum {NOT_WALL, CENTER, ROTATE_CENTER, FOLLOWING_WALL, CORNER} ObstacleState;
+typedef enum {NOT_WALL, CENTER, ROTATE_CENTER, FOLLOWING_WALL, CORNER, FINISHING_ZONE} ObstacleState;
 ObstacleState current_obstacle_state, next_obstacle_state;
 State current_state;
 GroundState ground_state;
@@ -138,12 +138,12 @@ int main(void)
 
          careful_movement = (analogSensors.obstSensFront <= 25 && current_state == FOLLOW_LINE);
          printf("%d\n", confirm_wall);
-         if (analogSensors.obstSensFront <= 12 && current_state != OBSTACLE) {
+         if (analogSensors.obstSensFront <= 11 && current_state != OBSTACLE) {
             c_wall++;
          } else {
             c_wall = 0;
          }
-         if (c_wall >= 12 && current_state != OBSTACLE) {
+         if (c_wall >= 20 && current_state != OBSTACLE) {
             c_wall = 0;
             confirm_wall = 0;
             current_state = OBSTACLE;
@@ -265,17 +265,19 @@ int state = 0;
 double last_current = -100;
 
 int blank_cycles;
+int ncorners;
 void dodge_obstacle()
 {
    printf("State: %d, Confirm_Wall: %d\n", current_obstacle_state, confirm_wall);
    if (current_obstacle_state == CENTER) { 
+      ncorners = 0; 
       setVel2(30, 30);
       if (analogSensors.obstSensFront > 25)
          current_state = FOLLOW_LINE;
-      if (analogSensors.obstSensFront <= 12) {
+      if (analogSensors.obstSensFront <= 11) {
          setVel2(0, 0);
          confirm_wall++;
-         if (confirm_wall >= 10) {
+         if (confirm_wall >= 20) {
             current_obstacle_state = ROTATE_CENTER;
             confirm_wall = 0;
          }
@@ -299,10 +301,32 @@ void dodge_obstacle()
    } else if (current_obstacle_state == CORNER) {
       setVel2(40, 40);
       blank_cycles++;
-      if (blank_cycles >= 150) {
+      if (blank_cycles >= 180) {
          rotateRel(100, M_PI / 2);
          current_obstacle_state = FOLLOWING_WALL;
          confirm_wall = 0;
+         ncorners++;
+      }
+   } else if (current_obstacle_state == FINISHING_ZONE) {
+      blank_cycles++;
+      if (blank_cycles >= 25) {
+         current_obstacle_state = NOT_WALL;
+         current_state = FOLLOW_LINE;
+         rotateRel(40, -M_PI / 2);
+      }
+   }
+
+   if (ncorners >= 2) {
+      int sum = 0, k, j;
+      for (k = 0; k < 10; k++) {
+         for (j = 0; j < 5; j++) {
+            sum += ground_buffer[k][j];
+         }
+      }
+      if (sum > 20) {
+         current_obstacle_state = FINISHING_ZONE;
+         blank_cycles = 0;
+         led(3, 1);
       }
    }
 }

@@ -31,7 +31,7 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 //   #define DEBUG_GROUND
 //   #define DEBUG_PID
 //   #define DEBUG_POSITION 
-   #define DEBUG_OBSTACLE
+//   #define DEBUG_OBSTACLE
 #endif
 
 #ifdef DEBUG_BLUETOOTH
@@ -45,7 +45,7 @@ bool ground_buffer[GROUND_HISTORY][5];
 typedef enum {START, FOLLOW_LINE, OBSTACLE} State;
 typedef enum {CENTERED, LOST_LEFT, LOST_RIGHT} GroundState;
 typedef enum {NOT_WALL, CENTER, ROTATE_CENTER, FOLLOWING_WALL, CORNER} ObstacleState;
-ObstacleState current_obstacle_state, old, next_obstacle_state;
+ObstacleState current_obstacle_state, next_obstacle_state;
 State current_state;
 GroundState ground_state;
 
@@ -62,13 +62,9 @@ static double previous_error, error = 0, integral_error = 0;
 void rotateRel_basic(int speed, double deltaAngle);
 void rotateRel(int maxVel, double deltaAngle);
 void walk_rotate(double);
-void sort_array(int *array, int size);
 void read_ground_sensors(int iterations);
-int median_array(int sensor, int newValue);
 void follow_line();
 void dodge_obstacle();
-void calibrate_ground_sensors();
-void update_obstacle_state();
 
 double obstacle_found_rotation;
 int last_ground_sensor;
@@ -77,8 +73,6 @@ int laps_finished;
 
 int forget_obstacle_cycles;
 
-
-int is_it_wall_cycles, old_is_it_wall;
 int following_wall_cycles;
 
 void follow_wall() {
@@ -99,8 +93,7 @@ void follow_wall() {
    double velocity_increment = 0;
    velocity_increment += propotional_error;
 
-   setVel2(30 + velocity_increment, 
-           30 - velocity_increment);
+   setVel2(50 + velocity_increment, 50 - velocity_increment);
 }
 
 bool careful_movement = false;
@@ -123,7 +116,6 @@ int main(void)
       readAnalogSensors();          // Fill in "analogSensors" structure
       printf("Battery Level: %d\n", analogSensors.array[BATTERY]);
 
-      //calibrate_ground_sensors();
       while (!startButton());
 
       enableGroundSens();
@@ -132,30 +124,17 @@ int main(void)
       ground_state = CENTERED;
       current_obstacle_state = NOT_WALL;
       next_obstacle_state = NOT_WALL;
-      old = CENTER;
       getRobotPos(&start_position.x, &start_position.y, &start_position.rot);
       number_of_cycles = 0;
       laps_finished = 0;      
       careful_movement = false;
 
-      is_it_wall_cycles = 0;
-      old_is_it_wall = -1;
       confirm_wall = 0;
       c_wall = 0;
 
       while (!stopButton()) {
          readAnalogSensors();          // Fill in "analogSensors" structure
          read_ground_sensors(1);
-
-         if (old != current_obstacle_state) {
-            printf("%d\n", current_obstacle_state);
-            old = current_obstacle_state;   
-         }
-
-         if (old_is_it_wall != is_it_wall_cycles) {
-            printf("It is wall: %d\n", is_it_wall_cycles);
-            old_is_it_wall = is_it_wall_cycles;
-         }
 
          careful_movement = (analogSensors.obstSensFront <= 25 && current_state == FOLLOW_LINE);
          printf("%d\n", confirm_wall);
@@ -168,9 +147,7 @@ int main(void)
             c_wall = 0;
             confirm_wall = 0;
             current_state = OBSTACLE;
-            next_obstacle_state = CENTER;
-            update_obstacle_state();
-            is_it_wall_cycles = 0;
+            current_obstacle_state = CENTER;
             following_wall_cycles = 0;
             printf("Found wall!\n");
          }
@@ -270,7 +247,7 @@ void read_ground_sensors(int iterations) {
 
 
 #ifdef DEBUG_GROUND
-      printInt(ground_sensor & 0x0000001F, 2 | 5 << 16);   // System call
+      printInt(ground_sensor & 0x0000001F, 2 | 5 << 16);asdasd   // System call
       printf("\n");
 #endif
 
@@ -280,32 +257,6 @@ void read_ground_sensors(int iterations) {
       ground_buffer[i][G_R] = ((ground_sensor & 0x00000002) >> 1);
       ground_buffer[i][G_MR] = (ground_sensor & 0x00000001);
    }
-}
-
-void calibrate_ground_sensors()
-{
-   int i;
-   bool calibrated;
-   printf("Started calibration\n");
-   do {
-      calibrated = true;
-      for (i = 0; i < GROUND_HISTORY; i++) {
-         read_ground_sensors(1);
-      }
-
-      for (i = 0; i < GROUND_HISTORY; i++) {
-         if (ground_buffer[i][G_R] != COLOR_LINE ||
-            ground_buffer[i][G_C] != COLOR_LINE) {
-            calibrated = false;
-            ground_gain--;
-            break;
-         }
-      }
-
-      //printf("ground_gain: %d\n", ground_gain);      
-   } while (!calibrated);
-
-   while (1) {}
 }
 
 int count_cycles_obstacle = 0; 
@@ -325,13 +276,13 @@ void dodge_obstacle()
          setVel2(0, 0);
          confirm_wall++;
          if (confirm_wall >= 10) {
-            next_obstacle_state = ROTATE_CENTER;
+            current_obstacle_state = ROTATE_CENTER;
             confirm_wall = 0;
          }
       }
    } else if (current_obstacle_state == ROTATE_CENTER) {
-      rotateRel(30, -M_PI / 2);
-      next_obstacle_state = FOLLOWING_WALL;
+      rotateRel(40, -M_PI / 2);
+      current_obstacle_state = FOLLOWING_WALL;
       confirm_wall = 0;
    } else if (current_obstacle_state == FOLLOWING_WALL) {
       if (analogSensors.obstSensLeft > 40) {
@@ -340,21 +291,20 @@ void dodge_obstacle()
 
       if (confirm_wall >= 10) {
          setVel2(0, 0);
-         next_obstacle_state = CORNER;
+         current_obstacle_state = CORNER;
          blank_cycles = 0;
       } else {
          follow_wall();
       }
    } else if (current_obstacle_state == CORNER) {
-      setVel2(30, 30);
+      setVel2(40, 40);
       blank_cycles++;
       if (blank_cycles >= 150) {
          rotateRel(100, M_PI / 2);
-         next_obstacle_state = FOLLOWING_WALL;
+         current_obstacle_state = FOLLOWING_WALL;
          confirm_wall = 0;
       }
    }
-   update_obstacle_state();
 }
 
 void follow_line() 

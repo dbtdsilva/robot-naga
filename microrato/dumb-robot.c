@@ -31,7 +31,7 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 //   #define DEBUG_GROUND
 //   #define DEBUG_PID
 //   #define DEBUG_POSITION 
-//   #define DEBUG_OBSTACLE
+   #define DEBUG_OBSTACLE
 #endif
 
 #ifdef DEBUG_BLUETOOTH
@@ -44,7 +44,7 @@ bool ground_buffer[GROUND_HISTORY][5];
 
 typedef enum {START, FOLLOW_LINE, OBSTACLE} State;
 typedef enum {CENTERED, LOST_LEFT, LOST_RIGHT} GroundState;
-typedef enum {NOT_WALL, CENTER, FOLLOWING_WALL, CORNER} ObstacleState;
+typedef enum {NOT_WALL, CENTER, ROTATE_CENTER, FOLLOWING_WALL, CORNER} ObstacleState;
 ObstacleState current_obstacle_state, old, next_obstacle_state;
 State current_state;
 GroundState ground_state;
@@ -88,9 +88,9 @@ void follow_wall() {
    } else if (analogSensors.obstSensLeft > 22) {
       aa -= 2.0;
    } else if (analogSensors.obstSensLeft < 17) {
-      aa += 5.0;
-   } else if (analogSensors.obstSensLeft < 20) {
       aa += 2.0;
+   } else if (analogSensors.obstSensLeft < 20) {
+      aa += 5.0;
    }
    
    double propotional_error = 3.0 * aa;
@@ -104,6 +104,8 @@ void follow_wall() {
 }
 
 bool careful_movement = false;
+int confirm_wall;
+int c_wall;
 int main(void)
 {
    initPIC32();
@@ -138,6 +140,8 @@ int main(void)
 
       is_it_wall_cycles = 0;
       old_is_it_wall = -1;
+      confirm_wall = 0;
+      c_wall = 0;
 
       while (!stopButton()) {
          readAnalogSensors();          // Fill in "analogSensors" structure
@@ -157,7 +161,15 @@ int main(void)
          }
 
          careful_movement = (analogSensors.obstSensFront <= 25 && current_state == FOLLOW_LINE);
-         if (analogSensors.obstSensFront <= 10 && current_state != OBSTACLE) {
+         printf("%d\n", confirm_wall);
+         if (analogSensors.obstSensFront <= 12 && current_state != OBSTACLE) {
+            c_wall++;
+         } else {
+            c_wall = 0;
+         }
+         if (c_wall >= 12 && current_state != OBSTACLE) {
+            c_wall = 0;
+            confirm_wall = 0;
             current_state = OBSTACLE;
             next_obstacle_state = CENTER;
             update_obstacle_state();
@@ -316,21 +328,56 @@ double last_current = -100;
 int blank_cycles;
 void dodge_obstacle()
 {
+   printf("State: %d, Confirm_Wall: %d\n", current_obstacle_state, confirm_wall);
    if (current_obstacle_state == CENTER) { 
       setVel2(30, 30);
-      if (analogSensors.obstSensFront <= 25)
+      if (analogSensors.obstSensFront > 25)
          current_state = FOLLOW_LINE;
-      if (analogSensors.obstSensFront <= 10)
-         next_obstacle_state = FOLLOWING_WALL;
+      if (analogSensors.obstSensFront <= 12) {
+         setVel2(0, 0);
+         confirm_wall++;
+         if (confirm_wall >= 10) {
+            next_obstacle_state = ROTATE_CENTER;
+            confirm_wall = 0;
+         }
+      }
+   } else if (current_obstacle_state == ROTATE_CENTER) {
+      rotateRel(30, -M_PI / 2);
+      next_obstacle_state = FOLLOWING_WALL;
+      confirm_wall = 0;
+
+   /*   if (analogSensors.obstSensLeft > 15) {
+         setVel2(30, -30);
+      } else {
+         confirm_wall++;
+         setVel2(0,0);
+         if (analogSensors.obstSensLeft <= 12) {
+            next_obstacle_state = FOLLOWING_WALL;
+            confirm_wall = 0;
+         }
+      }*/
    } else if (current_obstacle_state == FOLLOWING_WALL) {
-      setVel2(0, 0);
+      if (analogSensors.obstSensLeft > 40) {
+         confirm_wall++;
+      }
+
+      if (confirm_wall >= 10) {
+         setVel2(0, 0);
+         next_obstacle_state = CORNER;
+         blank_cycles = 0;
+      } else {
+         follow_wall();
+      }
    } else if (current_obstacle_state == CORNER) {
+      setVel2(30, 30);
       blank_cycles++;
-      if (blank_cycles >= 200) {
+      if (blank_cycles >= 150) {
          rotateRel(100, M_PI / 2);
          next_obstacle_state = FOLLOWING_WALL;
+         confirm_wall = 0;
       }
    }
+   update_obstacle_state();
 
    /*following_wall_cycles++;
    if (analogSensors.obstSensFront > 25 && current_obstacle_state == FIRST_CENTER) {
@@ -370,7 +417,6 @@ void dodge_obstacle()
    }*/
    //if (current_obstacle_state == FOLLOWING_WALL || current_obstacle_state == CORNER)
 
-   update_obstacle_state();
    /*if (last_current != current_position.rot && state >= 4) {
       last_current = current_position.rot;
       printf("%6.2f --- %6.2f\n", current_position.rot, obstacle_found_rotation);

@@ -18,8 +18,8 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 // LAP Configuration
 #define NUMBER_OF_LAPS     3
 #define LAP_MIN_CYCLES     1000
-#define LAP_DIFF_Y         175
-#define LAP_DIFF_X         175
+#define LAP_DIFF_Y         125
+#define LAP_DIFF_X         125
 #define LAP_BUFFER_CHECK   20
 // Comment next line to prevent rotate on even laps
 #define LAP_TURN           2
@@ -27,7 +27,7 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 // Feel free to comment any defines to disable debug
 #define DEBUG_VERBOSE
 #ifdef DEBUG_VERBOSE
-   #define DEBUG_BLUETOOTH
+//   #define DEBUG_BLUETOOTH
 //   #define DEBUG_GROUND
 //   #define DEBUG_PID
 //   #define DEBUG_POSITION 
@@ -44,6 +44,8 @@ bool ground_buffer[GROUND_HISTORY][5];
 
 typedef enum {START, FOLLOW_LINE, OBSTACLE} State;
 typedef enum {CENTERED, LOST_LEFT, LOST_RIGHT} GroundState;
+typedef enum {NOT_WALL, CENTER, FOLLOWING_WALL, CORNER} ObstacleState;
+ObstacleState current_obstacle_state, old, next_obstacle_state;
 State current_state;
 GroundState ground_state;
 
@@ -66,11 +68,42 @@ int median_array(int sensor, int newValue);
 void follow_line();
 void dodge_obstacle();
 void calibrate_ground_sensors();
+void update_obstacle_state();
 
+double obstacle_found_rotation;
 int last_ground_sensor;
 int number_of_cycles;
 int laps_finished;
 
+int forget_obstacle_cycles;
+
+
+int is_it_wall_cycles, old_is_it_wall;
+int following_wall_cycles;
+
+void follow_wall() {
+   double aa = 0;
+   if (analogSensors.obstSensLeft > 25) {
+      aa -= 5.0;   
+   } else if (analogSensors.obstSensLeft > 22) {
+      aa -= 2.0;
+   } else if (analogSensors.obstSensLeft < 17) {
+      aa += 5.0;
+   } else if (analogSensors.obstSensLeft < 20) {
+      aa += 2.0;
+   }
+   
+   double propotional_error = 3.0 * aa;
+
+
+   double velocity_increment = 0;
+   velocity_increment += propotional_error;
+
+   setVel2(30 + velocity_increment, 
+           30 - velocity_increment);
+}
+
+bool careful_movement = false;
 int main(void)
 {
    initPIC32();
@@ -95,20 +128,52 @@ int main(void)
       enableObstSens();
       current_state = START;
       ground_state = CENTERED;
+      current_obstacle_state = NOT_WALL;
+      next_obstacle_state = NOT_WALL;
+      old = CENTER;
       getRobotPos(&start_position.x, &start_position.y, &start_position.rot);
       number_of_cycles = 0;
       laps_finished = 0;      
+      careful_movement = false;
+
+      is_it_wall_cycles = 0;
+      old_is_it_wall = -1;
 
       while (!stopButton()) {
          readAnalogSensors();          // Fill in "analogSensors" structure
          read_ground_sensors(1);
 
-         
-         if (analogSensors.obstSensFront < 24) {
-            current_state = OBSTACLE;
-         } else {
-            current_state = FOLLOW_LINE;
+         //follow_wall();
+         //continue;
+
+         if (old != current_obstacle_state) {
+            printf("%d\n", current_obstacle_state);
+            old = current_obstacle_state;   
          }
+
+         if (old_is_it_wall != is_it_wall_cycles) {
+            printf("It is wall: %d\n", is_it_wall_cycles);
+            old_is_it_wall = is_it_wall_cycles;
+         }
+
+         careful_movement = (analogSensors.obstSensFront <= 25 && current_state == FOLLOW_LINE);
+         if (analogSensors.obstSensFront <= 10 && current_state != OBSTACLE) {
+            current_state = OBSTACLE;
+            next_obstacle_state = CENTER;
+            update_obstacle_state();
+            is_it_wall_cycles = 0;
+            following_wall_cycles = 0;
+            printf("Found wall!\n");
+         }
+
+         /*if (analogSensors.obstSensFront < 20 && current_state != OBSTACLE) {
+            
+         }*/
+         /*if (analogSensors.obstSensFront < 24 && current_state != OBSTACLE &&
+               forget_obstacle_cycles >= 200) {
+            current_state = OBSTACLE;
+            obstacle_found_rotation = current_position.rot;
+         }*/
          
 
 #ifdef DEBUG_OBSTACLE
@@ -149,6 +214,7 @@ int main(void)
                right = true;
          }
 
+         forget_obstacle_cycles++;
          number_of_cycles++;
          if (left && center && right && number_of_cycles >= LAP_MIN_CYCLES &&
                abs(current_position.x - start_position.x) <= LAP_DIFF_X &&
@@ -174,6 +240,12 @@ int main(void)
    }
 
    return 0;
+}
+
+void update_obstacle_state() {
+   if (next_obstacle_state == NOT_WALL ||
+      abs(next_obstacle_state - current_obstacle_state) == 1)
+      current_obstacle_state = next_obstacle_state;
 }
 
 void read_ground_sensors(int iterations) {
@@ -236,9 +308,104 @@ void calibrate_ground_sensors()
    while (1) {}
 }
 
+int count_cycles_obstacle = 0; 
+
+int state = 0;
+double last_current = -100;
+
+int blank_cycles;
 void dodge_obstacle()
 {
-   setVel2(0,0);
+   if (current_obstacle_state == CENTER) { 
+      setVel2(30, 30);
+      if (analogSensors.obstSensFront <= 25)
+         current_state = FOLLOW_LINE;
+      if (analogSensors.obstSensFront <= 10)
+         next_obstacle_state = FOLLOWING_WALL;
+   } else if (current_obstacle_state == FOLLOWING_WALL) {
+      setVel2(0, 0);
+   } else if (current_obstacle_state == CORNER) {
+      blank_cycles++;
+      if (blank_cycles >= 200) {
+         rotateRel(100, M_PI / 2);
+         next_obstacle_state = FOLLOWING_WALL;
+      }
+   }
+
+   /*following_wall_cycles++;
+   if (analogSensors.obstSensFront > 25 && current_obstacle_state == FIRST_CENTER) {
+      current_state = FOLLOW_LINE;
+      next_obstacle_state = NOT_WALL;
+   }
+
+   if (analogSensors.obstSensFront <= 25) {
+      is_it_wall_cycles++;
+      setVel2(30, -30);
+
+      if (is_it_wall_cycles >= 10 && current_obstacle_state == FIRST_CENTER) {
+         printf("IT IS A WALL!\n");
+         next_obstacle_state = CENTER;
+      }
+   } else if (analogSensors.obstSensLeft > 0 && analogSensors.obstSensLeft < 30) {
+      next_obstacle_state = FOLLOWING_WALL;
+      follow_wall();
+   } else {
+      next_obstacle_state = CORNER;
+      setVel2(30, 30);
+   }
+
+   if (next_obstacle_state == CORNER && current_obstacle_state == FOLLOWING_WALL) {
+      blank_cycles = 0;
+   }
+
+   if (following_wall_cycles > 600 && (current_obstacle_state == FOLLOWING_WALL || current_obstacle_state == CORNER)) {
+      int sum = 0, i, k;
+      for (i = 0; i < 5; i++) {
+         for (k = 0; k < 10; k++) {
+            sum = ground_buffer[k][i] == COLOR_LINE ? sum + 1 : sum;
+         }
+      }
+      if (sum > 15)
+         current_state = FOLLOW_LINE;
+   }*/
+   //if (current_obstacle_state == FOLLOWING_WALL || current_obstacle_state == CORNER)
+
+   update_obstacle_state();
+   /*if (last_current != current_position.rot && state >= 4) {
+      last_current = current_position.rot;
+      printf("%6.2f --- %6.2f\n", current_position.rot, obstacle_found_rotation);
+   }
+
+   if (state % 2 == 0) {
+      
+      } else {
+         count_cycles_obstacle++;
+         if (count_cycles_obstacle >= 400) {
+            state++;
+         }
+         setVel2(15, 15);
+      }
+   } else {
+      rotateRel(30, M_PI / 2);
+      state++;
+         count_cycles_obstacle = 0;
+   }
+
+   if (state >= 4) {
+      int i, j;
+      int sum = 0;
+      for (i = 0; i < 5; i++) {
+         for (j = 0; j < 20; j++) {
+            sum = ground_buffer[j][i] == COLOR_LINE ? sum + 1 : sum;
+         }
+      }
+
+      if (sum >= 7) {
+         forget_obstacle_cycles = 0;
+         current_state = FOLLOW_LINE;
+      }
+   }
+   //printf("Dodging...\n");*/
 }
 
 void follow_line() 
@@ -324,9 +491,9 @@ void follow_line()
       velocity_increment, propotional_error, integral_error,
       derivative_error, error, median_sum, elements_weight);
 #endif
-
-   setVel2(BASE_SPEED + velocity_increment + STATIC_INCREASE, 
-           BASE_SPEED - velocity_increment + STATIC_INCREASE);
+   double base_speed_modifier = careful_movement ? (BASE_SPEED + STATIC_INCREASE) / 2 : BASE_SPEED + STATIC_INCREASE;
+   setVel2(base_speed_modifier + velocity_increment, 
+           base_speed_modifier - velocity_increment);
 }
 
 void walk_rotate(double deltaAngle)
@@ -385,28 +552,3 @@ void rotateRel(int maxVel, double deltaAngle)
    } while (fabs(error) > 0.01);
    setVel2(0, 0);
 }
-
-
-void rotateRel_basic(int speed, double deltaAngle)
-{
-   double x, y, t;
-   double targetAngle;
-   double error;
-   int cmdVel, errorSignOri;
-
-   getRobotPos(&x, &y, &t);
-   targetAngle = normalizeAngle(t + deltaAngle);
-   error = normalizeAngle(targetAngle - t);
-   errorSignOri = error < 0 ? -1 : 1;
-
-   cmdVel = error < 0 ? -speed : speed;
-   setVel2(-cmdVel, cmdVel);
-
-   do
-   {
-      getRobotPos(&x, &y, &t);
-      error = normalizeAngle(targetAngle - t);
-   } while (fabs(error) > 0.01 && errorSignOri * error > 0);
-   setVel2(0, 0);
-}
-

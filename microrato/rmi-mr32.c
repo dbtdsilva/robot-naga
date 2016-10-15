@@ -141,7 +141,7 @@ const signed int KP_num=5, KP_den=1;   // Proportional constant
 const signed int KI_num=1, KI_den=1;    // Integral constant
 
 // ***************************************************************************
-#define DIM_BAT_ARRAY	   128            // Dimension of the battery voltage array
+#define DIM_BAT_ARRAY	   256            // Dimension of the battery voltage array
 #define MEDIAN_SIZE	   11             // Median buffer size for obstacle sensor filtering              
 #define AVERAGE_SIZE	   4              // Average buffer size for obstacle sensor filtering              
 
@@ -737,7 +737,7 @@ void _int_(_TIMER_2_VECTOR) isr_t2(void)
    {
       actuateMotors(pwmLeft, pwmRight);			// pwmLeft and pwmRight are global vars
    }
-   if(analogSensors.array[BATTERY] <= 92)
+   if(analogSensors.array[BATTERY] <= 90)
    {
       actuateMotors(0, 0);
       while(1)

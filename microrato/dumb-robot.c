@@ -70,6 +70,8 @@ int number_of_cycles;
 int laps_finished;
 int ncorners;
 int blank_cycles;
+int joins;
+int increment = 0;
 
 void follow_wall() {
    double weight = 0;
@@ -229,8 +231,6 @@ void read_ground_sensors(int iterations) {
    }
 }
 
-int joins = 0;
-int increment = 0;
 void dodge_obstacle()
 {
    printf("State: %d, Confirm_Wall: %d\n", current_obstacle_state, confirm_wall);
@@ -252,13 +252,14 @@ void dodge_obstacle()
       rotateRel(40, -M_PI / 2);
       current_obstacle_state = FOLLOWING_WALL;
       confirm_wall = 0;
+      joins = 0;
    } else if (current_obstacle_state == FOLLOWING_WALL) {
       if (analogSensors.obstSensLeft > 60) {
          confirm_wall++;
       }
-      joins ++;
+      joins++;
       if (confirm_wall >= 10) {
-         if (joins < 50) increment -= 60;
+         increment = joins < 50 ? -60 : 0;
          setVel2(0, 0);
          current_obstacle_state = CORNER;
          blank_cycles = 0;

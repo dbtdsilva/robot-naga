@@ -21,7 +21,6 @@ enum ground_sensors {G_ML = 0, G_L = 1, G_C = 2, G_R = 3, G_MR = 4};
 #define LAP_DIFF_Y         125
 #define LAP_DIFF_X         125
 #define LAP_BUFFER_CHECK   30
-// Comment next line to prevent rotate on even laps
 #define LAP_TURN           2
 
 // Feel free to comment any defines to disable debug
@@ -76,23 +75,18 @@ int forget_obstacle_cycles;
 int following_wall_cycles;
 
 void follow_wall() {
-   double aa = 0;
+   double weight = 0;
    if (analogSensors.obstSensLeft > 25) {
-      aa -= 3.0;   
+      weight -= 3.0;   
    } else if (analogSensors.obstSensLeft > 22) {
-      aa -= 1.0;
+      weight -= 1.0;
    } else if (analogSensors.obstSensLeft < 17) {
-      aa += 3.0;
+      weight += 3.0;
    } else if (analogSensors.obstSensLeft < 20) {
-      aa += 1.0;
+      weight += 1.0;
    }
-   
-   double propotional_error = 8.0 * aa;
-
-
-   double velocity_increment = 0;
-   velocity_increment += propotional_error;
-
+   double propotional_error = 8.0 * weight;
+   double velocity_increment = propotional_error;
    setVel2(50 + velocity_increment, 50 - velocity_increment);
 }
 
@@ -329,7 +323,7 @@ void dodge_obstacle()
 
 void follow_line() 
 {
-      double weight = 0;
+   double weight = 0;
    int element_influence = 0, i;
    if (!ground_buffer[0][G_ML] && !ground_buffer[0][G_L] && !ground_buffer[0][G_C] && 
       !ground_buffer[0][G_R] && !ground_buffer[0][G_MR]) {
@@ -379,10 +373,6 @@ void follow_line()
    setVel2(base_speed_modifier + velocity_increment, base_speed_modifier - velocity_increment);
 }
 
-#define KP_ROT 40
-#define KI_ROT 5
-
-// deltaAngle in radians
 void rotateRel(int maxVel, double deltaAngle)
 {
    double x, y, t;
@@ -403,7 +393,7 @@ void rotateRel(int maxVel, double deltaAngle)
       integral = integral > PI / 2 ? PI / 2: integral;
       integral = integral < -PI / 2 ? -PI / 2: integral;
 
-      cmdVel = (int)((KP_ROT * error) + (integral * KI_ROT));
+      cmdVel = (int)((40 * error) + (integral * 5));
       cmdVel = cmdVel > maxVel ? maxVel : cmdVel;
       cmdVel = cmdVel < -maxVel ? -maxVel : cmdVel;
 

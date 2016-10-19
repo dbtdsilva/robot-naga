@@ -73,25 +73,6 @@ int blank_cycles;
 int joins;
 int increment = 0;
 
-void follow_wall() {
-   double weight = 0;
-   if (analogSensors.obstSensFront < 20)
-      weight += 4.0;
-
-   if (analogSensors.obstSensLeft > 25) {
-      weight -= 3.0;   
-   } else if (analogSensors.obstSensLeft > 22) {
-      weight -= 1.0;
-   } else if (analogSensors.obstSensLeft < 17) {
-      weight += 3.0;
-   } else if (analogSensors.obstSensLeft < 20) {
-      weight += 1.0;
-   }
-   double propotional_error = 8.0 * weight;
-   double velocity_increment = propotional_error;
-   setVel2(50 + velocity_increment, 50 - velocity_increment);
-}
-
 bool careful_movement = false;
 int confirm_wall, confirm_wall_c;
 int main(void)
@@ -231,6 +212,25 @@ void read_ground_sensors(int iterations) {
    }
 }
 
+void follow_wall() {
+   double weight = 0;
+   if (analogSensors.obstSensFront < 20)
+      weight += 4.0;
+
+   if (analogSensors.obstSensLeft > 25) {
+      weight -= 3.0;   
+   } else if (analogSensors.obstSensLeft > 22) {
+      weight -= 1.0;
+   } else if (analogSensors.obstSensLeft < 17) {
+      weight += 3.0;
+   } else if (analogSensors.obstSensLeft < 20) {
+      weight += 1.0;
+   }
+   double propotional_error = 8.0 * weight;
+   double velocity_increment = propotional_error;
+   setVel2(50 + velocity_increment, 50 - velocity_increment);
+}
+
 void dodge_obstacle()
 {
    printf("State: %d, Confirm_Wall: %d\n", current_obstacle_state, confirm_wall);
@@ -259,7 +259,6 @@ void dodge_obstacle()
       }
       joins++;
       if (confirm_wall >= 10) {
-         increment = joins < 50 ? -60 : 0;
          setVel2(0, 0);
          current_obstacle_state = CORNER;
          blank_cycles = 0;
@@ -269,7 +268,10 @@ void dodge_obstacle()
    } else if (current_obstacle_state == CORNER) {
       setVel2(40, 40);
       blank_cycles++;
-      if (blank_cycles >= 180 + increment) {
+
+      int increment2 = joins < 50 ? -20 : 0;
+      if (blank_cycles >= 180 + increment2) {
+         joins = 0;
          rotateRel(100, M_PI / 2);
          current_obstacle_state = FOLLOWING_WALL;
          confirm_wall = 0;

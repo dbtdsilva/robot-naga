@@ -63,11 +63,12 @@ void walk_rotate(double);
 void read_ground_sensors(int iterations);
 void follow_line();
 void dodge_obstacle();
+bool check_lap_line();
 
 double obstacle_found_rotation;
 int last_ground_sensor, number_of_cycles, laps_finished, corners_number,
    blind_corners_cycle, check_wall_front, trigger_state_cycles;
-bool careful_movement = false;
+bool careful_movement;
 
 int main(void)
 {
@@ -90,15 +91,22 @@ int main(void)
 
       enableGroundSens();
       enableObstSens();
+
+      start_position.x = 0;
+      start_position.y = 0;
+      start_position.rot = 0;
+      setRobotPos(0, 0, 0);
+
       current_state = FOLLOW_LINE;
       ground_state = CENTERED;
       current_obstacle_state = NOT_WALL;
-      getRobotPos(&start_position.x, &start_position.y, &start_position.rot);
       number_of_cycles = 0;
       check_wall_front = 0;
       trigger_state_cycles = 0;
       laps_finished = 0;      
       careful_movement = false;
+
+      //while (!startButton());      
 
       while (!stopButton()) {
          readAnalogSensors();
@@ -113,7 +121,6 @@ int main(void)
             current_obstacle_state = CENTER;
          }
          
-
 #ifdef DEBUG_OBSTACLE
          printf("L = %03d, C = %03d, R = %03d\n", analogSensors.obstSensLeft, 
             analogSensors.obstSensFront, analogSensors.obstSensRight);
@@ -125,18 +132,7 @@ int main(void)
             case OBSTACLE:
                dodge_obstacle();
                break;
-         }
-
-         int k;
-         bool left = false, center = false, right = false;
-         for (k = 0; k < LAP_BUFFER_CHECK; k++) {
-            if (ground_buffer[k][G_ML])
-               left = true;
-            if (ground_buffer[k][G_C])
-               center = true;
-            if (ground_buffer[k][G_MR])
-               right = true;
-         }
+         }         
 
          getRobotPos(&current_position.x, &current_position.y, &current_position.rot);
 #ifdef DEBUG_POSITION
@@ -147,22 +143,23 @@ int main(void)
          printf("Cycles: %d\n", number_of_cycles);
 #endif
          number_of_cycles++;
-         led(3, abs(current_position.x - start_position.x) <= LAP_DIFF_X);
+         led(2, abs(current_position.x - start_position.x) <= LAP_DIFF_X);
          led(0, abs(current_position.y - start_position.y) <= LAP_DIFF_Y);
 
-         if (left && center && right && number_of_cycles >= LAP_MIN_CYCLES &&
-               abs(current_position.x - start_position.x) <= LAP_DIFF_X &&
-               abs(current_position.y - start_position.y) <= LAP_DIFF_Y) {
+         if (check_lap_line() && number_of_cycles >= LAP_MIN_CYCLES &&
+               fabs(current_position.x - start_position.x) <= LAP_DIFF_X &&
+               fabs(current_position.y - start_position.y) <= LAP_DIFF_Y &&
+               fabs(current_position.rot - start_position.rot) < M_PI / 4) {
             laps_finished++;
 #ifdef DEBUG_VERBOSE
             printf("\n\n> LAP FINISHED! <\n\n");
 #endif
             if (laps_finished == LAP_TURN)
                rotateRel(100, -M_PI);
-            setRobotPos(0, 0, 0);
             start_position.x = 0;
             start_position.y = 0;
             start_position.rot = 0;
+            setRobotPos(0, 0, 0);
             number_of_cycles = 0;
             if (laps_finished >= NUMBER_OF_LAPS)
                break;
@@ -265,7 +262,7 @@ void dodge_obstacle()
       int increment = blind_corners_cycle < 50 ? -20 : 0;
       if (trigger_state_cycles >= 180 + increment) {
          blind_corners_cycle = 0;
-         rotateRel(100, M_PI / 2);
+         rotateRel(BASE_SPEED_OBST, M_PI / 2);
          current_obstacle_state = FOLLOWING_WALL;
          trigger_state_cycles = 0;
          corners_number++;
@@ -349,6 +346,20 @@ void follow_line()
       base_speed_modifier += STATIC_INCREASE;
 #endif
    setVel2(base_speed_modifier + velocity_increment, base_speed_modifier - velocity_increment);
+}
+
+bool check_lap_line() {
+   int k;
+   bool left = false, center = false, right = false;
+   for (k = 0; k < LAP_BUFFER_CHECK; k++) {
+      if (ground_buffer[k][G_ML])
+         left = true;
+      if (ground_buffer[k][G_C])
+         center = true;
+      if (ground_buffer[k][G_MR])
+         right = true;
+   }
+   return (right && left && center);
 }
 
 void rotateRel(int maxVel, double deltaAngle)

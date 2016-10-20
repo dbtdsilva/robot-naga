@@ -148,8 +148,7 @@ int main(void)
 
          if (check_lap_line() && number_of_cycles >= LAP_MIN_CYCLES &&
                fabs(current_position.x - start_position.x) <= LAP_DIFF_X &&
-               fabs(current_position.y - start_position.y) <= LAP_DIFF_Y &&
-               fabs(current_position.rot - start_position.rot) < M_PI / 4) {
+               fabs(current_position.y - start_position.y) <= LAP_DIFF_Y) {
             laps_finished++;
 #ifdef DEBUG_VERBOSE
             printf("\n\n> LAP FINISHED! <\n\n");
@@ -223,7 +222,6 @@ void follow_wall() {
 
 void dodge_obstacle()
 {
-   printf("State: %d, Trigger State Cycles: %d\n", current_obstacle_state, trigger_state_cycles);
    if (current_obstacle_state == CENTER) { 
       corners_number = 0; 
       setVel2(BASE_SPEED_OBST - 10, BASE_SPEED_OBST - 10);
@@ -259,8 +257,8 @@ void dodge_obstacle()
       setVel2(BASE_SPEED_OBST, BASE_SPEED_OBST);
       trigger_state_cycles++;
 
-      int increment = blind_corners_cycle < 50 ? -20 : 0;
-      if (trigger_state_cycles >= 180 + increment) {
+      int increment = blind_corners_cycle < 50 ? -50 : 0;
+      if (trigger_state_cycles >= 300 + increment) {
          blind_corners_cycle = 0;
          rotateRel(BASE_SPEED_OBST, M_PI / 2);
          current_obstacle_state = FOLLOWING_WALL;
@@ -269,7 +267,7 @@ void dodge_obstacle()
       }
    } else if (current_obstacle_state == FINISHING_ZONE) {
       trigger_state_cycles++;
-      if (trigger_state_cycles >= 30) {
+      if (trigger_state_cycles >= 40) {
          current_obstacle_state = NOT_WALL;
          current_state = FOLLOW_LINE;
          while (!ground_buffer[0][G_C]) {
@@ -289,7 +287,7 @@ void dodge_obstacle()
             sum += ground_buffer[k][G_ML];
          }
       }
-      if (sum > 20) {
+      if (sum > 15) {
          current_obstacle_state = FINISHING_ZONE;
          trigger_state_cycles = 0;
       }

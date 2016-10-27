@@ -1,6 +1,47 @@
+### Source files generated ###
+pathfinder/cibertools-v2.2.2.rmi/GUISample/GUISample
+pathfinder/cibertools-v2.2.2.rmi/GUISample/Makefile
+pathfinder/cibertools-v2.2.2.rmi/GUISample/moc_robview.cpp
+pathfinder/cibertools-v2.2.2.rmi/GUISample/moc_sampapp.cpp
+pathfinder/cibertools-v2.2.2.rmi/Viewer/Makefile
+pathfinder/cibertools-v2.2.2.rmi/Viewer/Viewer
+pathfinder/cibertools-v2.2.2.rmi/Viewer/moc_crqcomm.cpp
+pathfinder/cibertools-v2.2.2.rmi/Viewer/moc_crqdataview.cpp
+pathfinder/cibertools-v2.2.2.rmi/Viewer/moc_crqlabview.cpp
+pathfinder/cibertools-v2.2.2.rmi/Viewer/moc_crqrobotinfo.cpp
+pathfinder/cibertools-v2.2.2.rmi/Viewer/moc_crqscene.cpp
+pathfinder/cibertools-v2.2.2.rmi/Viewer/qrc_default.cpp
+pathfinder/cibertools-v2.2.2.rmi/Viewer/ui_crqdataview.h
+pathfinder/cibertools-v2.2.2.rmi/Viewer/ui_crqlabview.h
+pathfinder/cibertools-v2.2.2.rmi/Viewer/ui_crqrobotinfo.h
+pathfinder/cibertools-v2.2.2.rmi/libRobSock/Makefile
+pathfinder/cibertools-v2.2.2.rmi/libRobSock/moc_croblink.cpp
+pathfinder/cibertools-v2.2.2.rmi/logplayer/Makefile
+pathfinder/cibertools-v2.2.2.rmi/logplayer/logplayer
+pathfinder/cibertools-v2.2.2.rmi/logplayer/moc_cblogplayer.cpp
+pathfinder/cibertools-v2.2.2.rmi/logplayer/ui_logplayerGUI.h
+pathfinder/cibertools-v2.2.2.rmi/robsample/Makefile
+pathfinder/cibertools-v2.2.2.rmi/robsample/robsample
+pathfinder/cibertools-v2.2.2.rmi/simulator/Makefile
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cbcontrolpanel.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cblabdialog.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cbmanagerobots.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cbparamdialog.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cbrobot.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cbrobotinfo.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cbsimulator.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/moc_cbsimulatorGUI.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/qrc_default.cpp
+pathfinder/cibertools-v2.2.2.rmi/simulator/simulator
+pathfinder/cibertools-v2.2.2.rmi/simulator/ui_cbcontrolpanel.h
+pathfinder/cibertools-v2.2.2.rmi/simulator/ui_cblabdialog.h
+pathfinder/cibertools-v2.2.2.rmi/simulator/ui_cbmanagerobots.h
+pathfinder/cibertools-v2.2.2.rmi/simulator/ui_cbparamdialogbase.h
+pathfinder/cibertools-v2.2.2.rmi/simulator/ui_cbrobotinfo.h
+pathfinder/cibertools-v2.2.2.rmi/simulator/ui_cbsimulatorGUI.h
+
 
 # Created by https://www.gitignore.io/api/assembler,c++,c,sublimetext,jetbrains
-
 ### Assembler ###
 *.[sS]
 *.bc

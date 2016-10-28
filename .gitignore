@@ -29,6 +29,7 @@ qrc_*.cpp
 ui_*.h
 Makefile*
 *build-*
+build
 
 # QtCreator
 
@@ -257,6 +258,6 @@ fabric.properties
 
 *.iml
 modules.xml
-.idea/misc.xml 
+.idea
 *.ipr
 

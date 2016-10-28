@@ -1,3 +1,46 @@
+
+# Created by https://www.gitignore.io/api/qt
+
+### Qt ###
+qmake.stash
+# C++ objects and libs
+
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+
+# Qt-es
+
+/.qmake.cache
+/.qmake.stash
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.moc
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+Makefile*
+*build-*
+
+# QtCreator
+
+*.autosave
+
+# QtCtreator Qml
+*.qmlproject.user
+*.qmlproject.user.*
+
+# QtCtreator CMake
+CMakeLists.txt.user*
+
 ### Source files generated ###
 pathfinder/cibertools-v2.2.2.rmi/GUISample/GUISample
 pathfinder/cibertools-v2.2.2.rmi/GUISample/Makefile
@@ -212,8 +255,8 @@ fabric.properties
 ### JetBrains Patch ###
 # Comment Reason: https://github.com/joeblau/gitignore.io/issues/186#issuecomment-215987721
 
-# *.iml
-# modules.xml
-# .idea/misc.xml 
-# *.ipr
+*.iml
+modules.xml
+.idea/misc.xml 
+*.ipr
 

@@ -7,7 +7,7 @@
 
 #include <string>
 #include <vector>
-#include <qapplication.h>
+#include <QtGui/QApplication>
 
 class RazerNaga : public QApplication {
     Q_OBJECT

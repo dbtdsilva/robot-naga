@@ -16,6 +16,6 @@ SET(CMAKE_CXX_EXTENSIONS OFF)
 FIND_PACKAGE(Qt4 REQUIRED)
 INCLUDE(${QT_USE_FILE})
 
-ADD_EXECUTABLE(razernaga main.cpp RazerNaga.cpp RazerNaga.h)
+ADD_EXECUTABLE(razernaga main.cpp RazerNaga.cpp RazerNaga.h Sensors.cpp Sensors.h Filter.h Position.cpp Position.h)
 
 TARGET_LINK_LIBRARIES(razernaga ${QT_LIBRARIES} RobSock)

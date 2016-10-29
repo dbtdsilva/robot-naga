@@ -15,6 +15,7 @@ public:
 
     void update_values();
     double get_compass() const;
+    double get_obstacle_sensor(const int& id) const;
 private:
     std::vector<double> obstacles_;
     int ground_;

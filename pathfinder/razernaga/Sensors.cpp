@@ -28,6 +28,10 @@ double Sensors::get_compass() const {
     return compass_.get_value();
 }
 
+double Sensors::get_obstacle_sensor(const int& id) const {
+    return obstacles_[id];
+}
+
 ostream& operator<<(ostream& os, const Sensors& sensors)
 {
     for (int obstacle_id = 0; obstacle_id < NUM_IR_SENSORS; obstacle_id++) {

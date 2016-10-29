@@ -8,11 +8,15 @@
 
 class Position {
 public:
-    Position() {
+    Position();
 
-    }
+    double x() const;
+    double y() const;
+
+    void update_position(double compass, double next_speed_left, double next_speed_right);
 private:
-    
+    double x_;
+    double y_;
 };
 
 

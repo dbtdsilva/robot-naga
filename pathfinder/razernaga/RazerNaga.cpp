@@ -8,9 +8,9 @@
 #include <cmath>
 
 #define INTEGRAL_CLIP   0.05
-#define KP              0.1
-#define KD              0.0
-#define KI              0.0
+#define KP              0.1    // 0.15
+#define KD              0.2     // 0.2
+#define KI              0.1
 #define BASE_SPEED      0.1
 
 using namespace std;
@@ -45,7 +45,8 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
     qApp->addLibraryPath("libRobSock");
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
 }
-
+#include <thread>         // std::this_thread::sleep_for
+#include <chrono>         // std::chrono::seconds
 void RazerNaga::take_action() {
     sensors_.update_values();
     //static int cycles = 0;
@@ -67,22 +68,15 @@ void RazerNaga::take_action() {
     double y = GetY() - get<1>(start_position);
     //cout << ", Correct: " << x << ", " << y << endl;
     cout << sensors_ << endl;
-    /*move_front();
-    if (sensors_.get_obstacle_sensor(3) > 0.8) {
+    move_front();
+    if (sensors_.get_obstacle_sensor(2) > 0.8) {
         get<0>(motor_speed) = 0;
         get<1>(motor_speed) = 0;
-    }*/
-    rotate(45.0);
-    rotate(180.0);
-    rotate(180.0);
-    rotate(-180.0);
-    rotate(-180.0);
-    rotate(-45.0);
-    rotate(90.0);
-    rotate(90.0);
-    rotate(-90.0);
-    rotate(-90.0);
-    exit(0);
+    }
+    //    rotate(-90.0);
+        /*DriveMotors(0.15, 0.15);
+        std::this_thread::sleep_for (std::chrono::seconds(1));*/
+    //}
     DriveMotors(get<0>(motor_speed), get<1>(motor_speed));
     //DriveMotors(0.15, 0.15);
     position_.update_position(sensors_.get_compass(), get<0>(motor_speed), get<1>(motor_speed));
@@ -91,27 +85,21 @@ void RazerNaga::take_action() {
 void RazerNaga::move_front() {
     double error;
     static double last_error = 0, integral_error = 0;
-
-    double left = sensors_.get_obstacle_sensor(0);
     double right = sensors_.get_obstacle_sensor(3);
-    // 0.4 to the nearest wall
-    error = right - 0.4;   // right -> 0, error -> -0.4, speed (0.1 - 0.4 * 0.1, 0.1 + 0.4 * 0.1) -> (0.14, 0.06)
-
-    // right -> 0.8, left -> 0.2, error -> 0.6
-    // right -> 0.6, left -> 0, error -> 0.6
-    // right -> 0.5, left -> 0.6, error -> -0.1
-    // right -> 0, left -> 0.4, error -> -0.4
-    // right -> 0.5, error -> -0.1, speed (0.1 - 0.1 * 0.1, 0.1 + 0.1 * 0.1) -> (
+    double left = sensors_.get_obstacle_sensor(0);
+    double cl = sensors_.get_obstacle_sensor(1);
+    double cr = sensors_.get_obstacle_sensor(2);
+    error = right - 0.4 + cr - 0.65;
     integral_error += error;
     integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
     integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
     double correction = KP * error + KI * integral_error + KD * (error - last_error);
     last_error = error;
 
+    //if (cr > 0.8)
+    //    correction = 0;
     get<0>(motor_speed) = BASE_SPEED + correction;
     get<1>(motor_speed) = BASE_SPEED - correction;
-
-    //std::printf("%f\t%f\t%f\t%f\n", left, get<0>(motor_speed), right, get<1>(motor_speed));
 }
 
 double RazerNaga::normalize_angle(double degrees_angle)

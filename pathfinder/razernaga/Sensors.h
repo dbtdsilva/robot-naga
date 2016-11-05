@@ -17,7 +17,7 @@ public:
     double get_compass() const;
     double get_obstacle_sensor(const int& id) const;
 private:
-    std::vector<double> obstacles_;
+    std::vector<Filter<double>> obstacles_;
     int ground_;
     Filter<double> compass_;
     friend std::ostream& operator<<(std::ostream& os, const Sensors& sensors);

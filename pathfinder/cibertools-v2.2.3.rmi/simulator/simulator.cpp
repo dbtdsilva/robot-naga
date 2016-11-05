@@ -94,11 +94,11 @@ double  cbBeaconSensor::noise = 0.0;
 double  cbIRSensor::noise = 0.0;
 double  cbGPSSensor::noiseLin = 0.5;
 double  cbGPSSensor::noiseAng = 5.0;
-double  cbGPSSensor::offsetX   = randUniform(0.0,1000.0);
-double  cbGPSSensor::offsetY   = randUniform(0.0,1000.0);
+double  cbGPSSensor::offsetX   = randUniform(0.0, 1000.0);
+double  cbGPSSensor::offsetY   = randUniform(0.0, 1000.0);
 double  cbGPSSensor::offsetDeg = 0.0;  // a different value would not be consistent with XY reference frame nor with compass
 
-bool    cbRobot::GPSOn = true;
+bool    cbRobot::GPSOn = false;
 bool    cbRobot::beaconSensorOn = false;
 bool    cbRobot::GPSDirOn = false;
 bool    cbRobot::scoreSensorOn = false;
@@ -335,7 +335,7 @@ int main(int argc, char *argv[])
 	simulator.setReceptionistAt(port);
 
     simulator.buildGraph();
-    simulator.setDistMaxFromGridToTarget();
+    //simulator.setDistMaxFromGridToTarget();
 
     if(showGraph) {
         simulator.showGraph(showGraphId);

@@ -26,7 +26,7 @@ CRQRobotInfo::CRQRobotInfo(CRRobot *rob, QString skinName, QWidget *parent) :
     ui->label_Name->setText( robot->name() );
 
     // RETURN TIME
-    connect(this, SIGNAL(time(int)), ui->lcdNumber_Time, SLOT(display(int)));
+    connect(this, SIGNAL(returnTime(int)), ui->lcdNumber_Time, SLOT(display(int)));
 
     // SCORE
     connect(this, SIGNAL(score(int)), ui->lcdNumber_Score, SLOT(display(int)));

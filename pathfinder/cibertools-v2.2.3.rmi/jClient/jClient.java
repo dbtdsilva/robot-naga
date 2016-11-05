@@ -38,66 +38,66 @@ public class jClient {
 
     public static void main(String[] args) {
 
-	String host, robName;
-	int pos; 
-	int arg;
+        String host, robName;
+        int pos; 
+        int arg;
 
-	//default values
-	host = "localhost";
-	robName = "jClient";
-	pos = 1;
+        //default values
+        host = "localhost";
+        robName = "jClient";
+        pos = 1;
 
 
         // parse command-line arguments
-	try {
-	    arg = 0;
-	    while (arg<args.length) {
-		if(args[arg].equals("-pos")) {
-			if(args.length > arg+1) {
-				pos = Integer.valueOf(args[arg+1]).intValue();
-				arg += 2;
-			}
-		}
-		else if(args[arg].equals("-robname")) {
-			if(args.length > arg+1) {
-				robName = args[arg+1];
-				arg += 2;
-			}
-		}
-		else if(args[arg].equals("-host")) {
-			if(args.length > arg+1) {
-				host = args[arg+1];
-				arg += 2;
-			}
-		}
-		else throw new Exception();
-	    }
-	}
-	catch (Exception e) {
-		print_usage();
-		return;
-	}
-	
-	// create client
-	jClient client = new jClient();
+        try {
+            arg = 0;
+            while (arg<args.length) {
+                if(args[arg].equals("-pos")) {
+                        if(args.length > arg+1) {
+                                pos = Integer.valueOf(args[arg+1]).intValue();
+                                arg += 2;
+                        }
+                }
+                else if(args[arg].equals("-robname")) {
+                        if(args.length > arg+1) {
+                                robName = args[arg+1];
+                                arg += 2;
+                        }
+                }
+                else if(args[arg].equals("-host")) {
+                        if(args.length > arg+1) {
+                                host = args[arg+1];
+                                arg += 2;
+                        }
+                }
+                else throw new Exception();
+            }
+        }
+        catch (Exception e) {
+                print_usage();
+                return;
+        }
+        
+        // create client
+        jClient client = new jClient();
 
         client.robName = robName;
 
-	// register robot in simulator
-	client.cif.InitRobot(robName, pos, host);
-	
-	// main loop
-	client.mainLoop();
-	
+        // register robot in simulator
+        client.cif.InitRobot(robName, pos, host);
+        
+        // main loop
+        client.mainLoop();
+        
     }
 
     // Constructor
     jClient() {
-	    cif = new ciberIF();
-	    beacon = new beaconMeasure();
+            cif = new ciberIF();
+            beacon = new beaconMeasure();
 
-	    beaconToFollow = 0;
-	    ground=-1;
+            beaconToFollow = 0;
+            ground=-1;
 
             state = State.RUN;
     }
@@ -107,79 +107,70 @@ public class jClient {
      */
     public void mainLoop () {
 
-	while(true) {
-		cif.ReadSensors();
-		decide();
-	}
+        while(true) {
+                cif.ReadSensors();
+                decide();
+        }
     }
 
     public void wander(boolean followBeacon) {
         if(irSensor0>4.0 || irSensor1>4.0 ||  irSensor2>4.0) 
-    	    cif.DriveMotors(0.1,-0.1);
-        else if(irSensor1>1.0) cif.DriveMotors(0.1,0.0);
-        else if(irSensor2>1.0) cif.DriveMotors(0.0,0.1);
+                cif.DriveMotors(-0.1,+0.1);
+        else if(irSensor1>0.7) cif.DriveMotors(0.15,0.0);
+        else if(irSensor2>0.7) cif.DriveMotors(0.0,0.15);
         else if(followBeacon && beacon.beaconVisible && beacon.beaconDir > 20.0) 
-	    cif.DriveMotors(0.0,0.1);
+            cif.DriveMotors(0.0,0.1);
         else if(followBeacon && beacon.beaconVisible && beacon.beaconDir < -20.0) 
-	    cif.DriveMotors(0.1,0.0);
-        else cif.DriveMotors(0.1,0.1);
+            cif.DriveMotors(0.1,0.0);
+        else cif.DriveMotors(0.15,0.15);
     }
 
     /**
      * basic reactive decision algorithm, decides action based on current sensor values
      */
     public void decide() {
-	    if(cif.IsObstacleReady(0))
-		    irSensor0 = cif.GetObstacleSensor(0);
-	    if(cif.IsObstacleReady(1))
-		    irSensor1 = cif.GetObstacleSensor(1);
-	    if(cif.IsObstacleReady(2))
-		    irSensor2 = cif.GetObstacleSensor(2);
+            if(cif.IsObstacleReady(0))
+                    irSensor0 = cif.GetObstacleSensor(0);
+            if(cif.IsObstacleReady(1))
+                    irSensor1 = cif.GetObstacleSensor(1);
+            if(cif.IsObstacleReady(2))
+                    irSensor2 = cif.GetObstacleSensor(2);
 
-	    if(cif.IsCompassReady())
-		    compass = cif.GetCompassSensor();
-	    if(cif.IsGroundReady())
-		    ground = cif.GetGroundSensor();
+            if(cif.IsCompassReady())
+                    compass = cif.GetCompassSensor();
+            if(cif.IsGroundReady())
+                    ground = cif.GetGroundSensor();
 
-	    if(cif.IsBeaconReady(beaconToFollow))
-		    beacon = cif.GetBeaconSensor(beaconToFollow);
-
-	    x = cif.GetX();
-	    y = cif.GetY();
-	    dir = cif.GetDir();
+            if(cif.IsBeaconReady(beaconToFollow))
+                    beacon = cif.GetBeaconSensor(beaconToFollow);
 
             //System.out.println("Measures: ir0=" + irSensor0 + " ir1=" + irSensor1 + " ir2=" + irSensor2 + "\n");
-            //System.out.println("Measures: x=" + x + " y=" + y + " dir=" + dir);
 
             //System.out.println(robName + " state " + state);
 
             switch(state) {
                  case RUN:    /* Go */
-		     if( cif.GetVisitingLed() ) state = State.WAIT;
+                     if( cif.GetVisitingLed() ) state = State.WAIT;
                      if( ground == 0 ) {         /* Visit Target */
                          cif.SetVisitingLed(true);
                          System.out.println(robName + " visited target at " + cif.GetTime() + "\n");
                      }
 
                      else {
-                         wander(true);
+                         wander(false);
                      }
                      break;
-		 case WAIT: /* Wait for others to visit target */
-		     if(cif.GetReturningLed()) state = State.RETURN;
+                 case WAIT: /* set returning led and check that it is on */
+                     cif.SetReturningLed(true);
+                     if(cif.GetVisitingLed()) cif.SetVisitingLed(false);
+                     if(cif.GetReturningLed()) state = State.RETURN;
 
                      cif.DriveMotors(0.0,0.0);
                      break;
-		 case RETURN: /* Return to home area */
-
-		     if( cif.GetFinished() ) System.exit(0); /* Terminate agent */
-		     if( ground == 1) { /* Finish */
-                         cif.Finish();
-                         System.out.println(robName + " found home at " + cif.GetTime() + "\n");
-                     }
-                     else {
-                         wander(false);
-                     }
+                 case RETURN: /* Return to home area */
+                     cif.SetVisitingLed(false);
+                     cif.SetReturningLed(false);
+                     wander(false);
                      break;
 
             }
@@ -192,8 +183,8 @@ public class jClient {
 
             //cif.Say(robName);
 
-	    //if(cif.GetTime() % 2 == 0) {
-	    //     cif.RequestIRSensor(0);
+            //if(cif.GetTime() % 2 == 0) {
+            //     cif.RequestIRSensor(0);
             //     if(cif.GetTime() % 8 == 0 || state == State.RETURN )
             //         cif.RequestGroundSensor();
             //     else
@@ -214,7 +205,6 @@ public class jClient {
     private beaconMeasure beacon;
     private int    ground;
     private boolean collision;
-    private double x,y,dir;
 
     private State state;
 

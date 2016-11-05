@@ -1,7 +1,7 @@
 /*
     This file is part of ciberRatoToolsSrc.
 
-    Copyright (C) 2001-2011 Universidade de Aveiro
+    Copyright (C) 2001-2016 Universidade de Aveiro
 
     ciberRatoToolsSrc is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -67,9 +67,9 @@ static const char *LAB =
 	"<Lab Name=\"Default LAB\" Height=\"14\" Width=\"28\">\n"
 		"\t<Beacon X=\"25\" Y=\"7.0\" Height=\"4.0\"/>\n"
 		"\t<Target X=\"25\" Y=\"7.0\" Radius=\"1.0\"/>\n"
-		"\t<Row  Pos=\"12\" Pattern=\"  |        |     |                 |     \" />\n"  
-		"\t<Row  Pos=\"11\" Pattern=\"  ·--·  ·--·--·  ·  ·--·--.--·--·  ·--·--\" />\n"  
-		"\t<Row  Pos=\"10\" Pattern=\"  |        |              |        |     \"/>\n"    
+		"\t<Row  Pos=\"12\" Pattern=\"  |        |     |                 |     \"  />\n"  
+		"\t<Row  Pos=\"11\" Pattern=\"  ·--·  ·--·--·  ·  ·--·--.--·--·  ·--·--\"  />\n"  
+		"\t<Row  Pos=\"10\" Pattern=\"  |        |              |        |     \"  />\n"    
 		"\t<Row  Pos=\"9\"  Pattern=\"--·--·  ·--·  ·--·--·--·  ·--·--·  ·--·  \"  />\n"    
 		"\t<Row  Pos=\"8\"  Pattern=\"        |        |     |     |     |  |  \"  />\n"    
 		"\t<Row  Pos=\"7\"  Pattern=\"--·--·--·  ·--·  .--·--·--·  ·  ·  ·--·  \"  />\n"    
@@ -1078,6 +1078,7 @@ void cbSimulator::buildGraph(void)
 
 double cbSimulator::calcDistMaxFromGridTo(cbPoint &p)
 {
+    fprintf(stderr,"calcDistMaxFromGridTo\n");
     int g;
 
     if(lab->nTargets()==0) return 1e10;
@@ -1088,8 +1089,10 @@ double cbSimulator::calcDistMaxFromGridTo(cbPoint &p)
 	    grAux->addFinalPoint(g+1,p);
 
 	double distMax=0.0;
-	for(g=0; g<grid->count();g++)
-		if(grAux->dist(g+1)>distMax) distMax=grAux->dist(g+1);
+	for(g=0; g<grid->count();g++) {
+                double distToGrid = grAux->dist(g+1);
+		if(distToGrid > distMax) distMax = distToGrid;
+        }
 
 	return distMax;
 }
@@ -1106,7 +1109,7 @@ class cbGraphView : public QGraphicsView
 {
 public:
     cbGraphView(QGraphicsScene *scene, cbSimulator *sim);
-    void contentsMouseMoveEvent(QMouseEvent *e);
+    void mouseMoveEvent(QMouseEvent *e);
 private:
     QGraphicsSimpleTextItem *distLabel;
 	cbSimulator *simulator;
@@ -1117,13 +1120,13 @@ cbGraphView::cbGraphView(QGraphicsScene *scene, cbSimulator *sim) : QGraphicsVie
 	simulator=sim;
 
     distLabel = new QGraphicsSimpleTextItem(0, scene);
-    distLabel->setText("");
+    distLabel->setText("AAAAA");
     distLabel->setZValue(10);
     distLabel->setPen(QPen(Qt::red));
 	distLabel->setVisible(true);
 }
 
-void cbGraphView::contentsMouseMoveEvent(QMouseEvent *e)
+void cbGraphView::mouseMoveEvent(QMouseEvent *e)
 {
 	double x,y,dist;
 	int xi,yi;
@@ -1277,7 +1280,7 @@ bool cbSimulator::changeLab(QString labFilename)
 	//rebuild graph
 	if(grid!=0) {
        buildGraph();
-       setDistMaxFromGridToTarget();
+       //setDistMaxFromGridToTarget();
 	}
 
 	// update parameters
@@ -1332,7 +1335,7 @@ bool cbSimulator::changeGrid(QString gridFilename)
 
 	//rebuild graph
     buildGraph();
-    setDistMaxFromGridToTarget();
+    //setDistMaxFromGridToTarget();
 
 	// update parameters
 	param->gridFilename = gridFilename;
@@ -1495,7 +1498,7 @@ void cbSimulator::setDefaultLab(void)
 	//rebuild graph
 	if(grid!=0) {
        buildGraph();
-       setDistMaxFromGridToTarget();
+       //setDistMaxFromGridToTarget();
 	}
 
     // update parameters
@@ -1509,9 +1512,9 @@ void cbSimulator::setDefaultGrid(void)
 	QXmlInputSource *source;
 
     source = new QXmlInputSource;
-        source->setData(QByteArray(GRID));
+    source->setData(QByteArray(GRID));
 
-        QXmlSimpleReader xmlParser;
+    QXmlSimpleReader xmlParser;
 
 	cbGridHandler *gridHandler = new cbGridHandler;
 	xmlParser.setContentHandler(gridHandler);
@@ -1532,7 +1535,7 @@ void cbSimulator::setDefaultGrid(void)
 	//rebuild graph
 	if(lab!=0) {
         buildGraph();
-        setDistMaxFromGridToTarget();
+        //setDistMaxFromGridToTarget();
 	}
 
     // update parameters

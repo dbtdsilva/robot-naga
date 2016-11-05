@@ -20,7 +20,7 @@ class CRobLink:
         
         msg = '<Robot Id="'+str(robId)+'" Name="'+robName+'" />'
         
-        self.sock.sendto(msg, (UDP_IP, UDP_PORT))  # TODO condider host arg
+        self.sock.sendto(msg, (host, UDP_PORT))  # TODO condider host arg
         data, (host,self.port) = self.sock.recvfrom(1024)
         #print "received message:", data, " port ", self.port
 
@@ -45,7 +45,7 @@ class CRobLink:
         data, (host,port) = self.sock.recvfrom(4096)
         d2 = data[:-1]
 
-        print "RECV : \"" + d2 +'"'
+        #print "RECV : \"" + d2 +'"'
         parser = sax.make_parser()
         # Tell it what handler to use
         handler = StructureHandler()
@@ -212,28 +212,4 @@ class StructureHandler(sax.ContentHandler):
 
 #    def endElement(self, name):
         #print 'End of element:', name
-
-
-#TODO parse heard message in handler::characters
-
-cif=CRobLink("AA",3,"localhost")
-if cif.status!=0:
-    print "Connection refused or error"
-    quit()
-
-while 1:
-     #print "READ"
-     cif.readSensors()
-     #print "IRS "+ str(cif.measures.irSensor[0]) +" " + str(cif.measures.irSensor[1])\
-     #         +" "+ str(cif.measures.irSensor[2]) +" "+ str(cif.measures.irSensor[3])
-     #print "Drive"
-     if cif.measures.irSensor[0]> 3.0\
-        or cif.measures.irSensor[1]> 3.0\
-        or cif.measures.irSensor[2]> 3.0\
-        or cif.measures.irSensor[3]> 3.0:
-     #    print "Rotate"
-         cif.driveMotors(0.1,-0.1)
-     else:
-     #    print "Go"
-         cif.driveMotors(0.1,0.1)
 

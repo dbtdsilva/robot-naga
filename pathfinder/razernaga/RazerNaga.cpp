@@ -44,6 +44,8 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
     get<1>(motor_speed) = 0.0;
     qApp->addLibraryPath("libRobSock");
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
+
+    map_.enable_debug();
 }
 
 void RazerNaga::take_action() {

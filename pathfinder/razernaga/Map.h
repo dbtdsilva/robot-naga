@@ -6,16 +6,18 @@
 #define RAZERNAGA_MAP_H
 
 #include <vector>
+#include <memory>
 #include <SDL2/SDL.h>
+#include "MapSDL2.h"
 
 class Map {
 public:
     Map();
-    Map(int cols, int rows, int square_precision, int square_size);
+    Map(int cols, int rows, int square_precision);
     ~Map();
+
+    void enable_debug();
 private:
-    bool create_window();
-    void render();
 
     typedef struct PositionStats {
         PositionStats() : wall_counter(0), ground_counter(0), visited(0) { }
@@ -24,11 +26,9 @@ private:
         unsigned int visited;
     } Stats;
 
-    const int square_size_, square_precision_, rows_, cols_;
+    const int square_precision_, rows_, cols_;
     std::vector<std::vector<Stats>> map_;
-
-    SDL_Window* window;
-    SDL_Renderer* renderer;
+    std::unique_ptr<MapSDL2> map_debug_;
 };
 
 

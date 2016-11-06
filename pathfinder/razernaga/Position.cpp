@@ -12,11 +12,11 @@ Position::Position() : x_(0), y_(0), out_left(0), out_right(0) {
 
 }
 
-double Position::x() const {
+const double& Position::x() const {
     return x_;
 }
 
-double Position::y() const {
+const double& Position::y() const {
     return y_;
 }
 

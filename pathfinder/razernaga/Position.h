@@ -10,8 +10,8 @@ class Position {
 public:
     Position();
 
-    double x() const;
-    double y() const;
+    const double& x() const;
+    const double& y() const;
 
     void update_position(double theta, double in_left, double in_right);
 private:

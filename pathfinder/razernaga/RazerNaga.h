@@ -26,6 +26,7 @@ public:
 
     void move_front();
     void rotate(double degress);
+    void retrieve_map();
 public slots:
     void take_action();
 private:

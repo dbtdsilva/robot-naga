@@ -55,7 +55,7 @@ void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].is_ground = true;
     else
-        map_[x][y].is_ground = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.05;
+        map_[x][y].is_ground = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.001;
 
     if (map_[x][y].is_ground)
         map_debug_->set_color(x, y, 0, 255, 0, 255);

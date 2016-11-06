@@ -8,7 +8,7 @@
 #include <cmath>
 
 #define INTEGRAL_CLIP   0.05
-#define KP              0.1    // 0.15
+#define KP              0.1     // 0.15
 #define KD              0.2     // 0.2
 #define KI              0.1
 #define BASE_SPEED      0.1
@@ -29,18 +29,13 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host) :
 }
 
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<double> ir_sensor_angles) :
-        QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host),
-        ir_sensor_angles_(ir_sensor_angles), state_(STOPPED)
+        QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host), start_position(0.0, 0.0),
+        motor_speed(0.0, 0.0), ir_sensor_angles_(ir_sensor_angles), state_(STOPPED)
 {
     if (InitRobot2(const_cast<char *>(name_.c_str()), grid_position_, &ir_sensor_angles[0],
                    const_cast<char *>(host_.c_str())) == -1) {
         throw runtime_error("Failed to connect robot");
     }
-    get<0>(start_position) = -1;
-    get<1>(start_position) = -1;
-
-    get<0>(motor_speed) = 0.0;
-    get<1>(motor_speed) = 0.0;
     qApp->addLibraryPath("libRobSock");
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
 
@@ -55,22 +50,12 @@ void RazerNaga::take_action() {
     if (state_ == STOPPED)
         return;
 
-    if (get<0>(start_position) == -1) {
-        get<0>(start_position) = GetX();
-        get<1>(start_position) = GetY();
-    }
-    double x = GetX() - get<0>(start_position);
-    double y = GetY() - get<1>(start_position);
     move_front();
-    if (sensors_.get_obstacle_sensor(2) > 0.8) {
-        get<0>(motor_speed) = 0;
-        get<1>(motor_speed) = 0;
-    }
-
     DriveMotors(get<0>(motor_speed), get<1>(motor_speed));
 
     retrieve_map();
-    position_.update_position(sensors_.get_compass(), get<0>(motor_speed), get<1>(motor_speed));
+    if (!GetBumperSensor())
+        position_.update_position(sensors_.get_compass(), get<0>(motor_speed), get<1>(motor_speed));
 }
 
 void RazerNaga::retrieve_map() {
@@ -113,7 +98,7 @@ void RazerNaga::move_front() {
     static double last_error = 0, integral_error = 0;
     double right = sensors_.get_obstacle_sensor(3);
     double center_right = sensors_.get_obstacle_sensor(2);
-    error = right - 0.4 + center_right - 0.65;
+    error = (right - 0.4) + (center_right - 0.65);
     integral_error += error;
     integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
     integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
@@ -129,6 +114,10 @@ double RazerNaga::normalize_angle(double degrees_angle)
     while (degrees_angle <= -180.0) degrees_angle += 2.0 * 180.0;
     while (degrees_angle > 180.0) degrees_angle -= 2.0 * 180.0;
     return degrees_angle;
+}
+
+double RazerNaga::walk_units(double units, double degree) {
+
 }
 
 void RazerNaga::rotate(double degrees) {

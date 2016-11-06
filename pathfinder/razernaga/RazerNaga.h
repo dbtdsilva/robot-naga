@@ -25,6 +25,7 @@ public:
     RazerNaga(int &argc, char* argv[], int grid_position, std::string host, std::vector<double> ir_sensor_angles);
 
     void move_front();
+    double walk_units(double units, double degree);
     void rotate(double degress);
     void retrieve_map();
 public slots:

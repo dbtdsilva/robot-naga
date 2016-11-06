@@ -33,8 +33,7 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
         ir_sensor_angles_(ir_sensor_angles), state_(STOPPED)
 {
     if (InitRobot2(const_cast<char *>(name_.c_str()), grid_position_, &ir_sensor_angles[0],
-                   const_cast<char *>(host_.c_str())) == -1)
-    {
+                   const_cast<char *>(host_.c_str())) == -1) {
         throw runtime_error("Failed to connect robot");
     }
     get<0>(start_position) = -1;
@@ -79,7 +78,7 @@ void RazerNaga::take_action() {
         std::this_thread::sleep_for (std::chrono::seconds(1));*/
     //}
     DriveMotors(get<0>(motor_speed), get<1>(motor_speed));
-    //DriveMotors(0.15, 0.15);
+    map_.increase_ground_counter(position_.x(), position_.y());
     position_.update_position(sensors_.get_compass(), get<0>(motor_speed), get<1>(motor_speed));
 }
 

@@ -16,14 +16,20 @@ public:
     Map(int cols, int rows, int square_precision);
     ~Map();
 
+    bool increase_wall_counter(const double& x, const double& y);
+    bool increase_ground_counter(const double& x, const double& y);
+    bool increase_visited_counter(const double& x, const double& y);
     void enable_debug();
 private:
+    void evaluate_position(const int& x, const int& y);
+    bool validate_position(const int& x, const int& y);
 
     typedef struct PositionStats {
-        PositionStats() : wall_counter(0), ground_counter(0), visited(0) { }
+        PositionStats() : wall_counter(0), ground_counter(0), visited(0), is_ground(false) { }
         unsigned int wall_counter;
         unsigned int ground_counter;
         unsigned int visited;
+        bool is_ground;
     } Stats;
 
     const int square_precision_, rows_, cols_;

@@ -19,7 +19,7 @@ private:
     void render_full_map();
 
     typedef struct color {
-        color() : R(0), G(255), B(255), A(255) {};
+        color() : R(220), G(220), B(220), A(255) {};
         Uint8 R, G, B, A;
     } Color;
 

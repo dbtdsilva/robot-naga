@@ -57,7 +57,7 @@ void RazerNaga::take_action() {
     if (state_ == STOPPED)
         return;
 
-    //cout << "Calcula: " << position_.x() << ", " << position_.y(); // << sensors_.get_compass() << endl;
+    cout << "Calcula: " << position_.x() << ", " << position_.y(); // << sensors_.get_compass() << endl;
 
     if (get<0>(start_position) == -1)
     {
@@ -66,17 +66,14 @@ void RazerNaga::take_action() {
     }
     double x = GetX() - get<0>(start_position);
     double y = GetY() - get<1>(start_position);
-    //cout << ", Correct: " << x << ", " << y << endl;
+    cout << ", Correct: " << x << ", " << y << endl;
     //cout << sensors_ << endl;
     move_front();
     if (sensors_.get_obstacle_sensor(2) > 0.8) {
         get<0>(motor_speed) = 0;
         get<1>(motor_speed) = 0;
     }
-    //    rotate(-90.0);
-        /*DriveMotors(0.15, 0.15);
-        std::this_thread::sleep_for (std::chrono::seconds(1));*/
-    //}
+
     DriveMotors(get<0>(motor_speed), get<1>(motor_speed));
     map_.increase_ground_counter(position_.x(), position_.y());
     position_.update_position(sensors_.get_compass(), get<0>(motor_speed), get<1>(motor_speed));

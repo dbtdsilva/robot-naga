@@ -13,8 +13,11 @@ public:
     double x() const;
     double y() const;
 
-    void update_position(double compass, double next_speed_left, double next_speed_right);
+    void update_position(double theta, double in_left, double in_right);
 private:
+    double out_left;
+    double out_right;
+    double previous_theta;
     double x_;
     double y_;
 };

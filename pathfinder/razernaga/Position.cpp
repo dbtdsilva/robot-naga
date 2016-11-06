@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Position::Position() : x_(0), y_(0){
+Position::Position() : x_(0), y_(0), out_left(0), out_right(0) {
 
 }
 
@@ -20,16 +20,20 @@ double Position::y() const {
     return y_;
 }
 
-void Position::update_position(double compass, double next_speed_left, double next_speed_right) {
-    double radians = compass * M_PI / 180.0;
+void Position::update_position(double theta, double in_left, double in_right) {
+    double theta_radians = theta * M_PI / 180.0;
 
-    // TODO: Should consider OUT speeds instead of IN speeds
-    // Formula: out_speed = (0.5 * in_speed + 0.5 * prev_outspeed) * noise
-    // The thing is... Motors have a constant error on motors and there is no way that I can discover that noise,
-    // Robot will get lost...
-    double linear = (next_speed_left + next_speed_right) / 2.0;
-    double rotational = (next_speed_right - next_speed_left);
+    double out_left_t = in_left * 0.5 + out_left * 0.5;
+    double out_right_t = in_right * 0.5 + out_right * 0.5;
 
-    x_ = x_ + linear * cos(radians + rotational);
-    y_ = y_ + linear * sin(radians + rotational);
+    double linear = (out_left_t + out_right_t) / 2.0;
+    double rotational = (out_right_t - out_left_t);
+
+    x_ = x_ + linear * cos(previous_theta);
+    y_ = y_ + linear * sin(previous_theta);
+
+    out_left = out_left_t;
+    out_right = out_right_t;
+
+    previous_theta = theta_radians + rotational;
 }

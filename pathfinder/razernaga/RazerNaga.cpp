@@ -80,9 +80,11 @@ void RazerNaga::retrieve_map() {
     const double& y = position_.y();
     long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
     long double dx, dy;
-    const int N_POINTS = 4;
-    vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
+    const int N_POINTS = 10;
+    vector<double> sensor_angles = {0};//{-M_PI / 6.0, 0, M_PI / 6.0};
     for (int i = 0; i < ir_sensor_angles_.size(); i++) {
+        if (ir_sensor_angles_[i] != 90 && ir_sensor_angles_[i] != -90)
+            continue;
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
         // Calculate sensor position
         sensor_x = x + cos(theta) * 0.5;
@@ -94,18 +96,21 @@ void RazerNaga::retrieve_map() {
             if (distance_measured < 1.0) {
                 sensor_final_x = x + cos(theta + *angle) * distance_measured;
                 sensor_final_y = y + sin(theta + *angle) * distance_measured;
-                map_.increase_wall_counter(sensor_final_x, sensor_final_x);
+                map_.increase_wall_counter(sensor_final_x, sensor_final_y);
             } else {
                 sensor_final_x = x + cos(theta + *angle) * 1.0;
                 sensor_final_y = y + sin(theta + *angle) * 1.0;
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
 
-            if (sensor_final_x == sensor_x || sensor_final_y == sensor_y)
+            if (sensor_final_x == sensor_x || sensor_final_y == sensor_y) {
+                cout << "skipping" << endl;
                 continue;
+            }
             dx = (sensor_final_x - sensor_x) / N_POINTS;
             dy = (sensor_final_y - sensor_y) / N_POINTS;
             for (int points = 0; points < N_POINTS; points++) {
+                cout << sensor_x + points * dx << ", " << sensor_y + points * dy << endl;
                 map_.increase_ground_counter(sensor_x + points * dx, sensor_y + points * dy);
             }
         };

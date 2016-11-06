@@ -7,7 +7,7 @@
 
 using namespace std;
 
-Map::Map() : Map(14, 7, 4) {
+Map::Map() : Map(14, 7, 8) {
 }
 
 Map::Map(int cols, int rows, int square_precision) :
@@ -18,9 +18,14 @@ Map::Map(int cols, int rows, int square_precision) :
 Map::~Map() {
 }
 
+void Map::enable_debug() {
+    if (map_debug_ == nullptr)
+        map_debug_ = make_unique<MapSDL2>(cols_, rows_, square_precision_, 4);
+}
+
 bool Map::increase_wall_counter(const double& x, const double& y) {
-    int new_x = (int) round(x * 2 + cols_ * square_precision_);
-    int new_y = (int) round(y * 2 + rows_ * square_precision_);
+    int new_x = (int) round(x * (square_precision_ / 2.0) + cols_ * square_precision_);
+    int new_y = (int) round(-y * (square_precision_ / 2.0) + rows_ * square_precision_);
     if (!validate_position(new_x, new_y)) return false;
     map_[new_x][new_y].wall_counter++;
 
@@ -28,8 +33,8 @@ bool Map::increase_wall_counter(const double& x, const double& y) {
     return true;
 }
 bool Map::increase_ground_counter(const double& x, const double& y) {
-    int new_x = (int) round(x * 2 + cols_ * square_precision_);
-    int new_y = (int) round(y * 2 + rows_ * square_precision_);
+    int new_x = (int) round(x * (square_precision_ / 2.0) + cols_ * square_precision_);
+    int new_y = (int) round(-y * (square_precision_ / 2.0) + rows_ * square_precision_);
     if (!validate_position(new_x, new_y)) return false;
     map_[new_x][new_y].ground_counter++;
 
@@ -37,8 +42,8 @@ bool Map::increase_ground_counter(const double& x, const double& y) {
     return true;
 }
 bool Map::increase_visited_counter(const double& x, const double& y) {
-    int new_x = (int) round(x * 2 + cols_ * square_precision_);
-    int new_y = (int) round(y * 2 + rows_ * square_precision_);
+    int new_x = (int) round(x * (square_precision_ / 2.0) + cols_ * square_precision_);
+    int new_y = (int) round(-y * (square_precision_ / 2.0) + rows_ * square_precision_);
     if (!validate_position(new_x, new_y)) return false;
     map_[new_x][new_y].visited++;
 
@@ -64,7 +69,3 @@ bool Map::validate_position(const int& x, const int& y) {
             y >= 0 && y < rows_ * square_precision_ * 2);
 }
 
-void Map::enable_debug() {
-    if (map_debug_ == nullptr)
-        map_debug_ = make_unique<MapSDL2>(cols_, rows_, square_precision_, 8);
-}

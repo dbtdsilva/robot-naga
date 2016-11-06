@@ -81,10 +81,8 @@ void RazerNaga::retrieve_map() {
     long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
     long double dx, dy;
     const int N_POINTS = 10;
-    vector<double> sensor_angles = {0};//{-M_PI / 6.0, 0, M_PI / 6.0};
+    vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
     for (int i = 0; i < ir_sensor_angles_.size(); i++) {
-        if (ir_sensor_angles_[i] != 90 && ir_sensor_angles_[i] != -90)
-            continue;
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
         sensor_x = x + cos(theta) * 0.5;
         sensor_y = y + sin(theta) * 0.5;

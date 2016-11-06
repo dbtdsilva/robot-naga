@@ -45,8 +45,7 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
     qApp->addLibraryPath("libRobSock");
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
 }
-#include <thread>         // std::this_thread::sleep_for
-#include <chrono>         // std::chrono::seconds
+
 void RazerNaga::take_action() {
     sensors_.update_values();
     //static int cycles = 0;
@@ -67,7 +66,7 @@ void RazerNaga::take_action() {
     double x = GetX() - get<0>(start_position);
     double y = GetY() - get<1>(start_position);
     //cout << ", Correct: " << x << ", " << y << endl;
-    cout << sensors_ << endl;
+    //cout << sensors_ << endl;
     move_front();
     if (sensors_.get_obstacle_sensor(2) > 0.8) {
         get<0>(motor_speed) = 0;
@@ -86,18 +85,14 @@ void RazerNaga::move_front() {
     double error;
     static double last_error = 0, integral_error = 0;
     double right = sensors_.get_obstacle_sensor(3);
-    double left = sensors_.get_obstacle_sensor(0);
-    double cl = sensors_.get_obstacle_sensor(1);
-    double cr = sensors_.get_obstacle_sensor(2);
-    error = right - 0.4 + cr - 0.65;
+    double center_right = sensors_.get_obstacle_sensor(2);
+    error = right - 0.4 + center_right - 0.65;
     integral_error += error;
     integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
     integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
     double correction = KP * error + KI * integral_error + KD * (error - last_error);
     last_error = error;
 
-    //if (cr > 0.8)
-    //    correction = 0;
     get<0>(motor_speed) = BASE_SPEED + correction;
     get<1>(motor_speed) = BASE_SPEED - correction;
 }

@@ -14,8 +14,10 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 SET(CMAKE_CXX_EXTENSIONS OFF)
 
 FIND_PACKAGE(Qt4 REQUIRED)
+FIND_PACKAGE(SDL2 REQUIRED)
 INCLUDE(${QT_USE_FILE})
+INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
 
-ADD_EXECUTABLE(razernaga main.cpp RazerNaga.cpp RazerNaga.h Sensors.cpp Sensors.h Filter.h Position.cpp Position.h)
+ADD_EXECUTABLE(razernaga main.cpp RazerNaga.cpp RazerNaga.h Sensors.cpp Sensors.h Filter.h Position.cpp Position.h Map.cpp Map.h)
 
-TARGET_LINK_LIBRARIES(razernaga ${QT_LIBRARIES} RobSock)
+TARGET_LINK_LIBRARIES(razernaga ${QT_LIBRARIES} ${SDL2_LIBRARIES} RobSock)

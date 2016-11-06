@@ -12,6 +12,7 @@
 #include <tuple>
 #include "Sensors.h"
 #include "Position.h"
+#include "Map.h"
 
 typedef std::tuple<double, double> TupleDouble;
 
@@ -39,6 +40,7 @@ private:
     const std::string host_;
     const std::vector<double> ir_sensor_angles_;
 
+    Map map_;
     Sensors sensors_;
     Position position_;
     State state_;

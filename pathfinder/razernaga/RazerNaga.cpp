@@ -86,34 +86,27 @@ void RazerNaga::retrieve_map() {
         if (ir_sensor_angles_[i] != 90 && ir_sensor_angles_[i] != -90)
             continue;
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
-        // Calculate sensor position
         sensor_x = x + cos(theta) * 0.5;
         sensor_y = y + sin(theta) * 0.5;
 
-        for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle)
-        {
+        for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle) {
             distance_measured = sensors_.get_obstacle_sensor(i);
-            if (distance_measured < 1.0) {
-                sensor_final_x = x + cos(theta + *angle) * distance_measured;
-                sensor_final_y = y + sin(theta + *angle) * distance_measured;
+            if (distance_measured < 0.5) {
+                sensor_final_x = sensor_x + cos(theta + *angle) * distance_measured;
+                sensor_final_y = sensor_y + sin(theta + *angle) * distance_measured;
                 map_.increase_wall_counter(sensor_final_x, sensor_final_y);
             } else {
-                sensor_final_x = x + cos(theta + *angle) * 1.0;
-                sensor_final_y = y + sin(theta + *angle) * 1.0;
+                sensor_final_x = sensor_x + cos(theta + *angle) * 0.5;
+                sensor_final_y = sensor_y + sin(theta + *angle) * 0.5;
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
 
-            if (sensor_final_x == sensor_x || sensor_final_y == sensor_y) {
-                cout << "skipping" << endl;
-                continue;
-            }
             dx = (sensor_final_x - sensor_x) / N_POINTS;
             dy = (sensor_final_y - sensor_y) / N_POINTS;
             for (int points = 0; points < N_POINTS; points++) {
-                cout << sensor_x + points * dx << ", " << sensor_y + points * dy << endl;
                 map_.increase_ground_counter(sensor_x + points * dx, sensor_y + points * dy);
             }
-        };
+        }
     }
 }
 

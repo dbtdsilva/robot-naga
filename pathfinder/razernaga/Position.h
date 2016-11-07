@@ -15,11 +15,11 @@ public:
 
     void update_position(double theta, double in_left, double in_right);
 private:
+    double x_;
+    double y_;
     double out_left;
     double out_right;
     double previous_theta;
-    double x_;
-    double y_;
 };
 
 

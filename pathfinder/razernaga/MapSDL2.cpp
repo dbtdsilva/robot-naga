@@ -10,7 +10,6 @@ using namespace std;
 MapSDL2::MapSDL2(int cols, int rows, int square_precision, int square_size) :
         cols_(cols), rows_(rows), square_precision_(square_precision), square_size_(square_size),
         map_(cols * square_precision * 2, vector<Color>(rows * square_precision * 2, Color())){
-    cout << "Hello" << endl;
     if (SDL_Init(SDL_INIT_EVERYTHING)) return;
     window = SDL_CreateWindow("RazerNaga Vision", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               cols_ * square_precision_ * 2 * (square_size_ + 1),

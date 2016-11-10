@@ -28,6 +28,7 @@ MapSDL2::~MapSDL2() {
     SDL_Quit();
 }
 
+int requests = 0;
 void MapSDL2::set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
     if (map_[x][y].R != R || map_[x][y].G != G || map_[x][y].B != B || map_[x][y].A != A)
     {
@@ -35,7 +36,8 @@ void MapSDL2::set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
         map_[x][y].G = G;
         map_[x][y].B = B;
         map_[x][y].A = A;
-        render_full_map();
+        if (requests++ % 1000 == 0)
+            render_full_map();
     }
 }
 
@@ -56,4 +58,5 @@ void MapSDL2::render_full_map() {
         }
     }
     SDL_RenderPresent(renderer);
+
 }

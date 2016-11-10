@@ -57,10 +57,12 @@ void Map::evaluate_position(const int& x, const int& y) {
     else
         map_[x][y].is_ground = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.2;
 
-    if (map_[x][y].is_ground)
-        map_debug_->set_color(x, y, 0, 255, 0, 255);
-    else
-        map_debug_->set_color(x, y, 0, 0, 0, 255);
+    if (map_debug_ != nullptr) {
+        if (map_[x][y].is_ground)
+            map_debug_->set_color(x, y, 0, 255, 0, 255);
+        else
+            map_debug_->set_color(x, y, 0, 0, 0, 255);
+    }
 
 }
 

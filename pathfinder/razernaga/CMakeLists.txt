@@ -19,5 +19,6 @@ INCLUDE(${QT_USE_FILE})
 INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
 
 ADD_EXECUTABLE(razernaga main.cpp RazerNaga.cpp RazerNaga.h Sensors.cpp Sensors.h Filter.h Position.cpp Position.h Map.cpp Map.h MapSDL2.cpp MapSDL2.h)
-ADD_DEFINITIONS("-O3")
 TARGET_LINK_LIBRARIES(razernaga ${QT_LIBRARIES} ${SDL2_LIBRARIES} RobSock)
+SET_TARGET_PROPERTIES(razernaga PROPERTIES COMPILE_FLAGS "-std=c++14 -O3")
+

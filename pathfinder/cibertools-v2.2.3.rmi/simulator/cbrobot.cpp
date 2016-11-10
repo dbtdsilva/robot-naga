@@ -321,10 +321,13 @@ void cbRobot::computeNextPosition()
      * é dada em relação ao eixo dos xx. */
 	double x = curPos.X() + vel * cos(theta);
 	double y = curPos.Y() + vel * sin(theta);
+
 	theta += rot;
 	if (theta > M_PI) theta -= (2.0*M_PI);
 	else if (theta < -M_PI) theta += (2.0*M_PI);
 
+	printf("LI: %8.4f RI: %8.4f L: %8.4f R: %8.4f %8.4f %8.4f %8.4f\n", leftMotor.inPower(), rightMotor.inPower(),
+		leftMotor.lastOutPower(), rightMotor.lastOutPower(), x, y, theta);
 	nextPos.set(x,y,theta);
 }
 

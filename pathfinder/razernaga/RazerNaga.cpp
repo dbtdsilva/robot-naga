@@ -46,10 +46,8 @@ double limit_motor(double speed) {
     return speed;
 }
 void RazerNaga::take_action() {
-    retrieve_map();
-    DriveMotors(limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
-    position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
     sensors_.update_values();
+    retrieve_map();
 
     if (state_ == STOPPED && GetStartButton())
         state_ = STARTED;
@@ -67,6 +65,9 @@ void RazerNaga::take_action() {
     //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
 
     //if (!GetBumperSensor())
+
+    DriveMotors(limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
+    position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
 }
 
 void RazerNaga::retrieve_map() {

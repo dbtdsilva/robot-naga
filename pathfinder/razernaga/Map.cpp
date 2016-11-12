@@ -23,6 +23,13 @@ void Map::enable_debug() {
         map_debug_ = make_unique<MapSDL2>(cols_, rows_, square_precision_, 4);
 }
 
+std::tuple<int, int> Map::get_map_dimensions() const{
+    return tuple<int, int>(map_.size(), map_[0].size());
+}
+bool Map::is_wall(const int& x, const int& y) const {
+    return !map_[x][y].is_ground;
+}
+
 bool Map::increase_wall_counter(const double& x, const double& y) {
     int new_x = (int) round(x * (square_precision_ / 2.0) + cols_ * square_precision_);
     int new_y = (int) round(-y * (square_precision_ / 2.0) + rows_ * square_precision_);

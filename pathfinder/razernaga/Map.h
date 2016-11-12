@@ -19,8 +19,10 @@ public:
     bool increase_wall_counter(const double& x, const double& y);
     bool increase_ground_counter(const double& x, const double& y);
     bool increase_visited_counter(const double& x, const double& y);
+    bool is_wall(const int& x, const int& y) const;
     void enable_debug();
     void render_map();
+    std::tuple<int, int> get_map_dimensions() const;
 private:
     void evaluate_position(const int& x, const int& y);
     bool validate_position(const int& x, const int& y);

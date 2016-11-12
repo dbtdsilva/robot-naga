@@ -19,7 +19,7 @@ private:
     double y_;
     double out_left;
     double out_right;
-    double previous_theta;
+    //double previous_theta;
 };
 
 

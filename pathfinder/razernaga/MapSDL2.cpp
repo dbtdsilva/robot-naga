@@ -11,12 +11,13 @@ MapSDL2::MapSDL2(int cols, int rows, int square_precision, int square_size) :
         cols_(cols), rows_(rows), square_precision_(square_precision), square_size_(square_size),
         map_(cols * square_precision * 2, vector<Color>(rows * square_precision * 2, Color())){
     if (SDL_Init(SDL_INIT_EVERYTHING)) return;
+
+    const int height = cols_ * square_precision_ * 2 * (square_size_ + 1);
+    const int width = rows_ * square_precision_ * 2 * (square_size_ + 1);
     window = SDL_CreateWindow("RazerNaga Vision", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-                              cols_ * square_precision_ * 2 * (square_size_ + 1),
-                              rows_ * square_precision_ * 2 * (square_size_ + 1),
-                              SDL_WINDOW_OPENGL);
+                              height, width, SDL_WINDOW_OPENGL);
     if (window == nullptr) return;
-    renderer = SDL_CreateRenderer(window, -1, 0);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if (renderer == nullptr) return;
     render_full_map();
 }
@@ -28,7 +29,6 @@ MapSDL2::~MapSDL2() {
     SDL_Quit();
 }
 
-int requests = 0;
 void MapSDL2::set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
     if (map_[x][y].R != R || map_[x][y].G != G || map_[x][y].B != B || map_[x][y].A != A)
     {
@@ -36,9 +36,11 @@ void MapSDL2::set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
         map_[x][y].G = G;
         map_[x][y].B = B;
         map_[x][y].A = A;
-        if (requests++ % 1000 == 0)
-            render_full_map();
     }
+}
+
+std::vector<int> MapSDL2::get_color(const int& x, const int& y) {
+    return {map_[x][y].R, map_[x][y].G, map_[x][y].B, map_[x][y].A};
 }
 
 void MapSDL2::render_full_map() {

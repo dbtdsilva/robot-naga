@@ -14,9 +14,9 @@ public:
     ~MapSDL2();
 
     void set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
-
-private:
     void render_full_map();
+    std::vector<int> get_color(const int& x, const int& y);
+private:
 
     typedef struct color {
         color() : R(220), G(220), B(220), A(255) {};

@@ -12,7 +12,7 @@ Map::Map() : Map(14, 7, 8) {
 
 Map::Map(int cols, int rows, int square_precision) :
         map_(cols * square_precision * 2, vector<Stats>(rows * square_precision * 2, Stats())),
-        cols_(cols), rows_(rows), square_precision_(square_precision) {
+        cols_(cols), rows_(rows), square_precision_(square_precision), last_visited_pos_(0,0) {
 }
 
 Map::~Map() {
@@ -47,6 +47,8 @@ bool Map::increase_visited_counter(const double& x, const double& y) {
     if (!validate_position(new_x, new_y)) return false;
     map_[new_x][new_y].visited++;
 
+    get<0>(last_visited_pos_) = new_x;
+    get<1>(last_visited_pos_) = new_y;
     evaluate_position(new_x, new_y);
     return true;
 }
@@ -64,6 +66,15 @@ void Map::evaluate_position(const int& x, const int& y) {
             map_debug_->set_color(x, y, 0, 0, 0, 255);
     }
 
+}
+
+void Map::render_map() {
+    if (map_debug_ == nullptr)
+        return;
+    std::vector<int> color = map_debug_->get_color(get<0>(last_visited_pos_), get<1>(last_visited_pos_));
+    map_debug_->set_color(get<0>(last_visited_pos_), get<1>(last_visited_pos_), 255, 0, 0, 255);
+    map_debug_->render_full_map();
+    map_debug_->set_color(get<0>(last_visited_pos_), get<1>(last_visited_pos_), color[0], color[1], color[2], color[3]);
 }
 
 bool Map::validate_position(const int& x, const int& y) {

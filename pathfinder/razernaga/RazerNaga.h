@@ -31,10 +31,11 @@ public:
     void walk_units_y(double units);
     void rotate(double degress);
     void retrieve_map();
-
-    void take_action_generic(std::function<void(void)>);
+signals:
+    void cycle_ended();
 public slots:
     void take_action();
+    void cycle_ended_action();
 private:
     double normalize_angle(double degrees_angle);
 

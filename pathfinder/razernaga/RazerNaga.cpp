@@ -31,11 +31,12 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
     }
     qApp->addLibraryPath("libRobSock");
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
-
+    QObject::connect(this, SIGNAL(cycle_ended()), this, SLOT(cycle_ended_action()));
     map_.enable_debug();
 }
 
-void RazerNaga::take_action_generic(std::function<void(void)> funct) {
+void RazerNaga::cycle_ended_action() {
+    map_.render_map();
 }
 
 double limit_motor(double speed) {
@@ -45,6 +46,7 @@ double limit_motor(double speed) {
         return -0.15;
     return speed;
 }
+
 void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
@@ -64,20 +66,23 @@ void RazerNaga::take_action() {
     //cout << position_.x() << ", " << position_.y() << ", c:, " << GetX() - get<0>(start_position) <<  ", " <<
     //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
 
-    //if (!GetBumperSensor())
+    //
 
     DriveMotors(limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
-    position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
+    if (!GetBumperSensor())
+        position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
+    cycle_ended();
 }
 
 void RazerNaga::retrieve_map() {
     map_.increase_ground_counter(position_.x(), position_.y());
+    map_.increase_visited_counter(position_.x(), position_.y());
 
     const double& x = position_.x();
     const double& y = position_.y();
     long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
     long double dx, dy;
-    const int N_POINTS = 10;
+    const int N_POINTS = 8;
     vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
     for (unsigned int i = 0; i < ir_sensor_angles_.size(); i++) {
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;

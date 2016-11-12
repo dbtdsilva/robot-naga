@@ -20,6 +20,7 @@ public:
     bool increase_ground_counter(const double& x, const double& y);
     bool increase_visited_counter(const double& x, const double& y);
     void enable_debug();
+    void render_map();
 private:
     void evaluate_position(const int& x, const int& y);
     bool validate_position(const int& x, const int& y);
@@ -35,6 +36,7 @@ private:
     const int square_precision_, rows_, cols_;
     std::vector<std::vector<Stats>> map_;
     std::unique_ptr<MapSDL2> map_debug_;
+    std::tuple<int, int> last_visited_pos_;
 };
 
 

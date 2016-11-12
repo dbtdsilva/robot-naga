@@ -74,21 +74,19 @@ void Map::evaluate_position(const int& x, const int& y) {
 }
 
 void Map::render_map() {
-    cout << "Rendering" << endl;
     if (map_debug_ == nullptr)
         return;
 
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;
     // Paint the path to the objective location
-    AStarNode* node = path_algorithm_->discover_path(
+    auto path = path_algorithm_->discover_path(
             last_visited_pos_, tuple<int, int>(get<0>(last_visited_pos_) + 10, get<1>(last_visited_pos_) + 10));
-    while (node != nullptr) {
-        color = map_debug_->get_color(get<0>(node->position), get<1>(node->position));
+    for (auto path_node : path) {
+        color = map_debug_->get_color(get<0>(path_node), get<1>(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
-                get<0>(node->position), get<1>(node->position), color[0], color[1], color[2], color[3]));
-        map_debug_->set_color(get<0>(node->position), get<1>(node->position), 255, 0, 0, 255);
-        node = node->parent;
+                get<0>(path_node), get<1>(path_node), color[0], color[1], color[2], color[3]));
+        map_debug_->set_color(get<0>(path_node), get<1>(path_node), 255, 0, 0, 255);
     }
     // Paint the current position
     color = map_debug_->get_color(get<0>(last_visited_pos_), get<1>(last_visited_pos_));
@@ -100,11 +98,10 @@ void Map::render_map() {
 
     // Give map the previous color before entering the current position and A*
     while (!temporary_paintings.empty()) {
-        tuple<int, int, Uint8, Uint8, Uint8, Uint8> value = temporary_paintings.back();
+        auto value = temporary_paintings.back();
         temporary_paintings.pop_back();
         map_debug_->set_color(get<0>(value), get<1>(value), get<2>(value), get<3>(value), get<4>(value), get<5>(value));
     }
-    cout << "Finished" << endl;
 }
 
 bool Map::validate_position(const int& x, const int& y) {

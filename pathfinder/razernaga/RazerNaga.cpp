@@ -31,11 +31,12 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
     }
     qApp->addLibraryPath("libRobSock");
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
-    QObject::connect(this, SIGNAL(cycle_ended()), this, SLOT(cycle_ended_action()));
+    QObject::connect(this, SIGNAL(cycle_ended()), this, SLOT(cycle_ended_action()), Qt::AutoConnection);
     map_.enable_debug();
 }
 
 void RazerNaga::cycle_ended_action() {
+    cout << "rendering map.." << endl;
     map_.render_map();
 }
 
@@ -48,6 +49,7 @@ double limit_motor(double speed) {
 }
 
 void RazerNaga::take_action() {
+    cout << "action.." << endl;
     sensors_.update_values();
     retrieve_map();
 
@@ -91,13 +93,13 @@ void RazerNaga::retrieve_map() {
 
         for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle) {
             distance_measured = sensors_.get_obstacle_sensor(i);
-            if (distance_measured < 1.0) {
+            if (distance_measured < 0.8) {
                 sensor_final_x = sensor_x + cos(theta + *angle) * distance_measured;
                 sensor_final_y = sensor_y + sin(theta + *angle) * distance_measured;
                 map_.increase_wall_counter(sensor_final_x, sensor_final_y);
             } else {
-                sensor_final_x = sensor_x + cos(theta + *angle) * 1.0;
-                sensor_final_y = sensor_y + sin(theta + *angle) * 1.0;
+                sensor_final_x = sensor_x + cos(theta + *angle) * 0.8;
+                sensor_final_y = sensor_y + sin(theta + *angle) * 0.8;
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
 

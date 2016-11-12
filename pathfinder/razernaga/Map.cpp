@@ -57,7 +57,7 @@ void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].is_ground = true;
     else
-        map_[x][y].is_ground = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.2;
+        map_[x][y].is_ground = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.1;
 
     if (map_debug_ != nullptr) {
         if (map_[x][y].is_ground)

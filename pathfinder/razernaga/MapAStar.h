@@ -18,7 +18,7 @@ public:
 
 private:
     typedef struct Node {
-        Node(std::tuple<int, int> position, std::shared_ptr<AStarNode> parent, double heuristic, double cost) :
+        Node(std::tuple<int, int> position, std::shared_ptr<Node> parent, double heuristic, double cost) :
                 position(position), parent(parent), heuristic(heuristic), cost(cost) { };
         double heuristic, cost;
         std::shared_ptr<Node> parent;

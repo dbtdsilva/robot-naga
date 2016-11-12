@@ -36,7 +36,6 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
 }
 
 void RazerNaga::cycle_ended_action() {
-    cout << "rendering map.." << endl;
     map_.render_map();
 }
 
@@ -49,7 +48,6 @@ double limit_motor(double speed) {
 }
 
 void RazerNaga::take_action() {
-    cout << "action.." << endl;
     sensors_.update_values();
     retrieve_map();
 

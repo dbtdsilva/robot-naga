@@ -3,10 +3,14 @@
 //
 
 #include "MapAStar.h"
+#include <cmath>
+#include <vector>
 #include <algorithm>
+#include "Map.h"
+
 using namespace std;
 
-MapAStar::MapAStar(const Map *map) : map_(map), evaluation_function_(evaluation_function_default) {
+MapAStar::MapAStar(Map *map) : map_(map), evaluation_function_(evaluation_function_default) {
     set_heuristic_function(MapAStar::heuristic_function_default);
 }
 
@@ -58,7 +62,8 @@ AStarNode* MapAStar::discover_path(std::tuple<int,int> start, std::tuple<int, in
             lnewlist.erase(lnewlist.begin());
 
             // Check if the new possibility is valid or not
-            if (!map_->is_wall(get<0>(current_possibility), get<1>(current_possibility))) {
+            PositionState state = map_->get_position_state(get<0>(current_possibility), get<1>(current_possibility));
+            if (state == UNKNOWN || state == GROUND) {
                 begin = curr;
                 // Check if that node was already on path from the solution or not, if yes, skip it.
                 while (begin != nullptr) {

@@ -1,7 +1,3 @@
-//
-// Created by myrddin on 06/11/16.
-//
-
 #ifndef RAZERNAGA_MAP_H
 #define RAZERNAGA_MAP_H
 
@@ -9,6 +5,9 @@
 #include <memory>
 #include <SDL2/SDL.h>
 #include "MapSDL2.h"
+#include "MapAStar.h"
+
+typedef enum { GROUND, WALL, UNKNOWN } PositionState;
 
 class Map {
 public:
@@ -19,7 +18,7 @@ public:
     bool increase_wall_counter(const double& x, const double& y);
     bool increase_ground_counter(const double& x, const double& y);
     bool increase_visited_counter(const double& x, const double& y);
-    bool is_wall(const int& x, const int& y) const;
+    PositionState get_position_state(const int& x, const int& y) const;
     void enable_debug();
     void render_map();
     std::tuple<int, int> get_map_dimensions() const;
@@ -28,17 +27,18 @@ private:
     bool validate_position(const int& x, const int& y);
 
     typedef struct PositionStats {
-        PositionStats() : wall_counter(0), ground_counter(0), visited(0), is_ground(false) { }
+        PositionStats() : wall_counter(0), ground_counter(0), visited(0), state(UNKNOWN) { }
         unsigned int wall_counter;
         unsigned int ground_counter;
         unsigned int visited;
-        bool is_ground;
+        PositionState state;
     } Stats;
 
     const int square_precision_, rows_, cols_;
     std::vector<std::vector<Stats>> map_;
     std::unique_ptr<MapSDL2> map_debug_;
     std::tuple<int, int> last_visited_pos_;
+    std::unique_ptr<MapAStar> path_algorithm_;
 };
 
 

@@ -26,8 +26,12 @@ public:
     void enable_debug();
     void render_map();
 private:
+    std::tuple<int, int> convert_to_map_coordinates(const std::tuple<double, double>&);
+    std::tuple<int, int> convert_to_map_coordinates(const double&, const double&);
     void evaluate_position(const int& x, const int& y);
+
     bool validate_position(const int& x, const int& y);
+    bool validate_position(const std::tuple<int, int>&);
 
     typedef struct PositionStats {
         PositionStats() : wall_counter(0), ground_counter(0), visited(0), state(UNKNOWN) { }
@@ -40,9 +44,9 @@ private:
     const int square_precision_, rows_, cols_;
     std::vector<std::vector<Stats>> map_;
     std::unique_ptr<MapSDL2> map_debug_;
+    std::unique_ptr<MapAStar> path_algorithm_;
     std::tuple<int, int> last_visited_pos_, target_;
     std::unique_ptr<std::tuple<int, int>> target_objective_;
-    std::unique_ptr<MapAStar> path_algorithm_;
 };
 
 

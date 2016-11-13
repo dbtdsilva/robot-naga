@@ -70,7 +70,6 @@ vector<tuple<int, int>> MapAStar::discover_path(tuple<int,int> start, tuple<int,
             // Draw a new posibility node
             tuple<int,int> current_possibility = ramification_list.front();
             ramification_list.erase(ramification_list.begin());
-
             // Check if the new possibility is valid or not
             PositionState state = map_->get_position_state(get<0>(current_possibility), get<1>(current_possibility));
             if (state == UNKNOWN || state == GROUND) {

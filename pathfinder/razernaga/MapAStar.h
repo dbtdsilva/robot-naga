@@ -18,13 +18,14 @@ public:
 
 private:
     typedef struct Node {
-        Node(std::tuple<int, int> position, std::shared_ptr<Node> parent, double heuristic, double cost) :
+        Node(std::tuple<int, int> position, Node* parent, double heuristic, double cost) :
                 position(position), parent(parent), heuristic(heuristic), cost(cost) { };
         double heuristic, cost;
-        std::shared_ptr<Node> parent;
+        Node* parent;
         std::tuple<int, int> position;
     } AStarNode;
 
+    static bool compare(const AStarNode* n1, const AStarNode* n2);
     static bool evaluation_function_default(const std::shared_ptr<AStarNode>&, const std::shared_ptr<AStarNode>&);
     static double heuristic_function_default(const std::tuple<int,int>& p1, const std::tuple<int, int>& p2);
 

@@ -44,8 +44,8 @@ void Map::set_random_target() {
     do {
         x = rand() % map_.size();
         y = rand() % map_[0].size();
-    } while (map_[get<0>(last_visited_pos_) + x][get<1>(last_visited_pos_) + y].state != UNKNOWN);
-    target_ = tuple<int, int>(get<0>(last_visited_pos_) + x, get<1>(last_visited_pos_) + y);
+    } while (map_[x][y].state != UNKNOWN);
+    target_ = tuple<int, int>(x, y);
 };
 
 bool Map::increase_wall_counter(const double& x, const double& y) {

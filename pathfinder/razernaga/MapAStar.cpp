@@ -18,11 +18,7 @@ double MapAStar::heuristic_function_default(const tuple<int,int>& p1, const tupl
     return sqrt(pow(get<0>(p2) - get<0>(p1), 2) + pow(get<1>(p2) - get<1>(p1), 2));
 }
 
-bool MapAStar::evaluation_function_default(const shared_ptr<AStarNode>& n1, const shared_ptr<AStarNode>& n2) {
-    return (n1->cost + n1->heuristic) < (n2->cost + n2->heuristic);
-}
-
-bool MapAStar::compare(const AStarNode* n1, const AStarNode* n2) {
+bool MapAStar::evaluation_function_default(const AStarNode* n1, const AStarNode* n2) {
     return (n1->cost + n1->heuristic) < (n2->cost + n2->heuristic);
 }
 
@@ -88,7 +84,7 @@ vector<tuple<int, int>> MapAStar::discover_path(tuple<int,int> start, tuple<int,
             }
         }
         // Sort the new ramifications of nodes found by their evaluation value
-        std::sort(open_nodes.begin(), open_nodes.end(), compare);
+        std::sort(open_nodes.begin(), open_nodes.end(), evaluation_function_default);
     }
     // No path was found
     return final_path;

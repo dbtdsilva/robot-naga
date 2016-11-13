@@ -38,10 +38,7 @@ public slots:
     void cycle_ended_action();
 private:
     double normalize_angle(double degrees_angle);
-
-    enum State {
-        STOPPED, STARTED
-    };
+    enum State { STOPPED, EXPLORING, RETURNING, FINISHED };
 
     const std::string name_;
     const int grid_position_;

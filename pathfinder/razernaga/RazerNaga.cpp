@@ -51,26 +51,26 @@ void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
 
-    if (state_ == STOPPED && GetStartButton())
-        state_ = STARTED;
-    if (state_ == STOPPED)
-        return;
-
-    move_front();
-    if (get<0>(start_position) == 0)
-    {
-        get<0>(start_position) = GetX();
-        get<1>(start_position) = GetY();
-        dir = GetDir();
+    switch (state_) {
+        case STOPPED:
+            if (GetStartButton()) state_ = EXPLORING;
+            break;
+        case EXPLORING:
+            move_front();
+            break;
+        case RETURNING:
+            break;
+        case FINISHED:
+            break;
     }
+
     //cout << position_.x() << ", " << position_.y() << ", c:, " << GetX() - get<0>(start_position) <<  ", " <<
     //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
 
-    //
-
     DriveMotors(limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
-    if (!GetBumperSensor())
+    if (!GetBumperSensor()) {
         position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
+    }
     cycle_ended();
 }
 

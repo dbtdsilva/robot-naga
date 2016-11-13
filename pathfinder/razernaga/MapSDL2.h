@@ -16,6 +16,7 @@ public:
     void set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
     void render_full_map();
     std::vector<int> get_color(const int& x, const int& y);
+    bool exit_requested();
 private:
 
     typedef struct color {
@@ -27,6 +28,7 @@ private:
 
     SDL_Window* window;
     SDL_Renderer* renderer;
+    SDL_Event events;
 
     std::vector<std::vector<Color>> map_;
 };

@@ -29,6 +29,14 @@ MapSDL2::~MapSDL2() {
     SDL_Quit();
 }
 
+bool MapSDL2::exit_requested() {
+    while(SDL_PollEvent(&events)) {
+        if (events.type == SDL_QUIT)
+            return true;
+    }
+    return false;
+}
+
 void MapSDL2::set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
     if (map_[x][y].R != R || map_[x][y].G != G || map_[x][y].B != B || map_[x][y].A != A)
     {

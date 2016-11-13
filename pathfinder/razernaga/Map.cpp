@@ -1,7 +1,5 @@
 #include "Map.h"
 #include <iostream>
-#include <stdlib.h>
-#include <time.h>
 
 using namespace std;
 
@@ -100,6 +98,11 @@ void Map::evaluate_position(const int& x, const int& y) {
 void Map::render_map() {
     if (map_debug_ == nullptr)
         return;
+
+    if (map_debug_->exit_requested()) {
+        cout << "RazerNaga has been requested to exit!" << endl;
+        std::exit(0);
+    }
 
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;

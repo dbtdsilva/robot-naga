@@ -30,7 +30,7 @@ vector<tuple<int, int>> MapAStar::discover_path(tuple<int,int> start, tuple<int,
         return final_path;
     // Nodes might be in more than one path (shared)
     vector<shared_ptr<AStarNode>> open_nodes;
-    shared_ptr<AStarNode> start_node = make_shared<AStarNode>(start, nullptr, 0, heuristic_func_(start, end));
+    shared_ptr<AStarNode> start_node = make_shared<AStarNode>(start, nullptr, heuristic_func_(start, end), 0);
     open_nodes.push_back(std::move(start_node));
 
     shared_ptr<AStarNode> curr, begin;
@@ -55,8 +55,8 @@ vector<tuple<int, int>> MapAStar::discover_path(tuple<int,int> start, tuple<int,
 
         vector<tuple<int,int>> ramification_list;
         // List of possible value from the current one
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position), get<1>(curr->position) + 1));
         ramification_list.push_back(tuple<int,int>(get<0>(curr->position) + 1, get<1>(curr->position)));
+        ramification_list.push_back(tuple<int,int>(get<0>(curr->position), get<1>(curr->position) + 1));
         ramification_list.push_back(tuple<int,int>(get<0>(curr->position) - 1, get<1>(curr->position)));
         ramification_list.push_back(tuple<int,int>(get<0>(curr->position), get<1>(curr->position) - 1));
 
@@ -76,7 +76,7 @@ vector<tuple<int, int>> MapAStar::discover_path(tuple<int,int> start, tuple<int,
                 }
                 if (begin == nullptr) {
                     open_nodes.push_back(make_shared<AStarNode>(
-                            current_possibility, curr, curr->cost + 1, heuristic_func_(current_possibility, end)));
+                            current_possibility, curr, heuristic_func_(current_possibility, end), curr->cost + 1));
                 }
             }
         }

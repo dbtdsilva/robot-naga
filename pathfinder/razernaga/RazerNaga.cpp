@@ -64,6 +64,10 @@ void RazerNaga::take_action() {
             break;
     }
 
+    if (GetGroundSensor() != -1) {
+        map_.set_objective_target(position_.x(), position_.y());
+    }
+
     //cout << position_.x() << ", " << position_.y() << ", c:, " << GetX() - get<0>(start_position) <<  ", " <<
     //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
 

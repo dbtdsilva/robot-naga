@@ -107,7 +107,7 @@ void Map::render_map() {
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;
     // Paint the path to the objective location
-    auto path = path_algorithm_->flood_fill(last_visited_pos_);//, tuple<int, int>(get<0>(target_), get<1>(target_)));
+    auto path = path_algorithm_->flood_fill(last_visited_pos_, 15);//, tuple<int, int>(get<0>(target_), get<1>(target_)));
     for (auto path_node : path) {
         color = map_debug_->get_color(get<0>(path_node), get<1>(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(

@@ -18,30 +18,31 @@ double MapAlgorithms::heuristic_function_default(const tuple<int,int>& p1, const
     return sqrt(pow(get<0>(p2) - get<0>(p1), 2) + pow(get<1>(p2) - get<1>(p1), 2));
 }
 
-bool MapAlgorithms::evaluation_function_default(const AStarNode* n1, const AStarNode* n2) {
+bool MapAlgorithms::evaluation_function_default(const Node* n1, const Node* n2) {
     return (n1->cost + n1->heuristic) < (n2->cost + n2->heuristic);
 }
 
-vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start) {
+vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start, int minimum_distance) {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
     if (map_->get_position_state(get<0>(start), get<1>(start)) == WALL)
         return final_path;
     // Nodes might be in more than one path (shared)
-    vector<unique_ptr<AStarNode>> nodes_created_ownership;
-    vector<AStarNode*> open_nodes;
-    unique_ptr<AStarNode> start_node = make_unique<AStarNode>(start, nullptr, 0, 0);
+    vector<unique_ptr<Node>> nodes_created_ownership;
+    vector<Node*> open_nodes;
+    auto start_node = make_unique<Node>(start, nullptr, 0, 0);
 
     open_nodes.push_back(start_node.get());
     nodes_created_ownership.push_back(std::move(start_node));
 
     vector<tuple<int,int>> visited;
-    AStarNode *curr, *begin;
+    Node *curr, *begin;
     while (!open_nodes.empty()) {
         // Get a new node to visit
         curr = open_nodes.front();
         open_nodes.erase(open_nodes.begin());
-        if (map_->get_position_state(get<0>(curr->position), get<1>(curr->position)) == UNKNOWN) {
+        if (map_->get_position_state(get<0>(curr->position), get<1>(curr->position)) == UNKNOWN &&
+                curr->cost >= minimum_distance) {
             while (curr != nullptr) {
                 final_path.push_back(curr->position);
                 curr = curr->parent;
@@ -75,7 +76,7 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start) {
                     begin = begin->parent;
                 }
                 if (begin == nullptr) {
-                    unique_ptr<AStarNode> n = make_unique<AStarNode>(current_possibility, curr, 0, curr->cost + 1);
+                    auto n = make_unique<Node>(current_possibility, curr, 0, curr->cost + 1);
                     open_nodes.push_back(n.get());
                     nodes_created_ownership.push_back(std::move(n));
                 }
@@ -88,22 +89,21 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start) {
     return final_path;
 }
 
-vector<tuple<int, int>> MapAlgorithms::discover_path(tuple<int,int> start, tuple<int, int> end) {
+vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(tuple<int,int> start, tuple<int, int> end) {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
     if (map_->get_position_state(get<0>(start), get<1>(start)) == WALL ||
             map_->get_position_state(get<0>(end), get<1>(end)) == WALL)
         return final_path;
     // Nodes might be in more than one path (shared)
-    vector<unique_ptr<AStarNode>> nodes_created_ownership;
-    vector<AStarNode*> open_nodes;
-    unique_ptr<AStarNode> start_node = make_unique<AStarNode>(start, nullptr, heuristic_func_(start, end), 0);
-
+    vector<unique_ptr<Node>> nodes_created_ownership;
+    vector<Node*> open_nodes;
+    auto start_node = make_unique<Node>(start, nullptr, heuristic_func_(start, end), 0);
     open_nodes.push_back(start_node.get());
     nodes_created_ownership.push_back(std::move(start_node));
 
     vector<tuple<int,int>> visited;
-    AStarNode *curr, *begin;
+    Node *curr, *begin;
     while (!open_nodes.empty()) {
         // Get a new node to visit
         curr = open_nodes.front();
@@ -130,7 +130,7 @@ vector<tuple<int, int>> MapAlgorithms::discover_path(tuple<int,int> start, tuple
 
         while (!ramification_list.empty()) {
             // Draw a new posibility node
-            tuple<int,int> current_possibility = ramification_list.front();
+            auto current_possibility = ramification_list.front();
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
             PositionState state = map_->get_position_state(get<0>(current_possibility), get<1>(current_possibility));
@@ -142,7 +142,7 @@ vector<tuple<int, int>> MapAlgorithms::discover_path(tuple<int,int> start, tuple
                     begin = begin->parent;
                 }
                 if (begin == nullptr) {
-                    unique_ptr<AStarNode> n = make_unique<AStarNode>(current_possibility, curr,
+                    auto n = make_unique<Node>(current_possibility, curr,
                                                  heuristic_func_(current_possibility, end), curr->cost + 1);
                     open_nodes.push_back(n.get());
                     nodes_created_ownership.push_back(std::move(n));

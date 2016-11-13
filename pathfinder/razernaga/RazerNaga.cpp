@@ -81,10 +81,6 @@ void RazerNaga::take_action() {
             Finish();
             break;
     }
-
-
-
-
     //cout << position_.x() << ", " << position_.y() << ", c:, " << GetX() - get<0>(start_position) <<  ", " <<
     //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
 

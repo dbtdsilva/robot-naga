@@ -103,7 +103,7 @@ void RazerNaga::retrieve_map() {
     const double& y = position_.y();
     long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
     long double dx, dy;
-    const int N_POINTS = 8;
+    const int N_POINTS = 10;
     vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
     for (unsigned int i = 0; i < ir_sensor_angles_.size(); i++) {
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
@@ -112,13 +112,13 @@ void RazerNaga::retrieve_map() {
 
         for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle) {
             distance_measured = sensors_.get_obstacle_sensor(i);
-            if (distance_measured < 0.8) {
+            if (distance_measured < 1) {
                 sensor_final_x = sensor_x + cos(theta + *angle) * distance_measured;
                 sensor_final_y = sensor_y + sin(theta + *angle) * distance_measured;
                 map_.increase_wall_counter(sensor_final_x, sensor_final_y);
             } else {
-                sensor_final_x = sensor_x + cos(theta + *angle) * 0.8;
-                sensor_final_y = sensor_y + sin(theta + *angle) * 0.8;
+                sensor_final_x = sensor_x + cos(theta + *angle) * 1;
+                sensor_final_y = sensor_y + sin(theta + *angle) * 1;
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
 

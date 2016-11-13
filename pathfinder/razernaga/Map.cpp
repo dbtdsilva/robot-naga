@@ -9,7 +9,7 @@ Map::Map() : Map(14, 7, 8) {
 Map::Map(int cols, int rows, int square_precision) :
         map_(cols * square_precision * 2, vector<Stats>(rows * square_precision * 2, Stats())),
         cols_(cols), rows_(rows), square_precision_(square_precision), last_visited_pos_(convert_to_map_coordinates(0,0)),
-        path_algorithm_(make_unique<MapAStar>(this)), target_(convert_to_map_coordinates(0,0)), target_objective_(nullptr) {
+        path_algorithm_(make_unique<MapAlgorithms>(this)), target_(convert_to_map_coordinates(0,0)), target_objective_(nullptr) {
     srand(time(NULL));
     set_random_target();
 }
@@ -107,7 +107,7 @@ void Map::render_map() {
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;
     // Paint the path to the objective location
-    auto path = path_algorithm_->discover_path(last_visited_pos_, tuple<int, int>(get<0>(target_), get<1>(target_)));
+    auto path = path_algorithm_->flood_fill(last_visited_pos_);//, tuple<int, int>(get<0>(target_), get<1>(target_)));
     for (auto path_node : path) {
         color = map_debug_->get_color(get<0>(path_node), get<1>(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(

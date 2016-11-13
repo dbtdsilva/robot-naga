@@ -5,7 +5,7 @@
 #include <memory>
 #include <SDL2/SDL.h>
 #include "MapSDL2.h"
-#include "MapAStar.h"
+#include "MapAlgorithms.h"
 
 typedef enum { GROUND, WALL, UNKNOWN } PositionState;
 
@@ -44,7 +44,7 @@ private:
     const int square_precision_, rows_, cols_;
     std::vector<std::vector<Stats>> map_;
     std::unique_ptr<MapSDL2> map_debug_;
-    std::unique_ptr<MapAStar> path_algorithm_;
+    std::unique_ptr<MapAlgorithms> path_algorithm_;
     std::tuple<int, int> last_visited_pos_, target_;
     std::unique_ptr<std::tuple<int, int>> target_objective_;
 };

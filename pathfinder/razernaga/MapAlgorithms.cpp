@@ -42,7 +42,6 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start) {
         curr = open_nodes.front();
         open_nodes.erase(open_nodes.begin());
         if (map_->get_position_state(get<0>(curr->position), get<1>(curr->position)) == UNKNOWN) {
-            printf("wat\n");
             while (curr != nullptr) {
                 final_path.push_back(curr->position);
                 curr = curr->parent;
@@ -68,7 +67,7 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start) {
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
             PositionState state = map_->get_position_state(get<0>(current_possibility), get<1>(current_possibility));
-            if (state == GROUND) {
+            if (state == GROUND || state == UNKNOWN) {
                 begin = curr;
                 // Check if that node was already on path from the solution or not, if yes, skip it.
                 while (begin != nullptr) {

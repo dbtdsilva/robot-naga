@@ -73,7 +73,7 @@ void RazerNaga::take_action() {
         case RETURNING:
             move_front(true);
             distance = sqrt(pow(position_.y(), 2) + pow(position_.x(), 2));
-            if (fabs(distance) < 0.1)
+            if (fabs(distance) < 0.3)
                 state_ = FINISHED;
             break;
         case FINISHED:
@@ -217,6 +217,7 @@ void RazerNaga::rotate(double degrees) {
     double speed, diff;
     do {
         sensors_.update_values();
+        retrieve_map();
         diff = normalize_angle(TARGET_ANGLE - sensors_.get_compass());
         speed = diff * NORMALIZE_FACTOR;
         get<0>(motor_speed) = -speed;
@@ -225,5 +226,6 @@ void RazerNaga::rotate(double degrees) {
         DriveMotors(limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
         if (!GetBumperSensor())
             position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
+        cycle_ended();
     } while(fabs(diff) > 1.0);
 }

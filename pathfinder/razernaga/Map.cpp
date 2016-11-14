@@ -49,7 +49,7 @@ void Map::set_random_target() {
 }
 
 void Map::set_target_nearest_exit() {
-    calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, 15);
+    calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, 8);
 
 }
 void Map::set_target_starter_area() {
@@ -90,7 +90,7 @@ void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].state = GROUND;
     else
-        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.1 ? GROUND : WALL;
+        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.25 ? GROUND : WALL;
 
     if (map_debug_ != nullptr) {
         if (map_[x][y].state == GROUND)

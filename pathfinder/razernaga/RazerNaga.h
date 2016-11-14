@@ -51,7 +51,7 @@ private:
     TupleDouble motor_speed;
     const std::vector<double> ir_sensor_angles_;
     State state_;
-    int dir;
+    std::vector<std::tuple<int, int>>& calculated_path_reference_;
 };
 
 

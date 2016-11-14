@@ -15,11 +15,15 @@ public:
     Map(int cols, int rows, int square_precision);
     ~Map();
 
-    void set_random_target();
-    void set_objective_target(const double& x, const double& y);
     bool increase_wall_counter(const double& x, const double& y);
     bool increase_ground_counter(const double& x, const double& y);
     bool increase_visited_counter(const double& x, const double& y);
+
+    void set_random_target();
+    void set_target_nearest_exit();
+    void set_target_starter_area();
+    std::vector<std::tuple<int, int>>& get_calculated_path();
+
     PositionState get_position_state(const int& x, const int& y) const;
     std::tuple<int, int> get_map_dimensions() const;
 
@@ -45,8 +49,8 @@ private:
     std::vector<std::vector<Stats>> map_;
     std::unique_ptr<MapSDL2> map_debug_;
     std::unique_ptr<MapAlgorithms> path_algorithm_;
-    std::tuple<int, int> last_visited_pos_, target_;
-    std::unique_ptr<std::tuple<int, int>> target_objective_;
+    std::tuple<int, int> last_visited_pos_;
+    std::vector<std::tuple<int, int>> calculated_target_path_;
 };
 
 

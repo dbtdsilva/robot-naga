@@ -24,7 +24,9 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host) :
 }
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<double> ir_sensor_angles) :
         QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host), start_position(0,0),
-        motor_speed(0.0, 0.0), ir_sensor_angles_(ir_sensor_angles), state_(STOPPED) {
+        motor_speed(0.0, 0.0), ir_sensor_angles_(ir_sensor_angles), state_(STOPPED),
+        calculated_path_reference_(map_.get_calculated_path())
+{
     if (InitRobot2(const_cast<char *>(name_.c_str()), grid_position_, &ir_sensor_angles[0],
                    const_cast<char *>(host_.c_str())) == -1) {
         throw runtime_error("Failed to connect robot");
@@ -57,15 +59,14 @@ void RazerNaga::take_action() {
             if (GetStartButton()) state_ = EXPLORING;
             break;
         case EXPLORING:
+            map_.set_target_nearest_exit();
             move_front(false);
 
             if (GetGroundSensor() != -1) {
-                map_.set_objective_target(position_.x(), position_.y());
+                map_.set_target_starter_area();
                 rotate(180);
                 SetVisitingLed(true);
                 SetReturningLed(true);
-                map_.set_objective_target(0, 0);
-
                 state_ = RETURNING;
             }
             break;

@@ -8,7 +8,7 @@
 
 using namespace std;
 
-Sensors::Sensors() : obstacles_(NUM_IR_SENSORS, Filter<double>(3)), compass_(1) {
+Sensors::Sensors() : obstacles_(NUM_IR_SENSORS, Filter<double>(1)), compass_(1) {
 }
 
 void Sensors::update_values() {

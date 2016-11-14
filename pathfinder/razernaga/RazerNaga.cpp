@@ -17,7 +17,7 @@ RazerNaga::RazerNaga(int &argc, char* argv[]) : RazerNaga(argc, argv, 0) {
 RazerNaga::RazerNaga(int &argc, char* argv[], int position) : RazerNaga(argc, argv, position, "localhost") {
 }
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host) :
-        RazerNaga(argc, argv, position, host, {60.0, 0.0, -60.0, 180.0}) {
+        RazerNaga(argc, argv, position, host, {60.0, 0.0, -60.0, -30.0}) {
 }
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<double> ir_sensor_angles) :
         QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host), start_position(0,0),
@@ -91,14 +91,14 @@ void RazerNaga::take_action() {
 }
 
 void RazerNaga::retrieve_map() {
-    map_.increase_ground_counter(position_.x(), position_.y());
+    //map_.increase_ground_counter(position_.x(), position_.y(), 0.01);
     map_.increase_visited_counter(position_.x(), position_.y());
 
     const double& x = position_.x();
     const double& y = position_.y();
     long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
     long double dx, dy;
-    const int N_POINTS = 8;
+    const int N_POINTS = 20;
     vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
     for (unsigned int i = 0; i < ir_sensor_angles_.size(); i++) {
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
@@ -107,13 +107,13 @@ void RazerNaga::retrieve_map() {
 
         for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle) {
             distance_measured = sensors_.get_obstacle_sensor(i);
-            if (distance_measured < 1.0) {
+            if (distance_measured < 1.2) {
                 sensor_final_x = sensor_x + cos(theta + *angle) * distance_measured;
                 sensor_final_y = sensor_y + sin(theta + *angle) * distance_measured;
                 map_.increase_wall_counter(sensor_final_x, sensor_final_y);
             } else {
-                sensor_final_x = sensor_x + cos(theta + *angle) * 1.0;
-                sensor_final_y = sensor_y + sin(theta + *angle) * 1.0;
+                sensor_final_x = sensor_x + cos(theta + *angle) * 1.2;
+                sensor_final_y = sensor_y + sin(theta + *angle) * 1.2;
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
 
@@ -164,14 +164,15 @@ void RazerNaga::move_right() {
     double error;
     static double last_error = 0, integral_error = 0;
     double right = sensors_.get_obstacle_sensor(2);
-    error = (right - 0.47); //+ (center_right - 0.65);
+    double center_right = sensors_.get_obstacle_sensor(3);
+    error = (right - 0.47) + (center_right - 0.65);
     if (sensors_.get_obstacle_sensor(1) < 0.6) {
         error -= 2;
     }
     integral_error += error;
     integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
     integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
-    double correction = 0.15 * error + 0.0 * integral_error + 0.2 * (error - last_error);
+    double correction = 0.4 * error + 0.0 * integral_error + 0.2 * (error - last_error);
     last_error = error;
 
     get<0>(motor_speed) = BASE_SPEED + correction;

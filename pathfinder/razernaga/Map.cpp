@@ -32,33 +32,51 @@ PositionState Map::get_position_state(const int& x, const int& y) const {
 
 std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, double>& real_coordinates) {
     return convert_to_map_coordinates(get<0>(real_coordinates), get<1>(real_coordinates));
-};
+}
 
 std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) {
     return tuple<int, int>((int) round(x * (square_precision_ / 2.0) + cols_ * square_precision_),
                            (int) round(-y * (square_precision_ / 2.0) + rows_ * square_precision_));
-};
+}
+
+std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const int& y) {
+    return tuple<double, double>(2.0 * ((double)x / square_precision_ - cols_),
+                                 -2.0 * ((double)y / square_precision_ - rows_));
+}
+
+std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) {
+    return convert_from_map_coordinates(get<0>(map_coordinates), get<1>(map_coordinates));
+}
 
 void Map::set_random_target() {
-    int x, y;
+    unsigned long x, y;
     do {
         x = rand() % map_.size();
         y = rand() % map_[0].size();
     } while (map_[x][y].state != UNKNOWN);
     calculated_target_path_ = path_algorithm_->astar_shortest_path(last_visited_pos_, tuple<int, int>(x, y));
+    calculated_target_path_converted_.clear();
+    for (auto element : calculated_target_path_)
+        calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
 }
 
 void Map::set_target_nearest_exit() {
     calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, 8);
+    calculated_target_path_converted_.clear();
+    for (auto element : calculated_target_path_)
+        calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
 
 }
 void Map::set_target_starter_area() {
     calculated_target_path_ = path_algorithm_->astar_shortest_path(
             last_visited_pos_, convert_to_map_coordinates(tuple<int, int>(0, 0)));
+    calculated_target_path_converted_.clear();
+    for (auto element : calculated_target_path_)
+        calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
 }
 
-vector<tuple<int,int>>& Map::get_calculated_path() {
-    return calculated_target_path_;
+vector<tuple<double,double>>& Map::get_calculated_path() {
+    return calculated_target_path_converted_;
 }
 
 bool Map::increase_wall_counter(const double& x, const double& y) {
@@ -89,13 +107,14 @@ bool Map::increase_visited_counter(const double& x, const double& y) {
 void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].state = GROUND;
-    else
-        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.25 ? GROUND : WALL;
+    else {
+        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.05 ? GROUND : WALL;
+    }
 
     if (map_debug_ != nullptr) {
         if (map_[x][y].state == GROUND)
             map_debug_->set_color(x, y, 0, 255, 0, 255);
-        else
+        else if (map_[x][y].state == WALL)
             map_debug_->set_color(x, y, 0, 0, 0, 255);
     }
 }
@@ -112,7 +131,8 @@ void Map::render_map() {
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;
     // Paint the path to the objective location
-    for (auto path_node : calculated_target_path_) {
+    for (auto aa : calculated_target_path_) {
+        tuple<int, int> path_node = convert_to_map_coordinates(convert_from_map_coordinates(aa));
         color = map_debug_->get_color(get<0>(path_node), get<1>(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
                 get<0>(path_node), get<1>(path_node), color[0], color[1], color[2], color[3]));

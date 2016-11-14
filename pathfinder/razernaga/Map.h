@@ -22,7 +22,7 @@ public:
     void set_random_target();
     void set_target_nearest_exit();
     void set_target_starter_area();
-    std::vector<std::tuple<int, int>>& get_calculated_path();
+    std::vector<std::tuple<double, double>>& get_calculated_path();
 
     PositionState get_position_state(const int& x, const int& y) const;
     std::tuple<int, int> get_map_dimensions() const;
@@ -32,6 +32,8 @@ public:
 private:
     std::tuple<int, int> convert_to_map_coordinates(const std::tuple<double, double>&);
     std::tuple<int, int> convert_to_map_coordinates(const double&, const double&);
+    std::tuple<double, double> convert_from_map_coordinates(const int&, const int&);
+    std::tuple<double, double> convert_from_map_coordinates(const std::tuple<int, int>&);
     void evaluate_position(const int& x, const int& y);
 
     bool validate_position(const int& x, const int& y);
@@ -39,8 +41,7 @@ private:
 
     typedef struct PositionStats {
         PositionStats() : wall_counter(0), ground_counter(0), visited(0), state(UNKNOWN) { }
-        unsigned int wall_counter;
-        unsigned int ground_counter;
+        int wall_counter, ground_counter;
         unsigned int visited;
         PositionState state;
     } Stats;
@@ -51,6 +52,7 @@ private:
     std::unique_ptr<MapAlgorithms> path_algorithm_;
     std::tuple<int, int> last_visited_pos_;
     std::vector<std::tuple<int, int>> calculated_target_path_;
+    std::vector<std::tuple<double, double>> calculated_target_path_converted_;
 };
 
 

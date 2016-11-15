@@ -39,7 +39,8 @@ public slots:
     void take_action();
     void cycle_ended_action();
 private:
-    double normalize_angle(double degrees_angle);
+    static double angle_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target);
+    static double normalize_angle(double degrees_angle);
     enum State { STOPPED, EXPLORING, RETURNING, FINISHED };
 
     const std::string name_;

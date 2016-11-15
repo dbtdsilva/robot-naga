@@ -250,3 +250,15 @@ void RazerNaga::retrieve_map() {
         }
     }
 }
+
+double RazerNaga::angle_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target) {
+    double opposite = get<1>(target) - get<1>(source);
+    double adjacent = get<0>(target) - get<0>(source);
+
+    double value;
+    if (adjacent == 0)
+        value = opposite > 0 ? M_PI / 2.0 : -M_PI / 2.0;
+    else
+        value = atan(opposite / adjacent);
+    return normalize_angle((value * 180.0) / M_PI);
+}

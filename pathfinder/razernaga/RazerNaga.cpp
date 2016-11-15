@@ -57,8 +57,10 @@ void RazerNaga::take_action() {
             if (GetStartButton()) state_ = EXPLORING;
             break;
         case EXPLORING:
-            map_.set_target_nearest_exit();
-            move_right();
+            if (calculated_path_reference_.size() == 0)
+                map_.set_target_nearest_exit();
+            //move_right();
+            move_to_the_exit();
 
             if (GetGroundSensor() != -1) {
                 map_.set_target_starter_area();
@@ -90,41 +92,25 @@ void RazerNaga::take_action() {
     cycle_ended();
 }
 
-void RazerNaga::retrieve_map() {
-    //map_.increase_ground_counter(position_.x(), position_.y(), 0.01);
-    map_.increase_visited_counter(position_.x(), position_.y());
+void RazerNaga::move_to_the_exit() {
+    double error;
+    static double last_error = 0, integral_error = 0;
+    double right = sensors_.get_obstacle_sensor(2);
+    double center_right = sensors_.get_obstacle_sensor(3);
+    error = (-180 + sensors_.get_compass()) / 40.0;
+    /*if (sensors_.get_obstacle_sensor(1) < 0.6) {
+        error -= 2;
+    }*/
+    integral_error += error;
+    integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
+    integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
+    double correction = 0.2 * error + 0.0 * integral_error + 0.2 * (error - last_error);
+    last_error = error;
 
-    const double& x = position_.x();
-    const double& y = position_.y();
-    long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
-    long double dx, dy;
-    const int N_POINTS = 20;
-    vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
-    for (unsigned int i = 0; i < ir_sensor_angles_.size(); i++) {
-        theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
-        sensor_x = x + cos(theta) * 0.5;
-        sensor_y = y + sin(theta) * 0.5;
-
-        for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle) {
-            distance_measured = sensors_.get_obstacle_sensor(i);
-            if (distance_measured < 1.2) {
-                sensor_final_x = sensor_x + cos(theta + *angle) * distance_measured;
-                sensor_final_y = sensor_y + sin(theta + *angle) * distance_measured;
-                map_.increase_wall_counter(sensor_final_x, sensor_final_y);
-            } else {
-                sensor_final_x = sensor_x + cos(theta + *angle) * 1.2;
-                sensor_final_y = sensor_y + sin(theta + *angle) * 1.2;
-                map_.increase_ground_counter(sensor_final_x, sensor_final_y);
-            }
-
-            dx = (sensor_final_x - sensor_x) / N_POINTS;
-            dy = (sensor_final_y - sensor_y) / N_POINTS;
-            for (int points = 0; points < N_POINTS; points++) {
-                map_.increase_ground_counter(sensor_x + points * dx, sensor_y + points * dy);
-            }
-        }
-    }
+    get<0>(motor_speed) = BASE_SPEED + correction;
+    get<1>(motor_speed) = BASE_SPEED - correction;
 }
+
 void RazerNaga::move_front(bool moving_back) {
     double error;
     static double last_error = 0, integral_error = 0;
@@ -227,4 +213,40 @@ void RazerNaga::rotate(double degrees) {
             position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
         cycle_ended();
     } while(fabs(diff) > 1.0);
+}
+
+void RazerNaga::retrieve_map() {
+    //map_.increase_ground_counter(position_.x(), position_.y(), 0.01);
+    map_.increase_visited_counter(position_.x(), position_.y());
+
+    const double& x = position_.x();
+    const double& y = position_.y();
+    long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
+    long double dx, dy;
+    const int N_POINTS = 20;
+    vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
+    for (unsigned int i = 0; i < ir_sensor_angles_.size(); i++) {
+        theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
+        sensor_x = x + cos(theta) * 0.5;
+        sensor_y = y + sin(theta) * 0.5;
+
+        for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle) {
+            distance_measured = sensors_.get_obstacle_sensor(i);
+            if (distance_measured < 1.2) {
+                sensor_final_x = sensor_x + cos(theta + *angle) * distance_measured;
+                sensor_final_y = sensor_y + sin(theta + *angle) * distance_measured;
+                map_.increase_wall_counter(sensor_final_x, sensor_final_y);
+            } else {
+                sensor_final_x = sensor_x + cos(theta + *angle) * 1.2;
+                sensor_final_y = sensor_y + sin(theta + *angle) * 1.2;
+                map_.increase_ground_counter(sensor_final_x, sensor_final_y);
+            }
+
+            dx = (sensor_final_x - sensor_x) / N_POINTS;
+            dy = (sensor_final_y - sensor_y) / N_POINTS;
+            for (int points = 0; points < N_POINTS; points++) {
+                map_.increase_ground_counter(sensor_x + points * dx, sensor_y + points * dy);
+            }
+        }
+    }
 }

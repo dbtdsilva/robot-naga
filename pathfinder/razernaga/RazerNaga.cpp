@@ -85,7 +85,15 @@ void RazerNaga::move_to_the_exit() {
     static double last_error = 0, integral_error = 0;
     double right = sensors_.get_obstacle_sensor(2);
     double center_right = sensors_.get_obstacle_sensor(3);
-    error = (-180 + sensors_.get_compass()) / 40.0;
+
+    tuple<double,double> source(position_.x(), position_.y());
+    tuple<double,double> dst(4, 0);
+    error = angle_between_two_points(source, dst) + sensors_.get_compass();
+    if (error > 180.0)
+        error -= 360.0;
+    if (error < -180)
+        error += 360.0;
+    error = error / 40.0; // Normalization factor
     /*if (sensors_.get_obstacle_sensor(1) < 0.6) {
         error -= 2;
     }*/
@@ -245,14 +253,18 @@ void RazerNaga::apply_motors_speed() {
 }
 
 double RazerNaga::angle_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target) {
-    double opposite = get<1>(target) - get<1>(source);
+    double opposite = -(get<1>(target) - get<1>(source));
     double adjacent = get<0>(target) - get<0>(source);
 
     double value;
-    if (adjacent == 0)
+    if (adjacent == 0) {
         value = opposite > 0 ? M_PI / 2.0 : -M_PI / 2.0;
-    else
+    } else {
+        // tan(theta) = theta + K * M_PI
         value = atan(opposite / adjacent);
+        if (adjacent < 0)
+            value += M_PI;
+    }
     return normalize_angle((value * 180.0) / M_PI);
 }
 

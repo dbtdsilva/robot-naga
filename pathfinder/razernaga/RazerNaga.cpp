@@ -39,6 +39,7 @@ void RazerNaga::cycle_ended_action() {
     map_.render_map();
 }
 
+vector<tuple<double, double>> targets = {tuple<double,double>(2, 0), tuple<double, double>(2, 2), tuple<double, double>(6, 2), tuple<double, double>(6, 0), tuple<double, double>(0,0)};
 void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
@@ -81,13 +82,25 @@ void RazerNaga::take_action() {
 }
 
 void RazerNaga::move_to_the_exit() {
+    tuple<double,double> source(position_.x(), position_.y());
+    tuple<double,double> dst;
+    do {
+        if (targets.size() == 0) {
+            set_motors_speed(0, 0);
+            return;
+        }
+        dst = targets.front();
+        if (distance_between_two_points(source, dst) < 0.2) {
+            targets.erase(targets.begin());
+        } else
+            break;
+    } while (true);
+
     double error;
     static double last_error = 0, integral_error = 0;
     double right = sensors_.get_obstacle_sensor(2);
     double center_right = sensors_.get_obstacle_sensor(3);
 
-    tuple<double,double> source(position_.x(), position_.y());
-    tuple<double,double> dst(4, 0);
     error = angle_between_two_points(source, dst) + sensors_.get_compass();
     if (error > 180.0)
         error -= 360.0;
@@ -266,6 +279,10 @@ double RazerNaga::angle_between_two_points(std::tuple<double, double>& source, s
             value += M_PI;
     }
     return normalize_angle((value * 180.0) / M_PI);
+}
+
+double RazerNaga::distance_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target) {
+    return sqrt(pow(get<1>(target) - get<1>(source), 2) + pow(get<0>(target) - get<0>(source), 2));
 }
 
 double RazerNaga::normalize_angle(double degrees_angle) {

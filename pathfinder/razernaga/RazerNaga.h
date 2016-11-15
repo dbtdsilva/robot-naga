@@ -43,6 +43,7 @@ private:
     void apply_motors_speed();
 
     static double angle_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target);
+    static double distance_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target);
     static double normalize_angle(double degrees_angle);
     enum State { STOPPED, EXPLORING, RETURNING, FINISHED };
 

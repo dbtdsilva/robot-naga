@@ -9,6 +9,7 @@
 
 #define INTEGRAL_CLIP   0.05
 #define BASE_SPEED      0.1
+#define MAX_SPEED       0.15
 
 using namespace std;
 
@@ -38,15 +39,6 @@ void RazerNaga::cycle_ended_action() {
     map_.render_map();
 }
 
-double limit_motor(double speed) {
-    if (speed > 0.15)
-        return 0.15;
-    if (speed < -0.15)
-        return -0.15;
-    return speed;
-}
-
-int cycle = 0;
 void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
@@ -85,11 +77,7 @@ void RazerNaga::take_action() {
     //cout << position_.x() << ", " << position_.y() << ", c:, " << GetX() - get<0>(start_position) <<  ", " <<
     //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
 
-    DriveMotors(limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
-    if (!GetBumperSensor()) {
-        position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
-    }
-    cycle_ended();
+    apply_motors_speed();
 }
 
 void RazerNaga::move_to_the_exit() {
@@ -107,8 +95,7 @@ void RazerNaga::move_to_the_exit() {
     double correction = 0.2 * error + 0.0 * integral_error + 0.2 * (error - last_error);
     last_error = error;
 
-    get<0>(motor_speed) = BASE_SPEED + correction;
-    get<1>(motor_speed) = BASE_SPEED - correction;
+    set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);
 }
 
 void RazerNaga::move_front(bool moving_back) {
@@ -142,8 +129,7 @@ void RazerNaga::move_front(bool moving_back) {
     double correction = 0.05 * error + 0.0 * integral_error + 0.2 * (error - last_error);
     last_error = error;
 
-    get<0>(motor_speed) = BASE_SPEED + correction;
-    get<1>(motor_speed) = BASE_SPEED - correction;
+    set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);
 }
 
 void RazerNaga::move_right() {
@@ -161,25 +147,16 @@ void RazerNaga::move_right() {
     double correction = 0.4 * error + 0.0 * integral_error + 0.2 * (error - last_error);
     last_error = error;
 
-    get<0>(motor_speed) = BASE_SPEED + correction;
-    get<1>(motor_speed) = BASE_SPEED - correction;
+    set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);
 }
 
-double RazerNaga::normalize_angle(double degrees_angle) {
-    while (degrees_angle <= -180.0) degrees_angle += 2.0 * 180.0;
-    while (degrees_angle > 180.0) degrees_angle -= 2.0 * 180.0;
-    return degrees_angle;
-}
 void RazerNaga::walk_units(double units) {
     const double start = position_.x();
     rotate(-sensors_.get_compass());
     do {
         sensors_.update_values();
-        get<0>(motor_speed) = 0.15;
-        get<1>(motor_speed) = 0.15;
-        DriveMotors(get<0>(motor_speed), get<1>(motor_speed));
-        retrieve_map();
-        position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
+        set_motors_speed(0.15, 0.15);
+        apply_motors_speed();
     } while(fabs(start - position_.x()) < units);
 }
 
@@ -190,9 +167,9 @@ void RazerNaga::walk_units_y(double units) {
         sensors_.update_values();
         get<0>(motor_speed) = 0.15;
         get<1>(motor_speed) = 0.15;
-        DriveMotors(get<0>(motor_speed), get<1>(motor_speed));
-        retrieve_map();
-        position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
+
+        set_motors_speed(0.15, 0.15);
+        apply_motors_speed();
     } while(fabs(start - position_.y()) < units);
 }
 
@@ -205,13 +182,9 @@ void RazerNaga::rotate(double degrees) {
         retrieve_map();
         diff = normalize_angle(TARGET_ANGLE - sensors_.get_compass());
         speed = diff * NORMALIZE_FACTOR;
-        get<0>(motor_speed) = -speed;
-        get<1>(motor_speed) = speed;
 
-        DriveMotors(limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
-        if (!GetBumperSensor())
-            position_.update_position(sensors_.get_compass(), limit_motor(get<0>(motor_speed)), limit_motor(get<1>(motor_speed)));
-        cycle_ended();
+        set_motors_speed(-speed, speed);
+        apply_motors_speed();
     } while(fabs(diff) > 1.0);
 }
 
@@ -251,6 +224,26 @@ void RazerNaga::retrieve_map() {
     }
 }
 
+void RazerNaga::set_motors_speed(double motor_left, double motor_right) {
+    get<0>(motor_speed) = motor_left;
+    if (get<0>(motor_speed) > MAX_SPEED)
+        get<0>(motor_speed) = 0.15;
+    if (get<0>(motor_speed) < -MAX_SPEED)
+        get<0>(motor_speed) = -0.15;
+
+    get<1>(motor_speed) = motor_right;
+    if (get<1>(motor_speed) > MAX_SPEED)
+        get<1>(motor_speed) = 0.15;
+    if (get<1>(motor_speed) < -MAX_SPEED)
+        get<1>(motor_speed) = -0.15;
+}
+void RazerNaga::apply_motors_speed() {
+    DriveMotors(get<0>(motor_speed), get<1>(motor_speed));
+    if (!GetBumperSensor())
+        position_.update_position(sensors_.get_compass(), get<0>(motor_speed), get<1>(motor_speed));
+    cycle_ended();
+}
+
 double RazerNaga::angle_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target) {
     double opposite = get<1>(target) - get<1>(source);
     double adjacent = get<0>(target) - get<0>(source);
@@ -261,4 +254,10 @@ double RazerNaga::angle_between_two_points(std::tuple<double, double>& source, s
     else
         value = atan(opposite / adjacent);
     return normalize_angle((value * 180.0) / M_PI);
+}
+
+double RazerNaga::normalize_angle(double degrees_angle) {
+    while (degrees_angle <= -180.0) degrees_angle += 2.0 * 180.0;
+    while (degrees_angle > 180.0) degrees_angle -= 2.0 * 180.0;
+    return degrees_angle;
 }

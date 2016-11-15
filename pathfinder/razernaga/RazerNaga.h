@@ -39,6 +39,9 @@ public slots:
     void take_action();
     void cycle_ended_action();
 private:
+    void set_motors_speed(double motor_left, double motor_right);
+    void apply_motors_speed();
+
     static double angle_between_two_points(std::tuple<double, double>& source, std::tuple<double, double>& target);
     static double normalize_angle(double degrees_angle);
     enum State { STOPPED, EXPLORING, RETURNING, FINISHED };

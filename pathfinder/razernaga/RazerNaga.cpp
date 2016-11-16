@@ -8,7 +8,7 @@
 #include <cmath>
 
 #define INTEGRAL_CLIP   0.05
-#define BASE_SPEED      0.1
+#define BASE_SPEED      0.13
 #define MAX_SPEED       0.15
 
 using namespace std;
@@ -20,6 +20,7 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position) : RazerNaga(argc, ar
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host) :
         RazerNaga(argc, argv, position, host, {60.0, 0.0, -60.0, 180.0}) {
 }
+
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<double> ir_sensor_angles) :
         QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host), start_position(0,0),
         motor_speed(0.0, 0.0), ir_sensor_angles_(ir_sensor_angles), state_(STOPPED),
@@ -39,25 +40,7 @@ void RazerNaga::cycle_ended_action() {
     map_.render_map();
 }
 
-vector<tuple<double, double>> targets = {tuple<double,double>(2, 0), tuple<double, double>(2, 2),
-                                         tuple<double, double>(4, 2), tuple<double, double>(4, 4),
-                                         tuple<double, double>(6, 4), tuple<double, double>(6, 6),
-                                         tuple<double, double>(4, 6), tuple<double, double>(6, 6),
-                                         tuple<double, double>(6, 4), tuple<double, double>(12, 4),
-                                         tuple<double, double>(12, 2), tuple<double, double>(14, 2),
-                                         tuple<double, double>(14, 0), tuple<double, double>(10, 0),
-                                         tuple<double, double>(10, -2), tuple<double, double>(2, -2),
-                                         tuple<double, double>(10, -2), tuple<double, double>(10, -4),
-                                         tuple<double, double>(14, -4), tuple<double, double>(14, -6),
-                                         tuple<double, double>(8, -6), tuple<double, double>(8, -4),
-                                         tuple<double, double>(0, -4), tuple<double, double>(0, -2),
-                                         tuple<double, double>(0, -4), tuple<double, double>(-2, -4),
-                                         tuple<double, double>(0, -4), tuple<double, double>(0, -6),
-                                         tuple<double, double>(6, -6), tuple<double, double>(0, -6),
-                                         tuple<double, double>(0, -4), tuple<double, double>(8, -4),
-                                         tuple<double, double>(8, -6), tuple<double, double>(14, -6),
-                                         tuple<double, double>(14, -4), tuple<double, double>(16, -4),
-                                         tuple<double, double>(16, 0), tuple<double, double>(20, 0)};
+vector<tuple<int, int>> new_targets;
 void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
@@ -68,8 +51,23 @@ void RazerNaga::take_action() {
             if (GetStartButton()) state_ = EXPLORING;
             break;
         case EXPLORING:
-            if (calculated_path_reference_.size() == 0)
+            if (new_targets.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.3 || GetBumperSensor()) { //) {
+                new_targets.clear();
                 map_.set_target_nearest_exit();
+
+                cout << "List" << endl;
+                for (const tuple<double, double>& point : calculated_path_reference_) {
+                    tuple<int,int> new_value = tuple<int, int>(
+                            floor((get<0>(point) + 1.0) / 2.0) * 2.0,
+                            floor((get<1>(point) + 1.0) / 2.0) * 2.0);
+                    if (find(new_targets.begin(), new_targets.end(), new_value) == new_targets.end()) {
+                        new_targets.push_back(new_value);
+
+                        printf("%2d %2d %4.2f %4.2f\n", get<0>(new_value), get<1>(new_value), get<0>(point), get<1>(point) );
+                    }
+                }
+                cout << "End" << endl;
+            }
             //move_right();
             move_to_the_exit();
 
@@ -104,13 +102,12 @@ void RazerNaga::move_to_the_exit() {
     tuple<double,double> source(position_.x(), position_.y());
     tuple<double,double> dst;
     do {
-        if (targets.size() == 0) {
-            set_motors_speed(0, 0);
+        if (new_targets.size() == 0) {
             return;
         }
-        dst = targets.front();
+        dst = new_targets.back();
         if (distance_between_two_points(source, dst) < 0.2) {
-            targets.erase(targets.begin());
+            new_targets.pop_back();
         } else
             break;
     } while (true);

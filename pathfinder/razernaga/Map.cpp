@@ -98,13 +98,23 @@ bool Map::increase_ground_counter(const double& x, const double& y) {
 
 bool Map::increase_ground_counter_range(const double& sx, const double& sy, const double& fx, const double& fy) {
     long double dx, dy;
-    const int N_POINTS = 5;
+    const int N_POINTS = 100;
 
     dx = (fx - sx) / N_POINTS;
     dy = (fy - sy) / N_POINTS;
+
+    vector<Stats*> modified_points;
     for (int points = 0; points < N_POINTS; points++) {
+        tuple<int, int> position = convert_to_map_coordinates(sx + points * dx, sy + points * dy);
+        if (map_[get<0>(position)][get<1>(position)].referred)
+            continue;
+        map_[get<0>(position)][get<1>(position)].referred = true;
+        modified_points.push_back(&map_[get<0>(position)][get<1>(position)]);
         increase_ground_counter(sx + points * dx, sy + points * dy);
     }
+
+    for (Stats* element : modified_points)
+        element->referred = false;
 }
 
 bool Map::increase_visited_counter(const double& x, const double& y) {
@@ -122,7 +132,7 @@ void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].state = GROUND;
     else {
-        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.35 ? GROUND : WALL;
+        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.2 ? GROUND : WALL;
     }
 
     if (map_debug_ != nullptr) {

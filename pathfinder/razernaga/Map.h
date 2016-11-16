@@ -41,7 +41,8 @@ private:
     bool validate_position(const std::tuple<int, int>&);
 
     typedef struct PositionStats {
-        PositionStats() : wall_counter(0), ground_counter(0), visited(0), state(UNKNOWN) { }
+        PositionStats() : referred(false), wall_counter(0), ground_counter(0), visited(0), state(UNKNOWN) { }
+        bool referred;
         int wall_counter, ground_counter;
         unsigned int visited;
         PositionState state;

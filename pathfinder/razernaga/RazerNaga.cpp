@@ -206,14 +206,11 @@ void RazerNaga::rotate(double degrees) {
 }
 
 void RazerNaga::retrieve_map() {
-    //map_.increase_ground_counter(position_.x(), position_.y(), 0.01);
     map_.increase_visited_counter(position_.x(), position_.y());
 
     const double& x = position_.x();
     const double& y = position_.y();
     long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
-    long double dx, dy;
-    const int N_POINTS = 5;
     vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
     for (unsigned int i = 0; i < ir_sensor_angles_.size(); i++) {
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;
@@ -231,7 +228,6 @@ void RazerNaga::retrieve_map() {
                 sensor_final_y = sensor_y + sin(theta + *angle) * 1.0;
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
-
             map_.increase_ground_counter_range(sensor_x, sensor_y, sensor_final_x, sensor_final_y);
         }
     }

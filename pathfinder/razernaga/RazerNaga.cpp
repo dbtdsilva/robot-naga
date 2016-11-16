@@ -171,29 +171,6 @@ void RazerNaga::move_right() {
     set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);
 }
 
-void RazerNaga::walk_units(double units) {
-    const double start = position_.x();
-    rotate(-sensors_.get_compass());
-    do {
-        sensors_.update_values();
-        set_motors_speed(0.15, 0.15);
-        apply_motors_speed();
-    } while(fabs(start - position_.x()) < units);
-}
-
-void RazerNaga::walk_units_y(double units) {
-    const double start = position_.y();
-    rotate(-sensors_.get_compass() - 90);
-    do {
-        sensors_.update_values();
-        get<0>(motor_speed) = 0.15;
-        get<1>(motor_speed) = 0.15;
-
-        set_motors_speed(0.15, 0.15);
-        apply_motors_speed();
-    } while(fabs(start - position_.y()) < units);
-}
-
 void RazerNaga::rotate(double degrees) {
     const double TARGET_ANGLE = normalize_angle(sensors_.get_compass() + degrees);
     constexpr double NORMALIZE_FACTOR = 0.15 / 90.0;

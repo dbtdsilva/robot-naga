@@ -29,8 +29,6 @@ public:
     void move_front(bool moving_back);
     void move_to_the_exit();
     void move_right();
-    void walk_units(double units);
-    void walk_units_y(double units);
     void rotate(double degress);
     void retrieve_map();
 signals:

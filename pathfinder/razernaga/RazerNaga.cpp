@@ -95,7 +95,8 @@ void RazerNaga::take_action() {
     }
     //cout << position_.x() << ", " << position_.y() << ", c:, " << GetX() - get<0>(start_position) <<  ", " <<
     //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
-
+    //printf("L: %4.2f, C: %4.2f, R: %4.2f\n", sensors_.get_obstacle_sensor(0), sensors_.get_obstacle_sensor(1),
+    //       sensors_.get_obstacle_sensor(2));
     apply_motors_speed();
 }
 
@@ -221,13 +222,13 @@ void RazerNaga::retrieve_map() {
 
         for(auto angle = sensor_angles.begin(); angle != sensor_angles.end() ; ++angle) {
             distance_measured = sensors_.get_obstacle_sensor(i);
-            if (distance_measured < 1.2) {
+            if (distance_measured < 1.0) {
                 sensor_final_x = sensor_x + cos(theta + *angle) * distance_measured;
                 sensor_final_y = sensor_y + sin(theta + *angle) * distance_measured;
                 map_.increase_wall_counter(sensor_final_x, sensor_final_y);
             } else {
-                sensor_final_x = sensor_x + cos(theta + *angle) * 1.2;
-                sensor_final_y = sensor_y + sin(theta + *angle) * 1.2;
+                sensor_final_x = sensor_x + cos(theta + *angle) * 1.0;
+                sensor_final_y = sensor_y + sin(theta + *angle) * 1.0;
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
 

@@ -17,6 +17,7 @@ public:
 
     bool increase_wall_counter(const double& x, const double& y);
     bool increase_ground_counter(const double& x, const double& y);
+    bool increase_ground_counter_range(const double& sx, const double& sy, const double& fx, const double& fy);
     bool increase_visited_counter(const double& x, const double& y);
 
     void set_random_target();

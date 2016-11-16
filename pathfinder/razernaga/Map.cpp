@@ -86,6 +86,7 @@ bool Map::increase_wall_counter(const double& x, const double& y) {
     evaluate_position(get<0>(position), get<1>(position));
     return true;
 }
+
 bool Map::increase_ground_counter(const double& x, const double& y) {
     tuple<int, int> position = convert_to_map_coordinates(x, y);
     if (!validate_position(position)) return false;
@@ -93,6 +94,19 @@ bool Map::increase_ground_counter(const double& x, const double& y) {
     evaluate_position(get<0>(position), get<1>(position));
     return true;
 }
+
+
+bool Map::increase_ground_counter_range(const double& sx, const double& sy, const double& fx, const double& fy) {
+    long double dx, dy;
+    const int N_POINTS = 5;
+
+    dx = (fx - sx) / N_POINTS;
+    dy = (fy - sy) / N_POINTS;
+    for (int points = 0; points < N_POINTS; points++) {
+        increase_ground_counter(sx + points * dx, sy + points * dy);
+    }
+}
+
 bool Map::increase_visited_counter(const double& x, const double& y) {
     tuple<int, int> position = convert_to_map_coordinates(x, y);
     if (!validate_position(position)) return false;

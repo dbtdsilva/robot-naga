@@ -232,11 +232,7 @@ void RazerNaga::retrieve_map() {
                 map_.increase_ground_counter(sensor_final_x, sensor_final_y);
             }
 
-            dx = (sensor_final_x - sensor_x) / N_POINTS;
-            dy = (sensor_final_y - sensor_y) / N_POINTS;
-            for (int points = 0; points < N_POINTS; points++) {
-                map_.increase_ground_counter(sensor_x + points * dx, sensor_y + points * dy);
-            }
+            map_.increase_ground_counter_range(sensor_x, sensor_y, sensor_final_x, sensor_final_y);
         }
     }
 }

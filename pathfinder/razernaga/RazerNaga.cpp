@@ -18,7 +18,7 @@ RazerNaga::RazerNaga(int &argc, char* argv[]) : RazerNaga(argc, argv, 0) {
 RazerNaga::RazerNaga(int &argc, char* argv[], int position) : RazerNaga(argc, argv, position, "localhost") {
 }
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host) :
-        RazerNaga(argc, argv, position, host, {60.0, 0.0, -60.0, -30.0}) {
+        RazerNaga(argc, argv, position, host, {60.0, 0.0, -60.0, 180.0}) {
 }
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<double> ir_sensor_angles) :
         QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host), start_position(0,0),
@@ -39,7 +39,25 @@ void RazerNaga::cycle_ended_action() {
     map_.render_map();
 }
 
-vector<tuple<double, double>> targets = {tuple<double,double>(2, 0), tuple<double, double>(2, 2), tuple<double, double>(6, 2), tuple<double, double>(6, 0), tuple<double, double>(0,0)};
+vector<tuple<double, double>> targets = {tuple<double,double>(2, 0), tuple<double, double>(2, 2),
+                                         tuple<double, double>(4, 2), tuple<double, double>(4, 4),
+                                         tuple<double, double>(6, 4), tuple<double, double>(6, 6),
+                                         tuple<double, double>(4, 6), tuple<double, double>(6, 6),
+                                         tuple<double, double>(6, 4), tuple<double, double>(12, 4),
+                                         tuple<double, double>(12, 2), tuple<double, double>(14, 2),
+                                         tuple<double, double>(14, 0), tuple<double, double>(10, 0),
+                                         tuple<double, double>(10, -2), tuple<double, double>(2, -2),
+                                         tuple<double, double>(10, -2), tuple<double, double>(10, -4),
+                                         tuple<double, double>(14, -4), tuple<double, double>(14, -6),
+                                         tuple<double, double>(8, -6), tuple<double, double>(8, -4),
+                                         tuple<double, double>(0, -4), tuple<double, double>(0, -2),
+                                         tuple<double, double>(0, -4), tuple<double, double>(-2, -4),
+                                         tuple<double, double>(0, -4), tuple<double, double>(0, -6),
+                                         tuple<double, double>(6, -6), tuple<double, double>(0, -6),
+                                         tuple<double, double>(0, -4), tuple<double, double>(8, -4),
+                                         tuple<double, double>(8, -6), tuple<double, double>(14, -6),
+                                         tuple<double, double>(14, -4), tuple<double, double>(16, -4),
+                                         tuple<double, double>(16, 0), tuple<double, double>(20, 0)};
 void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
@@ -194,7 +212,7 @@ void RazerNaga::retrieve_map() {
     const double& y = position_.y();
     long double sensor_x, sensor_y, theta, distance_measured, sensor_final_x, sensor_final_y;
     long double dx, dy;
-    const int N_POINTS = 20;
+    const int N_POINTS = 10;
     vector<double> sensor_angles = {-M_PI / 6.0, 0, M_PI / 6.0};
     for (unsigned int i = 0; i < ir_sensor_angles_.size(); i++) {
         theta = normalize_angle(sensors_.get_compass() + ir_sensor_angles_[i]) * M_PI / 180.0;

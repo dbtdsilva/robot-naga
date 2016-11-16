@@ -108,7 +108,7 @@ void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].state = GROUND;
     else {
-        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.05 ? GROUND : WALL;
+        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.125 ? GROUND : WALL;
     }
 
     if (map_debug_ != nullptr) {

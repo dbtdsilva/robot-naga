@@ -16,11 +16,11 @@ public:
     void update_values();
     double get_compass() const;
     double get_obstacle_sensor(const int& id) const;
+    friend std::ostream& operator<<(std::ostream& os, const Sensors& sensors);
 private:
     std::vector<Filter<double>> obstacles_;
     int ground_;
     Filter<double> compass_;
-    friend std::ostream& operator<<(std::ostream& os, const Sensors& sensors);
 };
 
 #endif //RAZERNAGA_SENSORS_H

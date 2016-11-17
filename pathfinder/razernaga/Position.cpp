@@ -5,7 +5,6 @@
 #include "Position.h"
 
 #include <math.h>
-#include <iostream>
 
 using namespace std;
 
@@ -40,4 +39,8 @@ void Position::update_position(const double& theta, const double& in_left, const
     //previous_theta += rotational;
     //if (previous_theta > M_PI) previous_theta -= (2.0 * M_PI);
     //else if (previous_theta < -M_PI) previous_theta += (2.0 * M_PI);
+}
+
+ostream& operator<<(ostream& os, const Position& position) {
+    os << position.x() << ", " << position.y();
 }

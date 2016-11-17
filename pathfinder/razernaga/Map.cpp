@@ -9,9 +9,8 @@ Map::Map() : Map(14, 7, 8) {
 Map::Map(int cols, int rows, int square_precision) :
         map_(cols * square_precision * 2, vector<Stats>(rows * square_precision * 2, Stats())),
         cols_(cols), rows_(rows), square_precision_(square_precision), last_visited_pos_(convert_to_map_coordinates(0,0)),
-        path_algorithm_(make_unique<MapAlgorithms>(this)) {//, target_(convert_to_map_coordinates(0,0)), target_objective_(nullptr) {
+        path_algorithm_(make_unique<MapAlgorithms>(this)) {
     srand(time(NULL));
-    //set_random_target();
 }
 
 void Map::enable_debug() {
@@ -75,7 +74,6 @@ bool Map::increase_ground_counter(const double& x, const double& y) {
     evaluate_position(get<0>(position), get<1>(position));
     return true;
 }
-
 
 bool Map::increase_ground_counter_range(const double& sx, const double& sy, const double& fx, const double& fy) {
     long double dx, dy;

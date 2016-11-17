@@ -10,8 +10,7 @@
 template <typename T>
 class Filter {
 public:
-    Filter(int buffer_size) : buffer_size_(buffer_size), calculated_value_(0)
-    {
+    Filter(int buffer_size) : buffer_size_(buffer_size), calculated_value_(0) {
     }
 
     T get_value() const {

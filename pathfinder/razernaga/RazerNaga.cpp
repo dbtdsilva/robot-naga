@@ -64,8 +64,7 @@ void RazerNaga::take_action() {
                             floor((get<1>(point) + 1.0) / 2.0) * 2.0);
                     if (find(new_targets.begin(), new_targets.end(), new_value) == new_targets.end()) {
                         new_targets.push_back(new_value);
-
-                        printf("%2d %2d %4.2f %4.2f\n", get<0>(new_value), get<1>(new_value), get<0>(point), get<1>(point) );
+                        //printf("%2d %2d %4.2f %4.2f\n", get<0>(new_value), get<1>(new_value), get<0>(point), get<1>(point) );
                     }
                 }
             }

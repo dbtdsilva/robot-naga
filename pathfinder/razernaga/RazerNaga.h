@@ -26,9 +26,7 @@ public:
     RazerNaga(int &argc, char* argv[], int grid_position, std::string host);
     RazerNaga(int &argc, char* argv[], int grid_position, std::string host, std::vector<double> ir_sensor_angles);
 
-    void move_front(bool moving_back);
     void move_to_the_exit();
-    void move_right();
     void rotate(double degress);
     void retrieve_map();
 signals:

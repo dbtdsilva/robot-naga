@@ -22,10 +22,6 @@ void Map::enable_debug() {
         map_debug_ = make_unique<MapSDL2>(cols_, rows_, square_precision_, 4);
 }
 
-std::tuple<int, int> Map::get_map_dimensions() const{
-    return tuple<int, int>(map_.size(), map_[0].size());
-}
-
 PositionState Map::get_position_state(const int& x, const int& y) const {
     return map_[x][y].state;
 }
@@ -35,29 +31,17 @@ std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, do
 }
 
 std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) {
-    return tuple<int, int>((int) round(x * (square_precision_ / 2.0) + cols_ * square_precision_),
-                           (int) round(-y * (square_precision_ / 2.0) + rows_ * square_precision_));
+    return tuple<int, int>(static_cast<int>(round(x * (square_precision_ / 2.0) + cols_ * square_precision_)),
+                           static_cast<int>(round(-y * (square_precision_ / 2.0) + rows_ * square_precision_)));
 }
 
 std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const int& y) {
-    return tuple<double, double>(2.0 * ((double)x / square_precision_ - cols_),
-                                 -2.0 * ((double)y / square_precision_ - rows_));
+    return tuple<double, double>(2.0 * (static_cast<double>(x) / square_precision_ - cols_),
+                                 -2.0 * (static_cast<double>(y) / square_precision_ - rows_));
 }
 
 std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) {
     return convert_from_map_coordinates(get<0>(map_coordinates), get<1>(map_coordinates));
-}
-
-void Map::set_random_target() {
-    unsigned long x, y;
-    do {
-        x = rand() % map_.size();
-        y = rand() % map_[0].size();
-    } while (map_[x][y].state != UNKNOWN);
-    calculated_target_path_ = path_algorithm_->astar_shortest_path(last_visited_pos_, tuple<int, int>(x, y));
-    calculated_target_path_converted_.clear();
-    for (auto element : calculated_target_path_)
-        calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
 }
 
 void Map::set_target_nearest_exit() {

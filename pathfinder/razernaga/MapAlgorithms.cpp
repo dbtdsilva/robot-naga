@@ -134,7 +134,7 @@ vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(tuple<int,int> start,
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
             PositionState state = map_->get_position_state(get<0>(current_possibility), get<1>(current_possibility));
-            if (state == UNKNOWN || state == GROUND) {
+            if (state == GROUND) {
                 begin = curr;
                 // Check if that node was already on path from the solution or not, if yes, skip it.
                 while (begin != nullptr) {

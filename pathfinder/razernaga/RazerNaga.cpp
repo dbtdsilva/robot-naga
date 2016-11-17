@@ -52,7 +52,7 @@ void RazerNaga::take_action() {
             break;
         case EXPLORING:
         case RETURNING:
-            if (new_targets.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.3 || GetBumperSensor()) { //) {
+            if (new_targets.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) { //) {
                 new_targets.clear();
                 if (state_ == EXPLORING)
                     map_.set_target_nearest_exit();
@@ -114,50 +114,17 @@ void RazerNaga::move_to_the_exit() {
 
     double error;
     static double last_error = 0, integral_error = 0;
-    double right = sensors_.get_obstacle_sensor(2);
-    double center_right = sensors_.get_obstacle_sensor(3);
-
     error = angle_between_two_points(source, dst) + sensors_.get_compass();
     if (error > 180.0)
         error -= 360.0;
     if (error < -180)
         error += 360.0;
-    error = error / 40.0; // Normalization factor
-    /*if (sensors_.get_obstacle_sensor(1) < 0.6) {
-        error -= 2;
-    }*/
+    error = error / 20.0; // Normalization factor
+
     integral_error += error;
     integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
     integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
     double correction = 0.2 * error + 0.0 * integral_error + 0.2 * (error - last_error);
-    last_error = error;
-
-    set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);
-}
-
-void RazerNaga::move_front(bool moving_back) {
-    double error;
-    static double last_error = 0, integral_error = 0;
-    double right = sensors_.get_obstacle_sensor(2);
-    double left = sensors_.get_obstacle_sensor(0);
-    if (right > 0.6 && left > 0.6) {
-        error = moving_back ? -1 * sensors_.get_compass() / 1000.0 : sensors_.get_compass() / 40.0;
-    } else if (left > 0.7) {
-        error = right - 0.46;
-    } else if (right > 0.7) {
-        error = -left + 0.46;
-    } else {
-        error = right - left;
-    }
-
-    if (sensors_.get_obstacle_sensor(1) < 0.6) {
-        error -= 6.0;
-    }
-
-    integral_error += error;
-    integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
-    integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
-    double correction = 0.05 * error + 0.0 * integral_error + 0.2 * (error - last_error);
     last_error = error;
 
     set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);

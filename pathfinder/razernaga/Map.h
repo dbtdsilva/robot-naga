@@ -20,13 +20,10 @@ public:
     bool increase_ground_counter_range(const double& sx, const double& sy, const double& fx, const double& fy);
     bool increase_visited_counter(const double& x, const double& y);
 
-    void set_random_target();
     void set_target_nearest_exit();
     void set_target_starter_area();
     std::vector<std::tuple<double, double>>& get_calculated_path();
-
     PositionState get_position_state(const int& x, const int& y) const;
-    std::tuple<int, int> get_map_dimensions() const;
 
     void enable_debug();
     void render_map();

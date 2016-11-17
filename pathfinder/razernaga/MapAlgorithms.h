@@ -13,8 +13,8 @@ class Map;
 class MapAlgorithms {
 public:
     MapAlgorithms(Map *map);
-    std::vector<std::tuple<int, int>> astar_shortest_path(std::tuple<int, int> start, std::tuple<int, int> end);
-    std::vector<std::tuple<int, int>> flood_fill(std::tuple<int, int> start, int minimum_distance = 0);
+    std::vector<std::tuple<int, int>> astar_shortest_path(const std::tuple<int, int>&, const std::tuple<int, int>&);
+    std::vector<std::tuple<int, int>> flood_fill(const std::tuple<int, int>&, const int& minimum_distance = 0);
     void set_heuristic_function(std::function<double(const std::tuple<int,int>&, const std::tuple<int, int>&)> h_func);
     static double heuristic_function_default(const std::tuple<int,int>& p1, const std::tuple<int, int>& p2);
 private:

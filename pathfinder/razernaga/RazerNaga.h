@@ -25,7 +25,7 @@ public:
     RazerNaga(int &argc, char* argv[], int grid_position, std::string host, std::vector<double> ir_sensor_angles);
 
     void move_to_the_exit();
-    void rotate(double degress);
+    void rotate(const double& degress);
     void retrieve_map();
 signals:
     void cycle_ended();
@@ -33,12 +33,14 @@ public slots:
     void take_action();
     void cycle_ended_action();
 private:
-    void set_motors_speed(double motor_left, double motor_right);
+    void set_motors_speed(const double& motor_left, const double& motor_right);
     void apply_motors_speed();
 
-    static double angle_between_two_points(const std::tuple<double, double>& source, const std::tuple<double, double>& target);
-    static double distance_between_two_points(const std::tuple<double, double>& source, const std::tuple<double, double>& target);
-    static double normalize_angle(double degrees_angle);
+    static double angle_between_two_points(const std::tuple<double, double>&,
+                                           const std::tuple<double, double>&);
+    static double distance_between_two_points(const std::tuple<double, double>&,
+                                              const std::tuple<double, double>&);
+    static double normalize_angle(const double&);
     enum State { STOPPED, EXPLORING, RETURNING, FINISHED };
 
     const std::string name_;
@@ -47,8 +49,7 @@ private:
     Map map_;
     Sensors sensors_;
     Position position_;
-    std::tuple<double, double> start_position;
-    std::tuple<double, double> motor_speed;
+    std::tuple<double, double> motor_speed_;
     const std::vector<double> ir_sensor_angles_;
     State state_;
     std::vector<std::tuple<double, double>>& calculated_path_reference_;

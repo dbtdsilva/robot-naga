@@ -160,12 +160,12 @@ void Map::render_map() {
     }
 }
 
-bool Map::validate_position(const int& x, const int& y) {
+bool Map::validate_position(const int& x, const int& y) const {
     return (x >= 0 && x < cols_ * square_precision_ * 2 &&
             y >= 0 && y < rows_ * square_precision_ * 2);
 }
 
-bool Map::validate_position(const tuple<int, int>& value) {
+bool Map::validate_position(const tuple<int, int>& value) const {
     return validate_position(get<0>(value), get<1>(value));
 }
 

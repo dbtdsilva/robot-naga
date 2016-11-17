@@ -10,12 +10,12 @@
 template <typename T>
 class Filter {
 public:
-    Filter(int buffer_size) : buffer_size_(buffer_size), calculated_value(0)
+    Filter(int buffer_size) : buffer_size_(buffer_size), calculated_value_(0)
     {
     }
 
     T get_value() const {
-        return calculated_value;
+        return calculated_value_;
     }
     void update(T new_value) {
         if (buffer_.size() >= buffer_size_)
@@ -26,11 +26,11 @@ public:
         for (int i = 0; i < buffer_.size(); i++)
             sum += buffer_.at(i);
 
-        calculated_value = sum / buffer_.size();
+        calculated_value_ = sum / buffer_.size();
     }
 private:
     int buffer_size_;
     std::vector<T> buffer_;
-    T calculated_value;
+    T calculated_value_;
 };
 #endif //RAZERNAGA_FILTER_H

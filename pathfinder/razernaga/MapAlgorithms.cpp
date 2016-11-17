@@ -22,7 +22,7 @@ bool MapAlgorithms::evaluation_function_default(const Node* n1, const Node* n2) 
     return (n1->cost + n1->heuristic) < (n2->cost + n2->heuristic);
 }
 
-vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start, int minimum_distance) {
+vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, const int& minimum_distance) {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
     if (map_->get_position_state(get<0>(start), get<1>(start)) == WALL)
@@ -89,7 +89,7 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(tuple<int, int> start, int min
     return final_path;
 }
 
-vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(tuple<int,int> start, tuple<int, int> end) {
+vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(const tuple<int,int>& start, const tuple<int, int>& end) {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
     if (map_->get_position_state(get<0>(start), get<1>(start)) == WALL ||

@@ -33,8 +33,8 @@ private:
     std::tuple<double, double> convert_from_map_coordinates(const std::tuple<int, int>&);
     void evaluate_position(const int& x, const int& y);
 
-    bool validate_position(const int& x, const int& y);
-    bool validate_position(const std::tuple<int, int>&);
+    bool validate_position(const int& x, const int& y) const;
+    bool validate_position(const std::tuple<int, int>&) const;
 
     typedef struct PositionStats {
         PositionStats() : referred(false), wall_counter(0), ground_counter(0), visited(0), state(UNKNOWN) { }

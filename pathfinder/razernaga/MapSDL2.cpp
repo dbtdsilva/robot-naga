@@ -14,24 +14,24 @@ MapSDL2::MapSDL2(int cols, int rows, int square_precision, int square_size) :
 
     const int height = cols_ * square_precision_ * 2 * (square_size_ + 1);
     const int width = rows_ * square_precision_ * 2 * (square_size_ + 1);
-    window = SDL_CreateWindow("RazerNaga Vision", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    window_ = SDL_CreateWindow("RazerNaga Vision", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               height, width, SDL_WINDOW_OPENGL);
-    if (window == nullptr) return;
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (renderer == nullptr) return;
+    if (window_ == nullptr) return;
+    renderer_ = SDL_CreateRenderer(window_, -1, SDL_RENDERER_ACCELERATED);
+    if (renderer_ == nullptr) return;
     render_full_map();
 }
 
 MapSDL2::~MapSDL2() {
-    if (window != nullptr) {
-        SDL_DestroyWindow(window);
+    if (window_ != nullptr) {
+        SDL_DestroyWindow(window_);
     }
     SDL_Quit();
 }
 
 bool MapSDL2::exit_requested() {
-    while(SDL_PollEvent(&events)) {
-        if (events.type == SDL_QUIT)
+    while(SDL_PollEvent(&events_)) {
+        if (events_.type == SDL_QUIT)
             return true;
     }
     return false;
@@ -52,8 +52,8 @@ std::vector<int> MapSDL2::get_color(const int& x, const int& y) {
 }
 
 void MapSDL2::render_full_map() {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255);
+    SDL_RenderClear(renderer_);
 
     SDL_Rect rect;
     for (int x = 0; x < map_.size(); x++) {
@@ -63,10 +63,10 @@ void MapSDL2::render_full_map() {
             rect.w = square_size_;
             rect.h = square_size_;
 
-            SDL_SetRenderDrawColor(renderer, map_[x][y].R, map_[x][y].G, map_[x][y].B, map_[x][y].A);
-            SDL_RenderFillRect(renderer, &rect);
+            SDL_SetRenderDrawColor(renderer_, map_[x][y].R, map_[x][y].G, map_[x][y].B, map_[x][y].A);
+            SDL_RenderFillRect(renderer_, &rect);
         }
     }
-    SDL_RenderPresent(renderer);
+    SDL_RenderPresent(renderer_);
 
 }

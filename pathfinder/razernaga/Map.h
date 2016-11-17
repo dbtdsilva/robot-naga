@@ -13,7 +13,6 @@ class Map {
 public:
     Map();
     Map(int cols, int rows, int square_precision);
-    ~Map();
 
     bool increase_wall_counter(const double& x, const double& y);
     bool increase_ground_counter(const double& x, const double& y);

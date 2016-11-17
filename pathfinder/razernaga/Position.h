@@ -19,6 +19,7 @@ private:
     double y_;
     double out_left;
     double out_right;
+    // Decided to use compass instead of generating a rotational
     //double previous_theta;
 };
 

@@ -16,8 +16,6 @@
 #include "Position.h"
 #include "Map.h"
 
-typedef std::tuple<double, double> TupleDouble;
-
 class RazerNaga : public QApplication {
     Q_OBJECT
 public:
@@ -38,8 +36,8 @@ private:
     void set_motors_speed(double motor_left, double motor_right);
     void apply_motors_speed();
 
-    static double angle_between_two_points(std::tuple<double, double> source, std::tuple<double, double> target);
-    static double distance_between_two_points(std::tuple<double, double> source, std::tuple<double, double> target);
+    static double angle_between_two_points(const std::tuple<double, double>& source, const std::tuple<double, double>& target);
+    static double distance_between_two_points(const std::tuple<double, double>& source, const std::tuple<double, double>& target);
     static double normalize_angle(double degrees_angle);
     enum State { STOPPED, EXPLORING, RETURNING, FINISHED };
 
@@ -49,12 +47,11 @@ private:
     Map map_;
     Sensors sensors_;
     Position position_;
-    TupleDouble start_position;
-    TupleDouble motor_speed;
+    std::tuple<double, double> start_position;
+    std::tuple<double, double> motor_speed;
     const std::vector<double> ir_sensor_angles_;
     State state_;
     std::vector<std::tuple<double, double>>& calculated_path_reference_;
 };
-
 
 #endif //RAZERNAGA_RAZERNAGA_H

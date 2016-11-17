@@ -45,7 +45,6 @@ void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
 
-    long double distance;
     switch (state_) {
         case STOPPED:
             if (GetStartButton()) state_ = EXPLORING;
@@ -193,7 +192,7 @@ void RazerNaga::apply_motors_speed() {
     cycle_ended();
 }
 
-double RazerNaga::angle_between_two_points(std::tuple<double, double> source, std::tuple<double, double> target) {
+double RazerNaga::angle_between_two_points(const std::tuple<double, double>& source, const std::tuple<double, double>& target) {
     double opposite = -(get<1>(target) - get<1>(source));
     double adjacent = get<0>(target) - get<0>(source);
 
@@ -209,7 +208,7 @@ double RazerNaga::angle_between_two_points(std::tuple<double, double> source, st
     return normalize_angle((value * 180.0) / M_PI);
 }
 
-double RazerNaga::distance_between_two_points(std::tuple<double, double> source, std::tuple<double, double> target) {
+double RazerNaga::distance_between_two_points(const std::tuple<double, double>& source, const std::tuple<double, double>& target) {
     return sqrt(pow(get<1>(target) - get<1>(source), 2) + pow(get<0>(target) - get<0>(source), 2));
 }
 

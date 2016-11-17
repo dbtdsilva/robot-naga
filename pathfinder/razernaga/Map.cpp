@@ -14,9 +14,6 @@ Map::Map(int cols, int rows, int square_precision) :
     //set_random_target();
 }
 
-Map::~Map() {
-}
-
 void Map::enable_debug() {
     if (map_debug_ == nullptr)
         map_debug_ = make_unique<MapSDL2>(cols_, rows_, square_precision_, 4);
@@ -116,7 +113,7 @@ void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].state = GROUND;
     else {
-        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.2 ? GROUND : WALL;
+        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.15 ? GROUND : WALL;
     }
 
     if (map_debug_ != nullptr) {

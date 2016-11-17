@@ -28,7 +28,8 @@ void Position::update_position(double theta, double in_left, double in_right) {
     double out_right_t = in_right * 0.5 + out_right * 0.5;
 
     double linear = (out_left_t + out_right_t) / 2.0;
-    double rotational = (out_right_t - out_left_t);
+    // Decided to use compass instead of generating a rotational
+    //double rotational = (out_right_t - out_left_t);
 
     x_ = x_ + linear * cos(theta_radians);
     y_ = y_ + linear * sin(theta_radians);
@@ -39,7 +40,4 @@ void Position::update_position(double theta, double in_left, double in_right) {
     //previous_theta += rotational;
     //if (previous_theta > M_PI) previous_theta -= (2.0 * M_PI);
     //else if (previous_theta < -M_PI) previous_theta += (2.0 * M_PI);
-
-    //printf("LI: %8.4f RI: %8.4f L: %8.4f R: %8.4f %8.4f %8.4f %8.4f\n", in_left, in_right,
-    //       out_left_t, out_right_t, x_, y_, previous_theta);
 }

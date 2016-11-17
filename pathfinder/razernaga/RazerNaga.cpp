@@ -57,16 +57,7 @@ void RazerNaga::take_action() {
                     map_.set_target_nearest_exit();
                 else
                     map_.set_target_starter_area();
-
-                for (const tuple<double, double>& point : calculated_path_reference_) {
-                    tuple<int,int> new_value = tuple<int, int>(
-                            floor((get<0>(point) + 1.0) / 2.0) * 2.0,
-                            floor((get<1>(point) + 1.0) / 2.0) * 2.0);
-                    if (find(new_targets.begin(), new_targets.end(), new_value) == new_targets.end()) {
-                        new_targets.push_back(new_value);
-                        //printf("%2d %2d %4.2f %4.2f\n", get<0>(new_value), get<1>(new_value), get<0>(point), get<1>(point) );
-                    }
-                }
+                calculated_path_reference_ = convert_trajectory_to_discrete(calculated_path_reference_, position_.get_tuple());
             }
             move_to_the_exit();
 
@@ -189,6 +180,21 @@ void RazerNaga::apply_motors_speed() {
     if (!GetBumperSensor())
         position_.update_position(sensors_.get_compass(), get<0>(motor_speed_), get<1>(motor_speed_));
     cycle_ended();
+}
+
+vector<tuple<double, double>> RazerNaga::convert_trajectory_to_discrete(
+        const vector<tuple<double, double>>& trajectory, const tuple<double, double>& current_position) {
+    vector<tuple<double, double>> discrete_trajectory;
+    for (const tuple<double, double>& point : trajectory) {
+        tuple<int,int> new_value = tuple<int, int>(
+                floor((get<0>(point) + 1.0) / 2.0) * 2.0,
+                floor((get<1>(point) + 1.0) / 2.0) * 2.0);
+        if (find(new_targets.begin(), new_targets.end(), new_value) == new_targets.end()) {
+            new_targets.push_back(new_value);
+            //printf("%2d %2d %4.2f %4.2f\n", get<0>(new_value), get<1>(new_value), get<0>(point), get<1>(point) );
+        }
+    }
+    return discrete_trajectory;
 }
 
 double RazerNaga::angle_between_two_points(const std::tuple<double, double>& source,

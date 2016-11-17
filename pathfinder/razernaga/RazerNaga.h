@@ -24,9 +24,6 @@ public:
     RazerNaga(int &argc, char* argv[], int grid_position, std::string host);
     RazerNaga(int &argc, char* argv[], int grid_position, std::string host, std::vector<double> ir_sensor_angles);
 
-    void move_to_the_exit();
-    void rotate(const double& degress);
-    void retrieve_map();
 signals:
     void cycle_ended();
 public slots:
@@ -35,12 +32,15 @@ public slots:
 private:
     void set_motors_speed(const double& motor_left, const double& motor_right);
     void apply_motors_speed();
-
-    static double angle_between_two_points(const std::tuple<double, double>&,
-                                           const std::tuple<double, double>&);
-    static double distance_between_two_points(const std::tuple<double, double>&,
-                                              const std::tuple<double, double>&);
+    void move_to_the_exit();
+    void rotate(const double& degress);
+    void retrieve_map();
+    static double angle_between_two_points(const std::tuple<double, double>&, const std::tuple<double, double>&);
+    static double distance_between_two_points(const std::tuple<double, double>&, const std::tuple<double, double>&);
     static double normalize_angle(const double&);
+    static std::vector<std::tuple<double, double>> convert_trajectory_to_discrete(
+            const std::vector<std::tuple<double, double>>&, const std::tuple<double, double>&);
+
     enum State { STOPPED, EXPLORING, RETURNING, FINISHED };
 
     const std::string name_;

@@ -6,18 +6,20 @@
 #define RAZERNAGA_POSITION_H
 
 #include <iostream>
+#include <tuple>
 
 class Position {
 public:
     Position();
 
-    const double& x() const;
-    const double& y() const;
+    const std::tuple<double, double>& get_tuple() const;
+    double x() const;
+    double y() const;
 
     void update_position(const double& theta, const double& in_left, const double& in_right);
     friend std::ostream& operator<<(std::ostream& os, const Position& position);
 private:
-    double x_, y_, out_left_, out_right_;
+    std::tuple<double, double> position_, movement_output_;
     // Decided to use compass instead of generating a rotational
     //double previous_theta;
 };

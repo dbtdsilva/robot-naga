@@ -52,6 +52,7 @@ void RazerNaga::take_action() {
 
             if (GetGroundSensor() != -1) {
                 map_.set_objective(position_.get_tuple());
+                calculated_path_reference_.clear();
                 SetVisitingLed(true);
                 state_ = EXPLORING_FINAL_PATH;
             }
@@ -61,8 +62,10 @@ void RazerNaga::take_action() {
                 map_.set_target_objective_area();
                 state_ = RETURN_TO_OBJECTIVE;
             } else {
-                set_motors_speed(0, 0);
-                cout << "Best path not discovered" << endl;
+                if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
+                    map_.set_target_unknown_path();
+                }
+                follow_path();
             }
             break;
         case RETURN_TO_OBJECTIVE:

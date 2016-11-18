@@ -25,6 +25,7 @@ public:
     void set_target_nearest_exit();
     void set_target_objective_area();
     void set_target_starter_area();
+    void set_target_unknown_path();
     void set_objective(const std::tuple<double, double>& objective);
     std::tuple<double, double> get_objective();
     std::vector<std::tuple<double, double>>& get_calculated_path();

@@ -47,6 +47,18 @@ void Map::set_target_starter_area() {
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 }
 
+void Map::set_target_unknown_path() {
+    unsigned long i;
+    for (i = unknown.size() - 1; i > 0; i--) {
+        if (map_[M_X(unknown.at(i))][M_Y(unknown.at(i))].state == UNKNOWN)
+            break;
+    }
+    calculated_target_path_ = path_algorithm_->astar_shortest_path(
+            last_visited_pos_, unknown.at(i), true);
+    calculated_target_path_converted_.clear();
+    calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
+}
+
 void Map::set_objective(const std::tuple<double, double>& objective) {
     ptr_objective_ = make_unique<std::tuple<int,int>>(convert_to_map_coordinates(objective));
 }
@@ -134,14 +146,6 @@ void Map::render_map() {
 
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;
-    // Paint the path to the objective location
-    for (auto path_node : calculated_target_path_) {
-        color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
-        temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
-                M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
-        map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 0, 0, 255);
-    }
-
     for (auto path_node : unknown) {
         color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
@@ -154,6 +158,14 @@ void Map::render_map() {
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
                 M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
         map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 128, 0, 255);
+    }
+
+    // Paint the path to the objective location
+    for (auto path_node : calculated_target_path_) {
+        color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
+        temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
+                M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
+        map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 0, 0, 255);
     }
     // Objective representation
     if (ptr_objective_ != nullptr) {
@@ -219,7 +231,6 @@ vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<t
                 floor((M_Y(point) + 1.0) / 2.0) * 2.0);
         if (std::find(discrete_trajectory.begin(), discrete_trajectory.end(), new_value) == discrete_trajectory.end()) {
             discrete_trajectory.push_back(new_value);
-            //printf("%2d %2d %4.2f %4.2f\n", M_X(new_value), M_Y(new_value), M_X(point), M_Y(point) );
         }
     }
     return discrete_trajectory;

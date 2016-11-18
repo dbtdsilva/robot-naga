@@ -15,7 +15,7 @@ void MapAlgorithms::set_heuristic_function(
 }
 
 double MapAlgorithms::heuristic_function_default(const tuple<int,int>& p1, const tuple<int, int>& p2) {
-    return sqrt(pow(M_X(p2) - M_X(p1), 2) + pow(M_Y(p2) - M_Y(p1), 2));
+    return abs(M_X(p2) - M_X(p1)) + abs(M_Y(p2) - M_Y(p1));
 }
 
 bool MapAlgorithms::evaluation_function_default(const Node* n1, const Node* n2) {

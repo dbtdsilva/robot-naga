@@ -23,7 +23,7 @@ bool Map::is_best_path_discovered() {
     if (ptr_objective_ == nullptr) return false;
     unknown = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), true);
     known = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), false);
-    return false;
+    return known.size() <= unknown.size();
 }
 
 void Map::set_target_nearest_exit() {
@@ -32,6 +32,14 @@ void Map::set_target_nearest_exit() {
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 
 }
+
+void Map::set_target_objective_area() {
+    if (ptr_objective_ == nullptr) return;
+    calculated_target_path_ = path_algorithm_->astar_shortest_path(last_visited_pos_, *ptr_objective_, false);
+    calculated_target_path_converted_.clear();
+    calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
+}
+
 void Map::set_target_starter_area() {
     calculated_target_path_ = path_algorithm_->astar_shortest_path(
             last_visited_pos_, convert_to_map_coordinates(tuple<int, int>(0, 0)), false);
@@ -41,6 +49,11 @@ void Map::set_target_starter_area() {
 
 void Map::set_objective(const std::tuple<double, double>& objective) {
     ptr_objective_ = make_unique<std::tuple<int,int>>(convert_to_map_coordinates(objective));
+}
+
+std::tuple<double, double> Map::get_objective() {
+    if (ptr_objective_ == nullptr) return tuple<double, double>(0, 0);
+    return convert_from_map_coordinates(*ptr_objective_);
 }
 
 vector<tuple<double,double>>& Map::get_calculated_path() {

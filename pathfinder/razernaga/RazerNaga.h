@@ -39,7 +39,7 @@ public slots:
 private:
     void set_motors_speed(const double& motor_left, const double& motor_right);
     void apply_motors_speed();
-    void move_to_the_exit();
+    void follow_path();
     void rotate(const double& degress);
     void retrieve_map();
     static double angle_between_two_points(const std::tuple<double, double>&, const std::tuple<double, double>&);

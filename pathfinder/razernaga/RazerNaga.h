@@ -16,6 +16,13 @@
 #include "Position.h"
 #include "Map.h"
 
+#define M_MOTOR_LEFT(motors_tuple)      std::get<0>(motors_tuple)
+#define M_MOTOR_RIGHT(motors_tuple)     std::get<1>(motors_tuple)
+
+#define INTEGRAL_CLIP   MAX_SPEED - BASE_SPEED
+#define BASE_SPEED      0.13
+#define MAX_SPEED       0.15
+
 class RazerNaga : public QApplication {
     Q_OBJECT
 public:

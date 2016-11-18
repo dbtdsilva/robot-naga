@@ -7,10 +7,6 @@
 #include <libRobSock/RobSock.h>
 #include <cmath>
 
-#define INTEGRAL_CLIP   0.05
-#define BASE_SPEED      0.13
-#define MAX_SPEED       0.15
-
 using namespace std;
 
 RazerNaga::RazerNaga(int &argc, char* argv[]) : RazerNaga(argc, argv, 0) {
@@ -76,15 +72,11 @@ void RazerNaga::take_action() {
             }
             break;
         case FINISHED:
-            get<0>(motor_speed_) = 0;
-            get<1>(motor_speed_) = 0;
+            M_MOTOR_LEFT(motor_speed_) = 0;
+            M_MOTOR_RIGHT(motor_speed_) = 0;
             Finish();
             break;
     }
-    //cout << position_.x() << ", " << position_.y() << ", c:, " << GetX() - get<0>(start_position) <<  ", " <<
-    //     GetY() - get<1>(start_position) << ", " << GetDir() << endl;
-    //printf("L: %4.2f, C: %4.2f, R: %4.2f\n", sensors_.get_obstacle_sensor(0), sensors_.get_obstacle_sensor(1),
-    //       sensors_.get_obstacle_sensor(2));
     apply_motors_speed();
 }
 
@@ -163,22 +155,22 @@ void RazerNaga::retrieve_map() {
 }
 
 void RazerNaga::set_motors_speed(const double& motor_left, const double& motor_right) {
-    get<0>(motor_speed_) = motor_left;
-    if (get<0>(motor_speed_) > MAX_SPEED)
-        get<0>(motor_speed_) = 0.15;
-    if (get<0>(motor_speed_) < -MAX_SPEED)
-        get<0>(motor_speed_) = -0.15;
+    M_MOTOR_LEFT(motor_speed_) = motor_left;
+    if (M_MOTOR_LEFT(motor_speed_) > MAX_SPEED)
+        M_MOTOR_LEFT(motor_speed_) = 0.15;
+    if (M_MOTOR_LEFT(motor_speed_) < -MAX_SPEED)
+        M_MOTOR_LEFT(motor_speed_) = -0.15;
 
-    get<1>(motor_speed_) = motor_right;
-    if (get<1>(motor_speed_) > MAX_SPEED)
-        get<1>(motor_speed_) = 0.15;
-    if (get<1>(motor_speed_) < -MAX_SPEED)
-        get<1>(motor_speed_) = -0.15;
+    M_MOTOR_RIGHT(motor_speed_) = motor_right;
+    if (M_MOTOR_RIGHT(motor_speed_) > MAX_SPEED)
+        M_MOTOR_RIGHT(motor_speed_) = 0.15;
+    if (M_MOTOR_RIGHT(motor_speed_) < -MAX_SPEED)
+        M_MOTOR_RIGHT(motor_speed_) = -0.15;
 }
 void RazerNaga::apply_motors_speed() {
-    DriveMotors(get<0>(motor_speed_), get<1>(motor_speed_));
+    DriveMotors(M_MOTOR_LEFT(motor_speed_), M_MOTOR_RIGHT(motor_speed_));
     if (!GetBumperSensor())
-        position_.update_position(sensors_.get_compass(), get<0>(motor_speed_), get<1>(motor_speed_));
+        position_.update_position(sensors_.get_compass(), M_MOTOR_LEFT(motor_speed_), M_MOTOR_RIGHT(motor_speed_));
     cycle_ended();
 }
 
@@ -187,11 +179,11 @@ vector<tuple<double, double>> RazerNaga::convert_trajectory_to_discrete(
     vector<tuple<double, double>> discrete_trajectory;
     for (const tuple<double, double>& point : trajectory) {
         tuple<int,int> new_value = tuple<int, int>(
-                floor((get<0>(point) + 1.0) / 2.0) * 2.0,
-                floor((get<1>(point) + 1.0) / 2.0) * 2.0);
+                floor((M_X(point) + 1.0) / 2.0) * 2.0,
+                floor((M_Y(point) + 1.0) / 2.0) * 2.0);
         if (find(new_targets.begin(), new_targets.end(), new_value) == new_targets.end()) {
             new_targets.push_back(new_value);
-            //printf("%2d %2d %4.2f %4.2f\n", get<0>(new_value), get<1>(new_value), get<0>(point), get<1>(point) );
+            //printf("%2d %2d %4.2f %4.2f\n", M_X(new_value), M_Y(new_value), M_X(point), M_Y(point) );
         }
     }
     return discrete_trajectory;
@@ -199,14 +191,13 @@ vector<tuple<double, double>> RazerNaga::convert_trajectory_to_discrete(
 
 double RazerNaga::angle_between_two_points(const std::tuple<double, double>& source,
                                            const std::tuple<double, double>& target) {
-    double opposite = -(get<1>(target) - get<1>(source));
-    double adjacent = get<0>(target) - get<0>(source);
+    double opposite = -(M_Y(target) - M_Y(source));
+    double adjacent = M_X(target) - M_X(source);
 
     double value;
     if (adjacent == 0) {
         value = opposite > 0 ? M_PI / 2.0 : -M_PI / 2.0;
-    } else {
-        // tan(theta) = theta + K * M_PI
+    } else { // tan(theta) = theta + K * M_PI
         value = atan(opposite / adjacent);
         if (adjacent < 0)
             value += M_PI;
@@ -216,7 +207,7 @@ double RazerNaga::angle_between_two_points(const std::tuple<double, double>& sou
 
 double RazerNaga::distance_between_two_points(const std::tuple<double, double>& source,
                                               const std::tuple<double, double>& target) {
-    return sqrt(pow(get<1>(target) - get<1>(source), 2) + pow(get<0>(target) - get<0>(source), 2));
+    return sqrt(pow(M_Y(target) - M_Y(source), 2) + pow(M_X(target) - M_X(source), 2));
 }
 
 double RazerNaga::normalize_angle(const double& degrees_angle) {

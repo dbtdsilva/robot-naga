@@ -17,11 +17,11 @@ const tuple<double, double>& Position::get_tuple() const {
 }
 
 double Position::x() const {
-    return get<0>(position_);
+    return M_X(position_);
 }
 
 double Position::y() const {
-    return get<1>(position_);
+    return M_Y(position_);
 }
 
 void Position::update_position(const double& theta, const double& in_left, const double& in_right) {
@@ -34,8 +34,8 @@ void Position::update_position(const double& theta, const double& in_left, const
     // Decided to use compass instead of generating a rotational
     //double rotational = (out_right_t - out_left_t);
 
-    get<0>(position_) = get<0>(position_) + linear * cos(theta_radians);
-    get<1>(position_) = get<1>(position_) + linear * sin(theta_radians);
+    M_X(position_) = M_X(position_) + linear * cos(theta_radians);
+    M_Y(position_) = M_Y(position_) + linear * sin(theta_radians);
 
     get<0>(movement_output_) = out_left_t;
     get<1>(movement_output_) = out_right_t;

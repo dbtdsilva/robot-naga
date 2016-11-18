@@ -56,13 +56,16 @@ void RazerNaga::take_action() {
                 map_.set_target_starter_area();
                 SetVisitingLed(true);
                 SetReturningLed(true);
-                state_ = RETURNING;
+                state_ = EXPLORING_FINAL_PATH;
             }
             break;
         case EXPLORING_FINAL_PATH:
-            state_ = RETURNING;
+            state_ = RETURN_TO_OBJECTIVE;
             break;
-        case RETURNING:
+        case RETURN_TO_OBJECTIVE:
+            state_ = RETURN_TO_START;
+            break;
+        case RETURN_TO_START:
             if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
                 calculated_path_reference_.clear();
                 map_.set_target_starter_area();

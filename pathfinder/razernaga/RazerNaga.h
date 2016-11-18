@@ -48,7 +48,7 @@ private:
     static std::vector<std::tuple<double, double>> convert_trajectory_to_discrete(
             const std::vector<std::tuple<double, double>>&, const std::tuple<double, double>&);
 
-    enum State { STOPPED, EXPLORING_OBJECTIVE, EXPLORING_FINAL_PATH, RETURNING, FINISHED };
+    enum State { STOPPED, EXPLORING_OBJECTIVE, EXPLORING_FINAL_PATH, RETURN_TO_OBJECTIVE, RETURN_TO_START, FINISHED };
 
     const std::string name_;
     const int grid_position_;

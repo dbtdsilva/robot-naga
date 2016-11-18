@@ -42,9 +42,9 @@ void RazerNaga::take_action() {
 
     switch (state_) {
         case STOPPED:
-            if (GetStartButton()) state_ = EXPLORING;
+            if (GetStartButton()) state_ = EXPLORING_OBJECTIVE;
             break;
-        case EXPLORING:
+        case EXPLORING_OBJECTIVE:
             if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
                 calculated_path_reference_.clear();
                 map_.set_target_nearest_exit();
@@ -59,30 +59,20 @@ void RazerNaga::take_action() {
                 state_ = RETURNING;
             }
             break;
+        case EXPLORING_FINAL_PATH:
+            state_ = RETURNING;
+            break;
         case RETURNING:
             if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
                 calculated_path_reference_.clear();
-                if (state_ == EXPLORING)
-                    map_.set_target_nearest_exit();
-                else
-                    map_.set_target_starter_area();
+                map_.set_target_starter_area();
                 calculated_path_reference_ = convert_trajectory_to_discrete(calculated_path_reference_, position_.get_tuple());
             }
             move_to_the_exit();
 
-            if (state_ == EXPLORING) {
-                if (GetGroundSensor() != -1) {
-                    map_.set_target_starter_area();
-                    rotate(180);
-                    SetVisitingLed(true);
-                    SetReturningLed(true);
-                    state_ = RETURNING;
-                }
-            } else {
-                if (distance_between_two_points(tuple<double, double>(0,0),
-                                                tuple<double, double>(position_.x(), position_.y())) < 0.2)
-                    state_ = FINISHED;
-            }
+            if (distance_between_two_points(tuple<double, double>(0,0),
+                                            tuple<double, double>(position_.x(), position_.y())) < 0.2)
+                state_ = FINISHED;
             break;
         case FINISHED:
             M_MOTOR_LEFT(motor_speed_) = 0;

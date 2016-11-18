@@ -9,7 +9,7 @@ Map::Map() : Map(14, 7, 8) {
 Map::Map(int cols, int rows, int square_precision) :
         map_(cols * square_precision * 2, vector<Stats>(rows * square_precision * 2, Stats())),
         cols_(cols), rows_(rows), square_precision_(square_precision), last_visited_pos_(convert_to_map_coordinates(0,0)),
-        path_algorithm_(make_unique<MapAlgorithms>(this)) {
+        path_algorithm_(make_unique<MapAlgorithms>(this)), ptr_objective_(nullptr) {
     srand(time(NULL));
 }
 
@@ -53,6 +53,10 @@ void Map::set_target_starter_area() {
     calculated_target_path_converted_.clear();
     for (auto element : calculated_target_path_)
         calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
+}
+
+void Map::set_objective(const std::tuple<double, double>& objective) {
+    ptr_objective_ = make_unique<std::tuple<int,int>>(convert_to_map_coordinates(objective));
 }
 
 vector<tuple<double,double>>& Map::get_calculated_path() {
@@ -134,12 +138,18 @@ void Map::render_map() {
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;
     // Paint the path to the objective location
-    for (auto aa : calculated_target_path_) {
-        tuple<int, int> path_node = convert_to_map_coordinates(convert_from_map_coordinates(aa));
+    for (auto path_node : calculated_target_path_) {
         color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
                 M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
         map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 0, 0, 255);
+    }
+    // Objective representation
+    if (ptr_objective_ != nullptr) {
+        color = map_debug_->get_color(M_X(*ptr_objective_), M_Y(*ptr_objective_));
+        map_debug_->set_color(M_X(*ptr_objective_), M_Y(*ptr_objective_), 0, 0, 204, 255);
+        temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
+                M_X(*ptr_objective_), M_Y(*ptr_objective_), color[0], color[1], color[2], color[3]));
     }
     // Paint the current position
     color = map_debug_->get_color(M_X(last_visited_pos_), M_Y(last_visited_pos_));

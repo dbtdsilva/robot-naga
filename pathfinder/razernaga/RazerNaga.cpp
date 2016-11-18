@@ -53,6 +53,7 @@ void RazerNaga::take_action() {
             move_to_the_exit();
 
             if (GetGroundSensor() != -1) {
+                map_.set_objective(position_.get_tuple());
                 map_.set_target_starter_area();
                 SetVisitingLed(true);
                 SetReturningLed(true);

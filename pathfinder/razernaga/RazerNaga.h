@@ -45,8 +45,6 @@ private:
     static double angle_between_two_points(const std::tuple<double, double>&, const std::tuple<double, double>&);
     static double distance_between_two_points(const std::tuple<double, double>&, const std::tuple<double, double>&);
     static double normalize_angle(const double&);
-    static std::vector<std::tuple<double, double>> convert_trajectory_to_discrete(
-            const std::vector<std::tuple<double, double>>&, const std::tuple<double, double>&);
 
     enum State { STOPPED, EXPLORING_OBJECTIVE, EXPLORING_FINAL_PATH, RETURN_TO_OBJECTIVE, RETURN_TO_START, FINISHED };
 

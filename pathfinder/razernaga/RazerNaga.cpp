@@ -46,9 +46,7 @@ void RazerNaga::take_action() {
             break;
         case EXPLORING_OBJECTIVE:
             if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
-                calculated_path_reference_.clear();
                 map_.set_target_nearest_exit();
-                calculated_path_reference_ = convert_trajectory_to_discrete(calculated_path_reference_, position_.get_tuple());
             }
             move_to_the_exit();
 
@@ -68,9 +66,7 @@ void RazerNaga::take_action() {
             break;
         case RETURN_TO_START:
             if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
-                calculated_path_reference_.clear();
                 map_.set_target_starter_area();
-                calculated_path_reference_ = convert_trajectory_to_discrete(calculated_path_reference_, position_.get_tuple());
             }
             move_to_the_exit();
 
@@ -179,21 +175,6 @@ void RazerNaga::apply_motors_speed() {
     if (!GetBumperSensor())
         position_.update_position(sensors_.get_compass(), M_MOTOR_LEFT(motor_speed_), M_MOTOR_RIGHT(motor_speed_));
     cycle_ended();
-}
-
-vector<tuple<double, double>> RazerNaga::convert_trajectory_to_discrete(
-        const vector<tuple<double, double>>& trajectory, const tuple<double, double>& current_position) {
-    vector<tuple<double, double>> discrete_trajectory;
-    for (const tuple<double, double>& point : trajectory) {
-        tuple<int,int> new_value = tuple<int, int>(
-                floor((M_X(point) + 1.0) / 2.0) * 2.0,
-                floor((M_Y(point) + 1.0) / 2.0) * 2.0);
-        if (find(discrete_trajectory.begin(), discrete_trajectory.end(), new_value) == discrete_trajectory.end()) {
-            discrete_trajectory.push_back(new_value);
-            //printf("%2d %2d %4.2f %4.2f\n", M_X(new_value), M_Y(new_value), M_X(point), M_Y(point) );
-        }
-    }
-    return discrete_trajectory;
 }
 
 double RazerNaga::angle_between_two_points(const std::tuple<double, double>& source,

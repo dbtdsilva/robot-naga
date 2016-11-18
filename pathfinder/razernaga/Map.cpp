@@ -1,5 +1,6 @@
 #include "Map.h"
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -40,19 +41,32 @@ std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<in
     return convert_from_map_coordinates(M_X(map_coordinates), M_Y(map_coordinates));
 }
 
+vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<tuple<int, int>>& trajectory) {
+    vector<tuple<double, double>> discrete_trajectory;
+    for (const tuple<int, int>& point_map : trajectory) {
+        tuple<double,double> point = convert_from_map_coordinates(point_map);
+        tuple<int,int> new_value = tuple<int, int>(
+                floor((M_X(point) + 1.0) / 2.0) * 2.0,
+                floor((M_Y(point) + 1.0) / 2.0) * 2.0);
+        if (std::find(discrete_trajectory.begin(), discrete_trajectory.end(), new_value) == discrete_trajectory.end()) {
+            discrete_trajectory.push_back(new_value);
+            //printf("%2d %2d %4.2f %4.2f\n", M_X(new_value), M_Y(new_value), M_X(point), M_Y(point) );
+        }
+    }
+    return discrete_trajectory;
+}
+
 void Map::set_target_nearest_exit() {
     calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, 8);
     calculated_target_path_converted_.clear();
-    for (auto element : calculated_target_path_)
-        calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
+    calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 
 }
 void Map::set_target_starter_area() {
     calculated_target_path_ = path_algorithm_->astar_shortest_path(
             last_visited_pos_, convert_to_map_coordinates(tuple<int, int>(0, 0)));
     calculated_target_path_converted_.clear();
-    for (auto element : calculated_target_path_)
-        calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
+    calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 }
 
 void Map::set_objective(const std::tuple<double, double>& objective) {

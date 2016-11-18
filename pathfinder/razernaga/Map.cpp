@@ -19,41 +19,11 @@ void Map::enable_debug() {
         map_debug_ = make_unique<MapSDL2>(cols_, rows_, square_precision_, 4);
 }
 
-PositionState Map::get_position_state(const int& x, const int& y) const {
-    return map_[x][y].state;
-}
-
-std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, double>& real_coordinates) {
-    return convert_to_map_coordinates(M_X(real_coordinates), M_Y(real_coordinates));
-}
-
-std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) {
-    return tuple<int, int>(static_cast<int>(round(x * (square_precision_ / 2.0) + cols_ * square_precision_)),
-                           static_cast<int>(round(-y * (square_precision_ / 2.0) + rows_ * square_precision_)));
-}
-
-std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const int& y) {
-    return tuple<double, double>(2.0 * (static_cast<double>(x) / square_precision_ - cols_),
-                                 -2.0 * (static_cast<double>(y) / square_precision_ - rows_));
-}
-
-std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) {
-    return convert_from_map_coordinates(M_X(map_coordinates), M_Y(map_coordinates));
-}
-
-vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<tuple<int, int>>& trajectory) {
-    vector<tuple<double, double>> discrete_trajectory;
-    for (const tuple<int, int>& point_map : trajectory) {
-        tuple<double,double> point = convert_from_map_coordinates(point_map);
-        tuple<int,int> new_value = tuple<int, int>(
-                floor((M_X(point) + 1.0) / 2.0) * 2.0,
-                floor((M_Y(point) + 1.0) / 2.0) * 2.0);
-        if (std::find(discrete_trajectory.begin(), discrete_trajectory.end(), new_value) == discrete_trajectory.end()) {
-            discrete_trajectory.push_back(new_value);
-            //printf("%2d %2d %4.2f %4.2f\n", M_X(new_value), M_Y(new_value), M_X(point), M_Y(point) );
-        }
-    }
-    return discrete_trajectory;
+bool Map::is_best_path_discovered() {
+    if (ptr_objective_ == nullptr) return false;
+    unknown = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), true);
+    known = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), false);
+    return false;
 }
 
 void Map::set_target_nearest_exit() {
@@ -64,7 +34,7 @@ void Map::set_target_nearest_exit() {
 }
 void Map::set_target_starter_area() {
     calculated_target_path_ = path_algorithm_->astar_shortest_path(
-            last_visited_pos_, convert_to_map_coordinates(tuple<int, int>(0, 0)));
+            last_visited_pos_, convert_to_map_coordinates(tuple<int, int>(0, 0)), false);
     calculated_target_path_converted_.clear();
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 }
@@ -158,6 +128,20 @@ void Map::render_map() {
                 M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
         map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 0, 0, 255);
     }
+
+    for (auto path_node : unknown) {
+        color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
+        temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
+                M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
+        map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 0, 255, 255);
+    }
+
+    for (auto path_node : known) {
+        color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
+        temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
+                M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
+        map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 128, 0, 255);
+    }
     // Objective representation
     if (ptr_objective_ != nullptr) {
         color = map_debug_->get_color(M_X(*ptr_objective_), M_Y(*ptr_objective_));
@@ -191,3 +175,39 @@ bool Map::validate_position(const tuple<int, int>& value) const {
     return validate_position(M_X(value), M_Y(value));
 }
 
+PositionState Map::get_position_state(const int& x, const int& y) const {
+    return map_[x][y].state;
+}
+
+std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, double>& real_coordinates) {
+    return convert_to_map_coordinates(M_X(real_coordinates), M_Y(real_coordinates));
+}
+
+std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) {
+    return tuple<int, int>(static_cast<int>(round(x * (square_precision_ / 2.0) + cols_ * square_precision_)),
+                           static_cast<int>(round(-y * (square_precision_ / 2.0) + rows_ * square_precision_)));
+}
+
+std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const int& y) {
+    return tuple<double, double>(2.0 * (static_cast<double>(x) / square_precision_ - cols_),
+                                 -2.0 * (static_cast<double>(y) / square_precision_ - rows_));
+}
+
+std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) {
+    return convert_from_map_coordinates(M_X(map_coordinates), M_Y(map_coordinates));
+}
+
+vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<tuple<int, int>>& trajectory) {
+    vector<tuple<double, double>> discrete_trajectory;
+    for (const tuple<int, int>& point_map : trajectory) {
+        tuple<double,double> point = convert_from_map_coordinates(point_map);
+        tuple<int,int> new_value = tuple<int, int>(
+                floor((M_X(point) + 1.0) / 2.0) * 2.0,
+                floor((M_Y(point) + 1.0) / 2.0) * 2.0);
+        if (std::find(discrete_trajectory.begin(), discrete_trajectory.end(), new_value) == discrete_trajectory.end()) {
+            discrete_trajectory.push_back(new_value);
+            //printf("%2d %2d %4.2f %4.2f\n", M_X(new_value), M_Y(new_value), M_X(point), M_Y(point) );
+        }
+    }
+    return discrete_trajectory;
+}

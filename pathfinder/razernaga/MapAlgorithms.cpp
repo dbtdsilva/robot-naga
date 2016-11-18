@@ -22,7 +22,7 @@ bool MapAlgorithms::evaluation_function_default(const Node* n1, const Node* n2) 
     return (n1->cost + n1->heuristic) < (n2->cost + n2->heuristic);
 }
 
-vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, const int& minimum_distance) {
+vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, const int& minimum_distance) const {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
     if (map_->get_position_state(M_X(start), M_Y(start)) == WALL)
@@ -89,7 +89,8 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, 
     return final_path;
 }
 
-vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(const tuple<int,int>& start, const tuple<int, int>& end) {
+vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(const tuple<int,int>& start, const tuple<int, int>& end,
+                                                           bool discover_unknown) const {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
     if (map_->get_position_state(M_X(start), M_Y(start)) == WALL ||
@@ -134,7 +135,7 @@ vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(const tuple<int,int>&
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
             PositionState state = map_->get_position_state(M_X(current_possibility), M_Y(current_possibility));
-            if (state == GROUND) {
+            if (state == GROUND || (discover_unknown && state == UNKNOWN)) {
                 begin = curr;
                 // Check if that node was already on path from the solution or not, if yes, skip it.
                 while (begin != nullptr) {

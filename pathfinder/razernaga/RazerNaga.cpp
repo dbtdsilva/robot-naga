@@ -59,7 +59,9 @@ void RazerNaga::take_action() {
             }
             break;
         case EXPLORING_FINAL_PATH:
-            state_ = RETURN_TO_OBJECTIVE;
+            set_motors_speed(0, 0);
+            map_.is_best_path_discovered();
+            //state_ = RETURN_TO_OBJECTIVE;
             break;
         case RETURN_TO_OBJECTIVE:
             state_ = RETURN_TO_START;

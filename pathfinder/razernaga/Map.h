@@ -26,6 +26,8 @@ public:
     void set_target_starter_area();
     void set_objective(const std::tuple<double, double>& objective);
     std::vector<std::tuple<double, double>>& get_calculated_path();
+    bool is_best_path_discovered();
+
     PositionState get_position_state(const int& x, const int& y) const;
 
     void enable_debug();
@@ -54,7 +56,7 @@ private:
     std::unique_ptr<MapAlgorithms> path_algorithm_;
     std::tuple<int, int> last_visited_pos_;
     std::unique_ptr<std::tuple<int, int>> ptr_objective_;
-    std::vector<std::tuple<int, int>> calculated_target_path_;
+    std::vector<std::tuple<int, int>> calculated_target_path_, unknown, known;
     std::vector<std::tuple<double, double>> calculated_target_path_converted_;
 };
 

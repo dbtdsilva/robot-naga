@@ -45,8 +45,22 @@ void RazerNaga::take_action() {
             if (GetStartButton()) state_ = EXPLORING;
             break;
         case EXPLORING:
+            if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
+                calculated_path_reference_.clear();
+                map_.set_target_nearest_exit();
+                calculated_path_reference_ = convert_trajectory_to_discrete(calculated_path_reference_, position_.get_tuple());
+            }
+            move_to_the_exit();
+
+            if (GetGroundSensor() != -1) {
+                map_.set_target_starter_area();
+                SetVisitingLed(true);
+                SetReturningLed(true);
+                state_ = RETURNING;
+            }
+            break;
         case RETURNING:
-            if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) { //) {
+            if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
                 calculated_path_reference_.clear();
                 if (state_ == EXPLORING)
                     map_.set_target_nearest_exit();

@@ -50,7 +50,7 @@ void Map::set_target_nearest_exit() {
 void Map::set_target_starter_area() {
     calculated_target_path_ = path_algorithm_->astar_shortest_path(
             last_visited_pos_, convert_to_map_coordinates(tuple<int, int>(0, 0)));
-    calculated_target_path_converted_.clear();\
+    calculated_target_path_converted_.clear();
     for (auto element : calculated_target_path_)
         calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
 }

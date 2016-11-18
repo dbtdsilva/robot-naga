@@ -23,7 +23,7 @@ PositionState Map::get_position_state(const int& x, const int& y) const {
 }
 
 std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, double>& real_coordinates) {
-    return convert_to_map_coordinates(get<0>(real_coordinates), get<1>(real_coordinates));
+    return convert_to_map_coordinates(M_X(real_coordinates), M_Y(real_coordinates));
 }
 
 std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) {
@@ -37,7 +37,7 @@ std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const
 }
 
 std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) {
-    return convert_from_map_coordinates(get<0>(map_coordinates), get<1>(map_coordinates));
+    return convert_from_map_coordinates(M_X(map_coordinates), M_Y(map_coordinates));
 }
 
 void Map::set_target_nearest_exit() {
@@ -50,7 +50,7 @@ void Map::set_target_nearest_exit() {
 void Map::set_target_starter_area() {
     calculated_target_path_ = path_algorithm_->astar_shortest_path(
             last_visited_pos_, convert_to_map_coordinates(tuple<int, int>(0, 0)));
-    calculated_target_path_converted_.clear();
+    calculated_target_path_converted_.clear();\
     for (auto element : calculated_target_path_)
         calculated_target_path_converted_.push_back(convert_from_map_coordinates(element));
 }
@@ -62,16 +62,16 @@ vector<tuple<double,double>>& Map::get_calculated_path() {
 bool Map::increase_wall_counter(const double& x, const double& y) {
     tuple<int, int> position = convert_to_map_coordinates(x, y);
     if (!validate_position(position)) return false;
-    map_[get<0>(position)][get<1>(position)].wall_counter++;
-    evaluate_position(get<0>(position), get<1>(position));
+    map_[M_X(position)][M_Y(position)].wall_counter++;
+    evaluate_position(M_X(position), M_Y(position));
     return true;
 }
 
 bool Map::increase_ground_counter(const double& x, const double& y) {
     tuple<int, int> position = convert_to_map_coordinates(x, y);
     if (!validate_position(position)) return false;
-    map_[get<0>(position)][get<1>(position)].ground_counter++;
-    evaluate_position(get<0>(position), get<1>(position));
+    map_[M_X(position)][M_Y(position)].ground_counter++;
+    evaluate_position(M_X(position), M_Y(position));
     return true;
 }
 
@@ -85,10 +85,10 @@ bool Map::increase_ground_counter_range(const double& sx, const double& sy, cons
     vector<Stats*> modified_points;
     for (int points = 0; points < N_POINTS; points++) {
         tuple<int, int> position = convert_to_map_coordinates(sx + points * dx, sy + points * dy);
-        if (map_[get<0>(position)][get<1>(position)].referred)
+        if (map_[M_X(position)][M_Y(position)].referred)
             continue;
-        map_[get<0>(position)][get<1>(position)].referred = true;
-        modified_points.push_back(&map_[get<0>(position)][get<1>(position)]);
+        map_[M_X(position)][M_Y(position)].referred = true;
+        modified_points.push_back(&map_[M_X(position)][M_Y(position)]);
         increase_ground_counter(sx + points * dx, sy + points * dy);
     }
 
@@ -99,11 +99,11 @@ bool Map::increase_ground_counter_range(const double& sx, const double& sy, cons
 bool Map::increase_visited_counter(const double& x, const double& y) {
     tuple<int, int> position = convert_to_map_coordinates(x, y);
     if (!validate_position(position)) return false;
-    map_[get<0>(position)][get<1>(position)].visited++;
+    map_[M_X(position)][M_Y(position)].visited++;
 
-    get<0>(last_visited_pos_) = get<0>(position);
-    get<1>(last_visited_pos_) = get<1>(position);
-    evaluate_position(get<0>(position), get<1>(position));
+    M_X(last_visited_pos_) = M_X(position);
+    M_Y(last_visited_pos_) = M_Y(position);
+    evaluate_position(M_X(position), M_Y(position));
     return true;
 }
 
@@ -136,16 +136,16 @@ void Map::render_map() {
     // Paint the path to the objective location
     for (auto aa : calculated_target_path_) {
         tuple<int, int> path_node = convert_to_map_coordinates(convert_from_map_coordinates(aa));
-        color = map_debug_->get_color(get<0>(path_node), get<1>(path_node));
+        color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
-                get<0>(path_node), get<1>(path_node), color[0], color[1], color[2], color[3]));
-        map_debug_->set_color(get<0>(path_node), get<1>(path_node), 255, 0, 0, 255);
+                M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
+        map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 0, 0, 255);
     }
     // Paint the current position
-    color = map_debug_->get_color(get<0>(last_visited_pos_), get<1>(last_visited_pos_));
-    map_debug_->set_color(get<0>(last_visited_pos_), get<1>(last_visited_pos_), 0, 0, 255, 255);
+    color = map_debug_->get_color(M_X(last_visited_pos_), M_Y(last_visited_pos_));
+    map_debug_->set_color(M_X(last_visited_pos_), M_Y(last_visited_pos_), 0, 0, 255, 255);
     temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
-            get<0>(last_visited_pos_), get<1>(last_visited_pos_), color[0], color[1], color[2], color[3]));
+            M_X(last_visited_pos_), M_Y(last_visited_pos_), color[0], color[1], color[2], color[3]));
 
     // Render the map
     map_debug_->render_full_map();
@@ -164,6 +164,6 @@ bool Map::validate_position(const int& x, const int& y) const {
 }
 
 bool Map::validate_position(const tuple<int, int>& value) const {
-    return validate_position(get<0>(value), get<1>(value));
+    return validate_position(M_X(value), M_Y(value));
 }
 

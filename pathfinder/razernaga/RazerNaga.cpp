@@ -36,7 +36,6 @@ void RazerNaga::cycle_ended_action() {
     map_.render_map();
 }
 
-vector<tuple<int, int>> new_targets;
 void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
@@ -47,8 +46,8 @@ void RazerNaga::take_action() {
             break;
         case EXPLORING:
         case RETURNING:
-            if (new_targets.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) { //) {
-                new_targets.clear();
+            if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) { //) {
+                calculated_path_reference_.clear();
                 if (state_ == EXPLORING)
                     map_.set_target_nearest_exit();
                 else
@@ -84,11 +83,11 @@ void RazerNaga::move_to_the_exit() {
     tuple<double,double> source(position_.x(), position_.y());
     tuple<double,double> dst;
     do {
-        if (new_targets.size() == 0)
+        if (calculated_path_reference_.size() == 0)
             return;
-        dst = new_targets.back();
+        dst = calculated_path_reference_.back();
         if (distance_between_two_points(source, dst) < 0.2) {
-            new_targets.pop_back();
+            calculated_path_reference_.pop_back();
         } else
             break;
     } while (true);
@@ -181,8 +180,8 @@ vector<tuple<double, double>> RazerNaga::convert_trajectory_to_discrete(
         tuple<int,int> new_value = tuple<int, int>(
                 floor((M_X(point) + 1.0) / 2.0) * 2.0,
                 floor((M_Y(point) + 1.0) / 2.0) * 2.0);
-        if (find(new_targets.begin(), new_targets.end(), new_value) == new_targets.end()) {
-            new_targets.push_back(new_value);
+        if (find(discrete_trajectory.begin(), discrete_trajectory.end(), new_value) == discrete_trajectory.end()) {
+            discrete_trajectory.push_back(new_value);
             //printf("%2d %2d %4.2f %4.2f\n", M_X(new_value), M_Y(new_value), M_X(point), M_Y(point) );
         }
     }

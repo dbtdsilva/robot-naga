@@ -15,7 +15,7 @@ void MapAlgorithms::set_heuristic_function(
 }
 
 double MapAlgorithms::heuristic_function_default(const tuple<int,int>& p1, const tuple<int, int>& p2) {
-    return sqrt(pow(get<0>(p2) - get<0>(p1), 2) + pow(get<1>(p2) - get<1>(p1), 2));
+    return sqrt(pow(M_X(p2) - M_X(p1), 2) + pow(M_Y(p2) - M_Y(p1), 2));
 }
 
 bool MapAlgorithms::evaluation_function_default(const Node* n1, const Node* n2) {
@@ -25,7 +25,7 @@ bool MapAlgorithms::evaluation_function_default(const Node* n1, const Node* n2) 
 vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, const int& minimum_distance) {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
-    if (map_->get_position_state(get<0>(start), get<1>(start)) == WALL)
+    if (map_->get_position_state(M_X(start), M_Y(start)) == WALL)
         return final_path;
     // Nodes might be in more than one path (shared)
     vector<unique_ptr<Node>> nodes_created_ownership;
@@ -41,7 +41,7 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, 
         // Get a new node to visit
         curr = open_nodes.front();
         open_nodes.erase(open_nodes.begin());
-        if (map_->get_position_state(get<0>(curr->position), get<1>(curr->position)) == UNKNOWN &&
+        if (map_->get_position_state(M_X(curr->position), M_Y(curr->position)) == UNKNOWN &&
                 curr->cost >= minimum_distance) {
             while (curr != nullptr) {
                 final_path.push_back(curr->position);
@@ -57,17 +57,17 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, 
 
         vector<tuple<int,int>> ramification_list;
         // List of possible value from the current one
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position), get<1>(curr->position) + 1));
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position) + 1, get<1>(curr->position)));
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position) - 1, get<1>(curr->position)));
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position), get<1>(curr->position) - 1));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) + 1));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position) + 1, M_Y(curr->position)));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position) - 1, M_Y(curr->position)));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) - 1));
 
         while (!ramification_list.empty()) {
             // Draw a new posibility node
             tuple<int,int> current_possibility = ramification_list.front();
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
-            PositionState state = map_->get_position_state(get<0>(current_possibility), get<1>(current_possibility));
+            PositionState state = map_->get_position_state(M_X(current_possibility), M_Y(current_possibility));
             if (state == GROUND || state == UNKNOWN) {
                 begin = curr;
                 // Check if that node was already on path from the solution or not, if yes, skip it.
@@ -92,8 +92,8 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, 
 vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(const tuple<int,int>& start, const tuple<int, int>& end) {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
-    if (map_->get_position_state(get<0>(start), get<1>(start)) == WALL ||
-            map_->get_position_state(get<0>(end), get<1>(end)) == WALL)
+    if (map_->get_position_state(M_X(start), M_Y(start)) == WALL ||
+            map_->get_position_state(M_X(end), M_Y(end)) == WALL)
         return final_path;
     // Nodes might be in more than one path (shared)
     vector<unique_ptr<Node>> nodes_created_ownership;
@@ -123,17 +123,17 @@ vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(const tuple<int,int>&
 
         vector<tuple<int,int>> ramification_list;
         // List of possible value from the current one
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position), get<1>(curr->position) + 1));
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position) + 1, get<1>(curr->position)));
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position) - 1, get<1>(curr->position)));
-        ramification_list.push_back(tuple<int,int>(get<0>(curr->position), get<1>(curr->position) - 1));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) + 1));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position) + 1, M_Y(curr->position)));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position) - 1, M_Y(curr->position)));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) - 1));
 
         while (!ramification_list.empty()) {
             // Draw a new posibility node
             auto current_possibility = ramification_list.front();
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
-            PositionState state = map_->get_position_state(get<0>(current_possibility), get<1>(current_possibility));
+            PositionState state = map_->get_position_state(M_X(current_possibility), M_Y(current_possibility));
             if (state == GROUND) {
                 begin = curr;
                 // Check if that node was already on path from the solution or not, if yes, skip it.

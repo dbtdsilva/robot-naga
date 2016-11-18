@@ -7,6 +7,9 @@
 #include "MapSDL2.h"
 #include "MapAlgorithms.h"
 
+#define M_X(tuple)  std::get<0>(tuple)
+#define M_Y(tuple)  std::get<1>(tuple)
+
 typedef enum { GROUND, WALL, UNKNOWN } PositionState;
 
 class Map {

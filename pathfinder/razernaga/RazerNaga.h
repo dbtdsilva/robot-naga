@@ -22,6 +22,7 @@
 #define INTEGRAL_CLIP   MAX_SPEED - BASE_SPEED
 #define BASE_SPEED      0.13
 #define MAX_SPEED       0.15
+#define OBSTACLE_LIMIT  0.4
 
 class RazerNaga : public QApplication {
     Q_OBJECT

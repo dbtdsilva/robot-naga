@@ -45,16 +45,16 @@ void RazerNaga::take_action() {
             if (GetStartButton()) state_ = EXPLORING_OBJECTIVE;
             break;
         case EXPLORING_OBJECTIVE:
-            if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
-                map_.set_target_nearest_exit();
-            }
-            follow_path();
-
             if (GetGroundSensor() != -1) {
+                state_ = EXPLORING_FINAL_PATH;
                 map_.set_objective(position_.get_tuple());
                 calculated_path_reference_.clear();
                 SetVisitingLed(true);
-                state_ = EXPLORING_FINAL_PATH;
+            } else {
+                if (calculated_path_reference_.size() == 0 ||
+                        sensors_.get_obstacle_sensor(1) < OBSTACLE_LIMIT || GetBumperSensor())
+                    map_.set_target_nearest_exit();
+                follow_path();
             }
             break;
         case EXPLORING_FINAL_PATH:
@@ -62,26 +62,27 @@ void RazerNaga::take_action() {
                 map_.set_target_objective_area();
                 state_ = RETURN_TO_OBJECTIVE;
             } else {
-                if (calculated_path_reference_.size() == 0 || sensors_.get_obstacle_sensor(1) < 0.4 || GetBumperSensor()) {
+                if (calculated_path_reference_.size() == 0 ||
+                        sensors_.get_obstacle_sensor(1) < OBSTACLE_LIMIT || GetBumperSensor()) {
                     map_.set_target_unknown_path();
                 }
                 follow_path();
             }
             break;
         case RETURN_TO_OBJECTIVE:
-            follow_path();
-
             if (GetGroundSensor() != -1) {
                 state_ = RETURN_TO_START;
                 SetReturningLed(true);
                 map_.set_target_starter_area();
+            } else { // Path is complete at this point, it shouldn't require recalculations
+                follow_path();
             }
             break;
         case RETURN_TO_START:
-            follow_path();
-            if (distance_between_two_points(tuple<double, double>(0, 0),
-                                            tuple<double, double>(position_.x(), position_.y())) < 0.2) {
+            if (distance_between_two_points(tuple<double, double>(0, 0), position_.get_tuple()) < 0.2) {
                 state_ = FINISHED;
+            } else {
+                follow_path();
             }
             break;
         case FINISHED:
@@ -94,24 +95,16 @@ void RazerNaga::take_action() {
 }
 
 void RazerNaga::follow_path() {
-    tuple<double,double> dst;
-    do {
-        if (calculated_path_reference_.size() == 0)
-            return;
+    tuple<double,double>& dst = calculated_path_reference_.back();
+    while (distance_between_two_points(position_.get_tuple(), dst) < 0.2) {
+        calculated_path_reference_.pop_back();
+        if (calculated_path_reference_.size() == 0) return;
         dst = calculated_path_reference_.back();
-        if (distance_between_two_points(position_.get_tuple(), dst) < 0.2) {
-            calculated_path_reference_.pop_back();
-        } else
-            break;
-    } while (true);
+    }
 
     double error;
     static double last_error = 0, integral_error = 0;
-    error = angle_between_two_points(position_.get_tuple(), dst) + sensors_.get_compass();
-    if (error > 180.0)
-        error -= 360.0;
-    if (error < -180.0)
-        error += 360.0;
+    error = normalize_angle(angle_between_two_points(position_.get_tuple(), dst) + sensors_.get_compass());
     error = error / 20.0; // Normalization factor
 
     integral_error += error;
@@ -209,7 +202,7 @@ double RazerNaga::distance_between_two_points(const std::tuple<double, double>& 
 
 double RazerNaga::normalize_angle(const double& degrees_angle) {
     double value = degrees_angle;
-    while (value <= -180.0) value += 2.0 * 180.0;
-    while (value > 180.0) value -= 2.0 * 180.0;
+    while (value <= -180.0) value += 360.0;
+    while (value > 180.0) value -= 360.0;
     return value;
 }

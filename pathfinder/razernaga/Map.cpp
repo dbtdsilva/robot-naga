@@ -27,7 +27,7 @@ bool Map::is_best_path_discovered() {
 }
 
 void Map::set_target_nearest_exit() {
-    calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, 8);
+    calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_);
     calculated_target_path_converted_.clear();
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 
@@ -61,11 +61,6 @@ void Map::set_target_unknown_path() {
 
 void Map::set_objective(const std::tuple<double, double>& objective) {
     ptr_objective_ = make_unique<std::tuple<int,int>>(convert_to_map_coordinates(objective));
-}
-
-std::tuple<double, double> Map::get_objective() {
-    if (ptr_objective_ == nullptr) return tuple<double, double>(0, 0);
-    return convert_from_map_coordinates(*ptr_objective_);
 }
 
 vector<tuple<double,double>>& Map::get_calculated_path() {

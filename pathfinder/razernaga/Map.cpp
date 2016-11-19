@@ -228,5 +228,11 @@ vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<t
             discrete_trajectory.push_back(new_value);
         }
     }
+
+    tuple<double,double> converted_last_pos = convert_from_map_coordinates(last_visited_pos_);
+    tuple<int,int> last_pos_discrete = tuple<int, int>(floor((M_X(converted_last_pos) + 1.0) / 2.0) * 2.0,
+                                               floor((M_Y(converted_last_pos) + 1.0) / 2.0) * 2.0);
+    discrete_trajectory.erase(std::remove(discrete_trajectory.begin(), discrete_trajectory.end(),
+                                          last_pos_discrete), discrete_trajectory.end());
     return discrete_trajectory;
 }

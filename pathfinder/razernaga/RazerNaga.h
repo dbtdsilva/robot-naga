@@ -41,13 +41,14 @@ private:
     void set_motors_speed(const double& motor_left, const double& motor_right);
     void apply_motors_speed();
     void follow_path();
-    void rotate(const double& degress);
     void retrieve_map();
+    bool rotate_to_point(std::tuple<double, double>&);
     static double angle_between_two_points(const std::tuple<double, double>&, const std::tuple<double, double>&);
     static double distance_between_two_points(const std::tuple<double, double>&, const std::tuple<double, double>&);
     static double normalize_angle(const double&);
 
-    enum State { STOPPED, EXPLORING_OBJECTIVE, EXPLORING_FINAL_PATH, RETURN_TO_OBJECTIVE, RETURN_TO_START, FINISHED };
+    enum State { STOPPED, EXPLORING_OBJECTIVE, EXPLORING_FINAL_PATH, RETURN_TO_OBJECTIVE,
+        PREPARE_TO_RETURN, RETURN_TO_START, FINISHED };
 
     const std::string name_;
     const int grid_position_;

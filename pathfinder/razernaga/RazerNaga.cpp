@@ -71,15 +71,20 @@ void RazerNaga::take_action() {
             break;
         case RETURN_TO_OBJECTIVE:
             if (GetGroundSensor() != -1) {
-                state_ = RETURN_TO_START;
-                SetReturningLed(true);
+                state_ = PREPARE_TO_RETURN;
                 map_.set_target_starter_area();
             } else { // Path is complete at this point, it shouldn't require recalculations
                 follow_path();
             }
             break;
+        case PREPARE_TO_RETURN:
+            if (rotate_to_point(calculated_path_reference_.back())) {
+                state_ = RETURN_TO_START;
+                SetReturningLed(true);
+            }
+            break;
         case RETURN_TO_START:
-            if (distance_between_two_points(tuple<double, double>(0, 0), position_.get_tuple()) < 0.2) {
+            if (distance_between_two_points(tuple<double, double>(0,0), position_.get_tuple()) < 0.2) {
                 state_ = FINISHED;
             } else {
                 follow_path();
@@ -116,19 +121,14 @@ void RazerNaga::follow_path() {
     set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);
 }
 
-void RazerNaga::rotate(const double& degrees) {
-    const double TARGET_ANGLE = normalize_angle(sensors_.get_compass() + degrees);
-    constexpr double NORMALIZE_FACTOR = 0.15 / 90.0;
+bool RazerNaga::rotate_to_point(std::tuple<double, double>& point) {
+    constexpr double NORMALIZE_FACTOR = (0.15 / 90.0) / 10.0;
     double speed, diff;
-    do {
-        sensors_.update_values();
-        retrieve_map();
-        diff = normalize_angle(TARGET_ANGLE - sensors_.get_compass());
-        speed = diff * NORMALIZE_FACTOR;
+    diff = normalize_angle(angle_between_two_points(position_.get_tuple(), point) - sensors_.get_compass());
+    speed = diff * NORMALIZE_FACTOR;
 
-        set_motors_speed(-speed, speed);
-        apply_motors_speed();
-    } while(fabs(diff) > 1.0);
+    set_motors_speed(-speed, speed);
+    return fabs(diff) <= 2.0;
 }
 
 void RazerNaga::retrieve_map() {

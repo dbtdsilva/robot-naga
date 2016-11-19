@@ -21,9 +21,9 @@ void Map::enable_debug() {
 
 bool Map::is_best_path_discovered() {
     if (ptr_objective_ == nullptr) return false;
-    unknown = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), true);
-    known = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), false);
-    return known.size() <= unknown.size();
+    unknown_path_ = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), true);
+    known_path_ = path_algorithm_->astar_shortest_path(*ptr_objective_, convert_to_map_coordinates(tuple<int, int>(0, 0)), false);
+    return known_path_.size() <= unknown_path_.size();
 }
 
 void Map::set_target_nearest_exit() {
@@ -49,12 +49,12 @@ void Map::set_target_starter_area() {
 
 void Map::set_target_unknown_path() {
     unsigned long i;
-    for (i = unknown.size() - 1; i > 0; i--) {
-        if (map_[M_X(unknown.at(i))][M_Y(unknown.at(i))].state == UNKNOWN)
+    for (i = unknown_path_.size() - 1; i > 0; i--) {
+        if (map_[M_X(unknown_path_.at(i))][M_Y(unknown_path_.at(i))].state == UNKNOWN)
             break;
     }
     calculated_target_path_ = path_algorithm_->astar_shortest_path(
-            last_visited_pos_, unknown.at(i), true);
+            last_visited_pos_, unknown_path_.at(i), true);
     calculated_target_path_converted_.clear();
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 }
@@ -141,14 +141,14 @@ void Map::render_map() {
 
     vector<tuple<int, int, Uint8, Uint8, Uint8, Uint8>> temporary_paintings;
     std::vector<int> color;
-    for (auto path_node : unknown) {
+    for (auto path_node : unknown_path_) {
         color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
                 M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
         map_debug_->set_color(M_X(path_node), M_Y(path_node), 255, 0, 255, 255);
     }
 
-    for (auto path_node : known) {
+    for (auto path_node : known_path_) {
         color = map_debug_->get_color(M_X(path_node), M_Y(path_node));
         temporary_paintings.push_back(tuple<int, int, Uint8, Uint8, Uint8, Uint8>(
                 M_X(path_node), M_Y(path_node), color[0], color[1], color[2], color[3]));
@@ -199,25 +199,25 @@ PositionState Map::get_position_state(const int& x, const int& y) const {
     return map_[x][y].state;
 }
 
-std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, double>& real_coordinates) {
+std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, double>& real_coordinates) const {
     return convert_to_map_coordinates(M_X(real_coordinates), M_Y(real_coordinates));
 }
 
-std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) {
+std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) const {
     return tuple<int, int>(static_cast<int>(round(x * (square_precision_ / 2.0) + cols_ * square_precision_)),
                            static_cast<int>(round(-y * (square_precision_ / 2.0) + rows_ * square_precision_)));
 }
 
-std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const int& y) {
+std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const int& y) const {
     return tuple<double, double>(2.0 * (static_cast<double>(x) / square_precision_ - cols_),
                                  -2.0 * (static_cast<double>(y) / square_precision_ - rows_));
 }
 
-std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) {
+std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) const {
     return convert_from_map_coordinates(M_X(map_coordinates), M_Y(map_coordinates));
 }
 
-vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<tuple<int, int>>& trajectory) {
+vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<tuple<int, int>>& trajectory) const {
     vector<tuple<double, double>> discrete_trajectory;
     for (const tuple<int, int>& point_map : trajectory) {
         tuple<double,double> point = convert_from_map_coordinates(point_map);

@@ -34,9 +34,11 @@ public:
 
 signals:
     void cycle_ended();
+
 public slots:
     void take_action();
     void cycle_ended_action();
+
 private:
     void set_motors_speed(const double& motor_left, const double& motor_right);
     void apply_motors_speed();
@@ -53,12 +55,12 @@ private:
     const std::string name_;
     const int grid_position_;
     const std::string host_;
+    const std::vector<double> ir_sensor_angles_;
     Map map_;
     Sensors sensors_;
     Position position_;
-    std::tuple<double, double> motor_speed_;
-    const std::vector<double> ir_sensor_angles_;
     State state_;
+    std::tuple<double, double> motor_speed_;
     std::vector<std::tuple<double, double>>& calculated_path_reference_;
 };
 

@@ -15,7 +15,7 @@ public:
 
     void set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A);
     void render_full_map();
-    std::vector<int> get_color(const int& x, const int& y);
+    std::vector<int> get_color(const int& x, const int& y) const;
     bool exit_requested();
 private:
     typedef struct color {

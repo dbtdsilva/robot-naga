@@ -47,7 +47,7 @@ void MapSDL2::set_color(int x, int y, Uint8 R, Uint8 G, Uint8 B, Uint8 A) {
     }
 }
 
-std::vector<int> MapSDL2::get_color(const int& x, const int& y) {
+std::vector<int> MapSDL2::get_color(const int& x, const int& y) const {
     return {map_[x][y].R, map_[x][y].G, map_[x][y].B, map_[x][y].A};
 }
 

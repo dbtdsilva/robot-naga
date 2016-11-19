@@ -35,11 +35,11 @@ public:
     void enable_debug();
     void render_map();
 private:
-    std::tuple<int, int> convert_to_map_coordinates(const std::tuple<double, double>&);
-    std::tuple<int, int> convert_to_map_coordinates(const double&, const double&);
-    std::tuple<double, double> convert_from_map_coordinates(const int&, const int&);
-    std::tuple<double, double> convert_from_map_coordinates(const std::tuple<int, int>&);
-    std::vector<std::tuple<double, double>> convert_trajectory_to_discrete(const std::vector<std::tuple<int, int>>&);
+    std::tuple<int, int> convert_to_map_coordinates(const std::tuple<double, double>&) const;
+    std::tuple<int, int> convert_to_map_coordinates(const double&, const double&) const;
+    std::tuple<double, double> convert_from_map_coordinates(const int&, const int&) const;
+    std::tuple<double, double> convert_from_map_coordinates(const std::tuple<int, int>&) const;
+    std::vector<std::tuple<double, double>> convert_trajectory_to_discrete(const std::vector<std::tuple<int, int>>&) const;
     void evaluate_position(const int& x, const int& y);
     bool validate_position(const int& x, const int& y) const;
     bool validate_position(const std::tuple<int, int>&) const;
@@ -59,7 +59,7 @@ private:
     std::tuple<int, int> last_visited_pos_;
 
     std::unique_ptr<std::tuple<int, int>> ptr_objective_;
-    std::vector<std::tuple<int, int>> calculated_target_path_, unknown, known;
+    std::vector<std::tuple<int, int>> calculated_target_path_, unknown_path_, known_path_;
     std::vector<std::tuple<double, double>> calculated_target_path_converted_;
 };
 

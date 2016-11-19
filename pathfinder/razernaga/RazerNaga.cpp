@@ -30,6 +30,9 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
     QObject::connect(this, SIGNAL(cycle_ended()), this, SLOT(cycle_ended_action()), Qt::AutoConnection);
     map_.enable_debug();
+
+    SetReturningLed(false);
+    SetVisitingLed(false);
 }
 
 void RazerNaga::cycle_ended_action() {

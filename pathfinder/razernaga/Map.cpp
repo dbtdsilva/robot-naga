@@ -27,12 +27,10 @@ bool Map::is_best_path_discovered() {
 }
 
 void Map::set_target_nearest_exit() {
-    for (int robot_size = 2; robot_size >= 0; robot_size--) {
-        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_, robot_size);
+    for (int robot_size = 1; robot_size >= 0; robot_size--) {
+        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 2, robot_size);
         if (calculated_target_path_.size() != 0) break;
     }
-    cout << "S: " << M_X(convert_from_map_coordinates(convert_to_map_coordinates(0, 0))) << ", " << M_Y(convert_from_map_coordinates(convert_to_map_coordinates(0, 0))) << endl;
-    cout << M_X(calculated_target_path_.back()) << ", " << M_Y(calculated_target_path_.back()) << endl;
     calculated_target_path_converted_.clear();
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 
@@ -226,7 +224,6 @@ vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<t
     vector<tuple<double, double>> discrete_trajectory;
     for (const tuple<int, int>& point_map : trajectory) {
         tuple<double, double> point = convert_from_map_coordinates(point_map);
-        cout << M_X(point) << ", " << M_Y(point) << endl;
         tuple<double, double> new_value = tuple<double, double>(
                 floor((M_X(point) + 1.0) / 2.0) * 2.0,
                 floor((M_Y(point) + 1.0) / 2.0) * 2.0);

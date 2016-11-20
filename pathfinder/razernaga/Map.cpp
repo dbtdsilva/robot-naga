@@ -27,7 +27,8 @@ bool Map::is_best_path_discovered() {
 }
 
 void Map::set_target_nearest_exit() {
-    calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_);
+    int size = 9;
+    calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_, size);
     calculated_target_path_converted_.clear();
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
 
@@ -196,7 +197,7 @@ bool Map::validate_position(const tuple<int, int>& value) const {
 }
 
 PositionState Map::get_position_state(const int& x, const int& y) const {
-    return map_[x][y].state;
+    return validate_position(x,y) ? map_[x][y].state : WALL;
 }
 
 std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, double>& real_coordinates) const {

@@ -22,7 +22,8 @@ bool MapAlgorithms::evaluation_function_default(const Node* n1, const Node* n2) 
     return (n1->cost + n1->heuristic) < (n2->cost + n2->heuristic);
 }
 
-vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, const int& minimum_distance) const {
+vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, const int& minimum_distance,
+                                                  const int &safe_distance) const {
     vector<tuple<int, int>> final_path;
     // start and end position must be a wall or an unknown place
     if (map_->get_position_state(M_X(start), M_Y(start)) == WALL)
@@ -67,19 +68,25 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, 
             tuple<int,int> current_possibility = ramification_list.front();
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
-            PositionState state = map_->get_position_state(M_X(current_possibility), M_Y(current_possibility));
-            if (state == GROUND || state == UNKNOWN) {
-                begin = curr;
-                // Check if that node was already on path from the solution or not, if yes, skip it.
-                while (begin != nullptr) {
-                    if (begin->position == current_possibility) break;
-                    begin = begin->parent;
+            bool wall_found = false;
+            for (int i = M_X(current_possibility) - minimum_distance; i <= minimum_distance; i++) {
+                for (int j = M_Y(current_possibility) - minimum_distance; j <= minimum_distance; j++) {
+                    if (map_->get_position_state(i, j) != UNKNOWN && map_->get_position_state(i, j) != GROUND)
+                        wall_found = true;
                 }
-                if (begin == nullptr) {
-                    auto n = make_unique<Node>(current_possibility, curr, 0, curr->cost + 1);
-                    open_nodes.push_back(n.get());
-                    nodes_created_ownership.push_back(std::move(n));
-                }
+            }
+            if (wall_found) continue;
+
+            begin = curr;
+            // Check if that node was already on path from the solution or not, if yes, skip it.
+            while (begin != nullptr) {
+                if (begin->position == current_possibility) break;
+                begin = begin->parent;
+            }
+            if (begin == nullptr) {
+                auto n = make_unique<Node>(current_possibility, curr, 0, curr->cost + 1);
+                open_nodes.push_back(n.get());
+                nodes_created_ownership.push_back(std::move(n));
             }
         }
         // Sort the new ramifications of nodes found by their evaluation value

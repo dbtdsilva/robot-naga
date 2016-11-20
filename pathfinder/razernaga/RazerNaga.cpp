@@ -88,7 +88,7 @@ void RazerNaga::take_action() {
             }
             break;
         case RETURN_TO_START:
-            if (distance_between_two_points(tuple<double, double>(0,0), position_.get_tuple()) < 0.2) {
+            if (distance_between_two_points(tuple<double, double>(0,0), position_.get_tuple()) < 0.1) {
                 state_ = FINISHED;
             } else {
                 follow_path();

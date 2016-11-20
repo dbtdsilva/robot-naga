@@ -1,5 +1,6 @@
 #include "MapAlgorithms.h"
 #include <cmath>
+#include <iostream>
 #include <algorithm>
 #include "Map.h"
 
@@ -58,9 +59,9 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, 
 
         vector<tuple<int,int>> ramification_list;
         // List of possible value from the current one
-        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) + 1));
         ramification_list.push_back(tuple<int,int>(M_X(curr->position) + 1, M_Y(curr->position)));
         ramification_list.push_back(tuple<int,int>(M_X(curr->position) - 1, M_Y(curr->position)));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) + 1));
         ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) - 1));
 
         while (!ramification_list.empty()) {
@@ -69,10 +70,11 @@ vector<tuple<int, int>> MapAlgorithms::flood_fill(const tuple<int, int>& start, 
             ramification_list.erase(ramification_list.begin());
             // Check if the new possibility is valid or not
             bool wall_found = false;
-            for (int i = M_X(current_possibility) - minimum_distance; i <= minimum_distance; i++) {
-                for (int j = M_Y(current_possibility) - minimum_distance; j <= minimum_distance; j++) {
-                    if (map_->get_position_state(i, j) != UNKNOWN && map_->get_position_state(i, j) != GROUND)
+            for (int i = -safe_distance; i <= safe_distance; i++) {
+                for (int j = -safe_distance; j <= safe_distance; j++) {
+                    if (map_->get_position_state(M_X(current_possibility) + i, M_Y(current_possibility) + j) == WALL) {
                         wall_found = true;
+                    }
                 }
             }
             if (wall_found) continue;
@@ -131,9 +133,9 @@ vector<tuple<int, int>> MapAlgorithms::astar_shortest_path(const tuple<int,int>&
 
         vector<tuple<int,int>> ramification_list;
         // List of possible value from the current one
-        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) + 1));
         ramification_list.push_back(tuple<int,int>(M_X(curr->position) + 1, M_Y(curr->position)));
         ramification_list.push_back(tuple<int,int>(M_X(curr->position) - 1, M_Y(curr->position)));
+        ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) + 1));
         ramification_list.push_back(tuple<int,int>(M_X(curr->position), M_Y(curr->position) - 1));
 
         while (!ramification_list.empty()) {

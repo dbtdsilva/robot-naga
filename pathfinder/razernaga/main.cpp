@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 
     if (argc != 1) {
         cerr << "Bad number of parameters" << endl <<
-                "SYNOPSIS: GUISample [-host hostname] [-robname robotname] [-pos posnumber]" << endl;
+                "SYNOPSIS: razernaga [-host hostname] [-robname robotname] [-pos posnumber]" << endl;
         return 1;
     }
 

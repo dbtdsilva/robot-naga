@@ -61,6 +61,7 @@ void RazerNaga::take_action() {
             }
             break;
         case EXPLORING_FINAL_PATH:
+            SetVisitingLed(false);
             if (map_.is_best_path_discovered()) {
                 map_.set_target_objective_area();
                 state_ = RETURN_TO_OBJECTIVE;

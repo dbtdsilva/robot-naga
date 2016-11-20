@@ -104,6 +104,8 @@ void RazerNaga::take_action() {
 }
 
 void RazerNaga::follow_path() {
+    if (calculated_path_reference_.size() == 0) return;
+
     tuple<double,double>& dst = calculated_path_reference_.back();
     while (distance_between_two_points(position_.get_tuple(), dst) < 0.2) {
         calculated_path_reference_.pop_back();
@@ -166,15 +168,15 @@ void RazerNaga::retrieve_map() {
 void RazerNaga::set_motors_speed(const double& motor_left, const double& motor_right) {
     M_MOTOR_LEFT(motor_speed_) = motor_left;
     if (M_MOTOR_LEFT(motor_speed_) > MAX_SPEED)
-        M_MOTOR_LEFT(motor_speed_) = 0.15;
+        M_MOTOR_LEFT(motor_speed_) = MAX_SPEED;
     if (M_MOTOR_LEFT(motor_speed_) < -MAX_SPEED)
-        M_MOTOR_LEFT(motor_speed_) = -0.15;
+        M_MOTOR_LEFT(motor_speed_) = -MAX_SPEED;
 
     M_MOTOR_RIGHT(motor_speed_) = motor_right;
     if (M_MOTOR_RIGHT(motor_speed_) > MAX_SPEED)
-        M_MOTOR_RIGHT(motor_speed_) = 0.15;
+        M_MOTOR_RIGHT(motor_speed_) = MAX_SPEED;
     if (M_MOTOR_RIGHT(motor_speed_) < -MAX_SPEED)
-        M_MOTOR_RIGHT(motor_speed_) = -0.15;
+        M_MOTOR_RIGHT(motor_speed_) = -MAX_SPEED;
 }
 void RazerNaga::apply_motors_speed() {
     DriveMotors(M_MOTOR_LEFT(motor_speed_), M_MOTOR_RIGHT(motor_speed_));

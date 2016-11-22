@@ -119,12 +119,12 @@ void RazerNaga::follow_path() {
     double error;
     static double last_error = 0, integral_error = 0;
     error = normalize_angle(angle_between_two_points(position_.get_tuple(), dst) + sensors_.get_compass());
-    error = error / 20.0; // Normalization factor
+    error = error / NORM_FACTOR; // Normalization factor
 
     integral_error += error;
     integral_error = integral_error > INTEGRAL_CLIP ? INTEGRAL_CLIP : integral_error;
     integral_error = integral_error < -INTEGRAL_CLIP ? -INTEGRAL_CLIP : integral_error;
-    double correction = 0.2 * error + 0.0 * integral_error + 0.2 * (error - last_error);
+    double correction = KP * error + KI * integral_error + KD * (error - last_error);
     last_error = error;
 
     set_motors_speed(BASE_SPEED + correction, BASE_SPEED - correction);

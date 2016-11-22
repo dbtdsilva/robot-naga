@@ -19,10 +19,14 @@
 #define M_MOTOR_LEFT(motors_tuple)      std::get<0>(motors_tuple)
 #define M_MOTOR_RIGHT(motors_tuple)     std::get<1>(motors_tuple)
 
-#define INTEGRAL_CLIP   MAX_SPEED - BASE_SPEED
-#define BASE_SPEED      0.13
-#define MAX_SPEED       0.15
-#define OBSTACLE_LIMIT  0.4
+#define INTEGRAL_CLIP           MAX_SPEED - BASE_SPEED
+#define BASE_SPEED              0.13
+#define MAX_SPEED               0.15
+#define NORM_FACTOR             20.0
+#define OBSTACLE_LIMIT          0.4
+#define KP                      0.2
+#define KI                      0.0
+#define KD                      0.2
 
 class RazerNaga : public QApplication {
     Q_OBJECT

@@ -1,11 +1,27 @@
 #include <iostream>
+#include <signal.h>
 #include "RazerNaga.h"
-#include <SDL2/SDL.h>
 
 using namespace std;
 
-int main(int argc, char** argv)
-{
+// This way to catch Unix signals was found in
+// https://gist.github.com/azadkuh/a2ac6869661ebd3f8588
+void catch_unix_signals(const std::vector<int>& quitSignals,
+                      const std::vector<int>& ignoreSignals = std::vector<int>()) {
+    auto handler = [](int sig) ->void {
+        printf("\nquit the application (user request signal = %d).\n", sig);
+        QCoreApplication::quit();
+        exit(0);
+    };
+
+    for (int sig : ignoreSignals)
+        signal(sig, SIG_IGN);
+
+    for (int sig : quitSignals)
+        signal(sig, handler);
+}
+
+int main(int argc, char** argv) {
     string host = "localhost";
     int rob_id = 0;
     cout << "Compiled with Qt Version " << QT_VERSION_STR << endl;
@@ -31,5 +47,7 @@ int main(int argc, char** argv)
     }
 
     RazerNaga app(argc, argv, rob_id, host);
+    catch_unix_signals({SIGQUIT, SIGINT, SIGTERM, SIGHUP});
+
     return app.exec();
 }

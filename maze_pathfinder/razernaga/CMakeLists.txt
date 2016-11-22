@@ -25,3 +25,5 @@ ADD_EXECUTABLE(razernaga main.cpp RazerNaga.cpp RazerNaga.h Sensors.cpp Sensors.
 TARGET_LINK_LIBRARIES(razernaga ${QT_LIBRARIES} ${SDL2_LIBRARIES} RobSock)
 SET_TARGET_PROPERTIES(razernaga PROPERTIES COMPILE_FLAGS "-std=c++14 -O3")
 
+ADD_DEFINITIONS(-DDEBUG)
+

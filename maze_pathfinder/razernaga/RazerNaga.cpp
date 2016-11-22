@@ -29,7 +29,9 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<
     qApp->addLibraryPath("libRobSock");
     QObject::connect((QObject *)(Link()), SIGNAL(NewMessage()), this, SLOT(take_action()));
     QObject::connect(this, SIGNAL(cycle_ended()), this, SLOT(cycle_ended_action()), Qt::AutoConnection);
+#ifdef DEBUG
     map_.enable_debug();
+#endif
 
     SetReturningLed(false);
     SetVisitingLed(false);

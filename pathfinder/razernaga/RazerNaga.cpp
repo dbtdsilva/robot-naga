@@ -100,6 +100,9 @@ void RazerNaga::take_action() {
             Finish();
             break;
     }
+
+    if (sensors_.get_obstacle_sensor(1) <= 0.2 || GetBumperSensor())
+        set_motors_speed(-0.1, -0.1);
     apply_motors_speed();
 }
 

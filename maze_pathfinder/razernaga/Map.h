@@ -33,6 +33,7 @@ public:
     void set_objective(const std::tuple<double, double>& objective);
     std::vector<std::tuple<double, double>>& get_calculated_path();
     bool is_best_path_discovered();
+    bool has_time(const unsigned int& time);
 
     PositionState get_position_state(const int& x, const int& y) const;
 

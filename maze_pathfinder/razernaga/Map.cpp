@@ -30,6 +30,20 @@ bool Map::is_best_path_discovered() {
     return known_path_.size() <= unknown_path_.size();
 }
 
+bool Map::has_time(const unsigned int& time) {
+    if (ptr_objective_ == nullptr) return false;
+    unsigned long path_total_size = known_path_.size() +
+            path_algorithm_->astar_shortest_path(last_visited_pos_, *ptr_objective_, false).size();
+
+    const double TIME_PER_CELL = 25;
+    double required_cells_size = path_total_size / static_cast<double>(square_precision_);
+    double current_cells_left = time / TIME_PER_CELL;
+    
+    if (current_cells_left < required_cells_size)
+        cout << "There is not enough time to explore! It must return now!" << endl;
+    return current_cells_left >= required_cells_size;
+}
+
 void Map::set_target_nearest_exit() {
     for (int robot_size = 0; robot_size >= 0; robot_size--) {
         calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 1.1, robot_size);

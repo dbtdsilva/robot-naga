@@ -45,6 +45,7 @@ void RazerNaga::take_action() {
     sensors_.update_values();
     retrieve_map();
 
+    bool best_path;
     switch (state_) {
         case STOPPED:
             if (GetStartButton()) state_ = EXPLORING_OBJECTIVE;
@@ -64,7 +65,8 @@ void RazerNaga::take_action() {
             break;
         case EXPLORING_FINAL_PATH:
             SetVisitingLed(false);
-            if (map_.is_best_path_discovered()) {
+            best_path = map_.is_best_path_discovered();
+            if (!map_.has_time(GetFinalTime() - GetTime()) || best_path) {
                 map_.set_target_objective_area();
                 state_ = RETURN_TO_OBJECTIVE;
             } else {

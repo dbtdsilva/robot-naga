@@ -10,6 +10,7 @@
 #define POSITION_RESET_ANGLE    2.0
 #define POSITION_RESET_OBSTACLE 0.05
 #define POSITION_RESET_MIN_DIFF 0.5
+#define POSITION_RESET_CYCLES   3
 // Basic parameters defined for the robot
 #define SQUARE_SIZE             2.0
 #define BASE_SPEED              0.13

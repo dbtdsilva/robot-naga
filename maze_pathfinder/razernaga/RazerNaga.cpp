@@ -20,7 +20,7 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host) :
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<double> ir_sensor_angles) :
         QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host),
         motor_speed_(0.0, 0.0), ir_sensor_angles_(ir_sensor_angles), state_(STOPPED),
-        calculated_path_reference_(map_.get_calculated_path())
+        calculated_path_reference_(map_.get_calculated_path()), position_cycles_reset(0)
 {
     if (InitRobot2(const_cast<char *>(name_.c_str()), grid_position_, &ir_sensor_angles[0],
                    const_cast<char *>(host_.c_str())) == -1) {
@@ -112,17 +112,19 @@ void RazerNaga::take_action() {
 
 void RazerNaga::recalibrate_position() {
     // Resetting X if possible
-    if (fabs(sensors_.get_compass()) < POSITION_RESET_ANGLE ||
-        fabs(normalize_angle(sensors_.get_compass() - 180.0)) < POSITION_RESET_ANGLE) {
-        if (fabs(sensors_.get_obstacle_sensor(0) - sensors_.get_obstacle_sensor(2)) < POSITION_RESET_OBSTACLE) {
+    if ((fabs(sensors_.get_compass()) < POSITION_RESET_ANGLE ||
+            fabs(normalize_angle(sensors_.get_compass() - 180.0)) < POSITION_RESET_ANGLE) &&
+            (fabs(sensors_.get_obstacle_sensor(0) - sensors_.get_obstacle_sensor(2)) < POSITION_RESET_OBSTACLE)) {
+        if (++position_cycles_reset == POSITION_RESET_CYCLES)
             position_.reset_y();
-        }
     // Resetting Y if possible
-    } else if (fabs(sensors_.get_compass() - 90) < POSITION_RESET_ANGLE ||
-        fabs(sensors_.get_compass() + 90) < POSITION_RESET_ANGLE) {
-        if (fabs(sensors_.get_obstacle_sensor(0) - sensors_.get_obstacle_sensor(2)) < POSITION_RESET_OBSTACLE) {
+    } else if ((fabs(sensors_.get_compass() - 90) < POSITION_RESET_ANGLE ||
+            fabs(sensors_.get_compass() + 90) < POSITION_RESET_ANGLE) &&
+            (fabs(sensors_.get_obstacle_sensor(0) - sensors_.get_obstacle_sensor(2)) < POSITION_RESET_OBSTACLE)) {
+        if (++position_cycles_reset == POSITION_RESET_CYCLES)
             position_.reset_x();
-        }
+    } else {
+        position_cycles_reset = 0;
     }
 }
 

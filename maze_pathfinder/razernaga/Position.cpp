@@ -28,9 +28,9 @@ double Position::y() const {
 void Position::reset_y() {
     // It only resets if the position trying to reset is near the SQUARE_SIZE
     double value = M_Y(position_) / SQUARE_SIZE;
-    if (fabs(value - round(value)) >= POSITION_RESET_MIN_DIFF / SQUARE_SIZE) return;
+    if (fabs(value - round(value)) >= POS_RESET_MIN_DIFF / SQUARE_SIZE) return;
 
-    cout << "Resetting Y from " << M_X(position_);
+    cout << "Resetting Y from " << M_Y(position_);
     M_Y(position_) = round(M_Y(position_) / SQUARE_SIZE) * SQUARE_SIZE;
     cout << " to " << M_Y(position_)  << endl;
 }
@@ -38,7 +38,7 @@ void Position::reset_y() {
 void Position::reset_x() {
     // It only resets if the position trying to reset is near the SQUARE_SIZE
     double value = M_X(position_) / SQUARE_SIZE;
-    if (fabs(value - round(value)) >= POSITION_RESET_MIN_DIFF / SQUARE_SIZE) return;
+    if (fabs(value - round(value)) >= POS_RESET_MIN_DIFF / SQUARE_SIZE) return;
 
     cout << "Resetting X from " << M_X(position_);
     M_X(position_) = round(M_X(position_) / SQUARE_SIZE) * SQUARE_SIZE;

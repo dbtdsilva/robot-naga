@@ -1,3 +1,7 @@
+//
+// Created by Diogo Silva on 26/10/16.
+//
+
 #include <iostream>
 #include <signal.h>
 #include "RazerNaga.h"

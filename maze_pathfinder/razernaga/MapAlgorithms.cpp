@@ -1,3 +1,7 @@
+//
+// Created by Diogo Silva on 05/11/16.
+//
+
 #include "MapAlgorithms.h"
 #include <cmath>
 #include <iostream>

@@ -1,3 +1,7 @@
+//
+// Created by Diogo Silva on 28/10/16.
+//
+
 #include "Map.h"
 #include <iostream>
 #include <algorithm>

@@ -1,5 +1,5 @@
 //
-// Created by myrddin on 28/10/16.
+// Created by Diogo Silva on 28/10/16.
 //
 
 #ifndef RAZERNAGA_RAZERNAGA_H

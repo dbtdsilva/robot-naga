@@ -1,5 +1,5 @@
 //
-// Created by myrddin on 23/11/16.
+// Created by Diogo Silva on 23/11/16.
 //
 
 #ifndef RAZERNAGA_CONSTS_H
@@ -17,6 +17,8 @@
 #define MAX_SPEED               0.15
 // Normalization factor used for the controller that rotates, smaller is faster to rotate and big is slower
 #define NORM_FACTOR             20.0
+// This represent the maximum angle that the robot allows before stop the desired rotation
+#define ROTATE_ANGLE_MAX        2.0
 #define OBSTACLE_LIMIT          0.4
 // Following parameters are related with the controller to follow a specific point
 #define INTEGRAL_CLIP           MAX_SPEED - BASE_SPEED

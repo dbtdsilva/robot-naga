@@ -1,5 +1,5 @@
 //
-// Created by myrddin on 28/10/16.
+// Created by Diogo Silva on 28/10/16.
 //
 
 #include "RazerNaga.h"
@@ -159,7 +159,7 @@ bool RazerNaga::rotate_to_point(std::tuple<double, double>& point) {
     speed = diff * NORMALIZE_FACTOR;
 
     set_motors_speed(-speed, speed);
-    return fabs(diff) <= 2.0;
+    return fabs(diff) <=  ROTATE_ANGLE_MAX;
 }
 
 void RazerNaga::retrieve_map() {

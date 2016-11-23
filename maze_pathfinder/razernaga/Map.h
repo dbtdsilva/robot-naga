@@ -1,3 +1,7 @@
+//
+// Created by Diogo Silva on 28/10/16.
+//
+
 #ifndef RAZERNAGA_MAP_H
 #define RAZERNAGA_MAP_H
 

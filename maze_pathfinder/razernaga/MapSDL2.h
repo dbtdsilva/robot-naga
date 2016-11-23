@@ -1,5 +1,5 @@
 //
-// Created by myrddin on 06/11/16.
+// Created by Diogo Silva on 06/11/16.
 //
 
 #ifndef RAZERNAGA_MAPSDL2_H

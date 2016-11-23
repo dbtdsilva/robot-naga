@@ -24,6 +24,16 @@ double Position::y() const {
     return M_Y(position_);
 }
 
+void Position::reset_y() {
+    M_Y(position_) = round(M_Y(position_) / 2.0) * 2.0;
+    cout << "Resetting Y" << endl;
+}
+
+void Position::reset_x() {
+    M_X(position_) = round(M_X(position_) / 2.0) * 2.0;
+    cout << "Resetting X" << endl;
+}
+
 void Position::update_position(const double& theta, const double& in_left, const double& in_right) {
     double theta_radians = theta * M_PI / 180.0;
 

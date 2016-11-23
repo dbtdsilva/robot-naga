@@ -28,7 +28,7 @@ bool Map::is_best_path_discovered() {
 
 void Map::set_target_nearest_exit() {
     for (int robot_size = 0; robot_size >= 0; robot_size--) {
-        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 2, robot_size);
+        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 1.25, robot_size);
         if (calculated_target_path_.size() != 0) break;
     }
     calculated_target_path_converted_.clear();

@@ -19,6 +19,9 @@ public:
     double x() const;
     double y() const;
 
+    void reset_y();
+    void reset_x();
+
     void update_position(const double& theta, const double& in_left, const double& in_right);
     friend std::ostream& operator<<(std::ostream& os, const Position& position);
 private:

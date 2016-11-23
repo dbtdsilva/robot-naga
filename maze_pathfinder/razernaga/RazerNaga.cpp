@@ -105,7 +105,25 @@ void RazerNaga::take_action() {
 
     if (sensors_.get_obstacle_sensor(1) <= 0.2 || GetBumperSensor())
         set_motors_speed(-0.1, -0.1);
+
+    recalibrate_position();
     apply_motors_speed();
+}
+
+void RazerNaga::recalibrate_position() {
+    // Resetting X if possible
+    if (fabs(sensors_.get_compass()) < POSITION_RESET_ANGLE ||
+        fabs(normalize_angle(sensors_.get_compass() - 180.0)) < POSITION_RESET_ANGLE) {
+        if (fabs(sensors_.get_obstacle_sensor(0) - sensors_.get_obstacle_sensor(2)) < POSITION_RESET_OBSTACLE) {
+            position_.reset_y();
+        }
+    // Resetting Y if possible
+    } else if (fabs(sensors_.get_compass() - 90) < POSITION_RESET_ANGLE ||
+        fabs(sensors_.get_compass() + 90) < POSITION_RESET_ANGLE) {
+        if (fabs(sensors_.get_obstacle_sensor(0) - sensors_.get_obstacle_sensor(2)) < POSITION_RESET_OBSTACLE) {
+            position_.reset_x();
+        }
+    }
 }
 
 void RazerNaga::follow_path() {

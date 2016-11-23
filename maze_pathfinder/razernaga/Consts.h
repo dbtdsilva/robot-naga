@@ -22,5 +22,7 @@
 #define KP                      0.2
 #define KD                      0.2
 #define KI                      0.0
+// This define controls how many walls should appear
+#define WALL_MARGIN             0.15
 
 #endif //RAZERNAGA_CONSTS_H

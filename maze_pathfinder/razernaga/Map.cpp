@@ -9,10 +9,9 @@ Map::Map() : Map(14, 7, 8) {
 }
 
 Map::Map(int cols, int rows, int square_precision) :
-        map_(cols * square_precision * 2, vector<Stats>(rows * square_precision * 2, Stats())),
+        map_(cols * square_precision * SQUARE_SIZE, vector<Stats>(rows * square_precision * SQUARE_SIZE, Stats())),
         cols_(cols), rows_(rows), square_precision_(square_precision), last_visited_pos_(convert_to_map_coordinates(0,0)),
         path_algorithm_(make_unique<MapAlgorithms>(this)), ptr_objective_(nullptr) {
-    srand(time(NULL));
 }
 
 void Map::enable_debug() {
@@ -29,7 +28,7 @@ bool Map::is_best_path_discovered() {
 
 void Map::set_target_nearest_exit() {
     for (int robot_size = 0; robot_size >= 0; robot_size--) {
-        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 1.25, robot_size);
+        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 1.1, robot_size);
         if (calculated_target_path_.size() != 0) break;
     }
     calculated_target_path_converted_.clear();
@@ -123,7 +122,7 @@ void Map::evaluate_position(const int& x, const int& y) {
     if (map_[x][y].visited > 0)
         map_[x][y].state = GROUND;
     else {
-        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * 0.15 ? GROUND : WALL;
+        map_[x][y].state = map_[x][y].wall_counter <= map_[x][y].ground_counter * WALL_MARGIN ? GROUND : WALL;
     }
 
     if (map_debug_ != nullptr) {
@@ -191,8 +190,8 @@ void Map::render_map() {
 }
 
 bool Map::validate_position(const int& x, const int& y) const {
-    return (x >= 0 && x < cols_ * square_precision_ * 2 &&
-            y >= 0 && y < rows_ * square_precision_ * 2);
+    return (x >= 0 && x < cols_ * square_precision_ * SQUARE_SIZE &&
+            y >= 0 && y < rows_ * square_precision_ * SQUARE_SIZE);
 }
 
 bool Map::validate_position(const tuple<int, int>& value) const {
@@ -208,13 +207,13 @@ std::tuple<int, int> Map::convert_to_map_coordinates(const std::tuple<double, do
 }
 
 std::tuple<int, int> Map::convert_to_map_coordinates(const double& x, const double& y) const {
-    return tuple<int, int>(static_cast<int>(round(x * (square_precision_ / 2.0) + cols_ * square_precision_)),
-                           static_cast<int>(round(-y * (square_precision_ / 2.0) + rows_ * square_precision_)));
+    return tuple<int, int>(static_cast<int>(round(x * (square_precision_ / SQUARE_SIZE) + cols_ * square_precision_)),
+                           static_cast<int>(round(-y * (square_precision_ / SQUARE_SIZE) + rows_ * square_precision_)));
 }
 
 std::tuple<double, double> Map::convert_from_map_coordinates(const int& x, const int& y) const {
-    return tuple<double, double>(2.0 * (static_cast<double>(x) / square_precision_ - cols_),
-                                 -2.0 * (static_cast<double>(y) / square_precision_ - rows_));
+    return tuple<double, double>(SQUARE_SIZE * (static_cast<double>(x) / square_precision_ - cols_),
+                                 -SQUARE_SIZE * (static_cast<double>(y) / square_precision_ - rows_));
 }
 
 std::tuple<double, double> Map::convert_from_map_coordinates(const std::tuple<int, int>& map_coordinates) const {
@@ -226,16 +225,17 @@ vector<tuple<double, double>> Map::convert_trajectory_to_discrete(const vector<t
     for (const tuple<int, int>& point_map : trajectory) {
         tuple<double, double> point = convert_from_map_coordinates(point_map);
         tuple<double, double> new_value = tuple<double, double>(
-                floor((M_X(point) + 1.0) / 2.0) * 2.0,
-                floor((M_Y(point) + 1.0) / 2.0) * 2.0);
+                floor((M_X(point) + 1.0) / SQUARE_SIZE) * SQUARE_SIZE,
+                floor((M_Y(point) + 1.0) / SQUARE_SIZE) * SQUARE_SIZE);
         if (std::find(discrete_trajectory.begin(), discrete_trajectory.end(), new_value) == discrete_trajectory.end()) {
             discrete_trajectory.push_back(new_value);
         }
     }
 
     tuple<double,double> converted_last_pos = convert_from_map_coordinates(last_visited_pos_);
-    tuple<int,int> last_pos_discrete = tuple<int, int>(floor((M_X(converted_last_pos) + 1.0) / 2.0) * 2.0,
-                                               floor((M_Y(converted_last_pos) + 1.0) / 2.0) * 2.0);
+    tuple<int,int> last_pos_discrete =
+            tuple<int, int>(floor((M_X(converted_last_pos) + 1.0) / SQUARE_SIZE) * SQUARE_SIZE,
+                            floor((M_Y(converted_last_pos) + 1.0) / 2.0) * SQUARE_SIZE);
     discrete_trajectory.erase(std::remove(discrete_trajectory.begin(), discrete_trajectory.end(),
                                           last_pos_discrete), discrete_trajectory.end());
     return discrete_trajectory;

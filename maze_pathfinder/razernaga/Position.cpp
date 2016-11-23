@@ -30,8 +30,9 @@ void Position::reset_y() {
     double value = M_Y(position_) / SQUARE_SIZE;
     if (fabs(value - round(value)) >= POSITION_RESET_MIN_DIFF / SQUARE_SIZE) return;
 
+    cout << "Resetting Y from " << M_X(position_);
     M_Y(position_) = round(M_Y(position_) / SQUARE_SIZE) * SQUARE_SIZE;
-    cout << "Resetting Y" << endl;
+    cout << " to " << M_Y(position_)  << endl;
 }
 
 void Position::reset_x() {
@@ -39,8 +40,9 @@ void Position::reset_x() {
     double value = M_X(position_) / SQUARE_SIZE;
     if (fabs(value - round(value)) >= POSITION_RESET_MIN_DIFF / SQUARE_SIZE) return;
 
+    cout << "Resetting X from " << M_X(position_);
     M_X(position_) = round(M_X(position_) / SQUARE_SIZE) * SQUARE_SIZE;
-    cout << "Resetting X" << endl;
+    cout << " to " << M_X(position_) << endl;
 }
 
 void Position::update_position(const double& theta, const double& in_left, const double& in_right) {

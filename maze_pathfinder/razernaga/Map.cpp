@@ -1,6 +1,7 @@
 #include "Map.h"
 #include <iostream>
 #include <algorithm>
+#include "Consts.h"
 
 using namespace std;
 

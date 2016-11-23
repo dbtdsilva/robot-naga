@@ -5,6 +5,7 @@
 #include "Position.h"
 
 #include <math.h>
+#include "Consts.h"
 
 using namespace std;
 
@@ -25,12 +26,20 @@ double Position::y() const {
 }
 
 void Position::reset_y() {
-    M_Y(position_) = round(M_Y(position_) / 2.0) * 2.0;
+    // It only resets if the position trying to reset is near the SQUARE_SIZE
+    double value = M_Y(position_) / SQUARE_SIZE;
+    if (fabs(value - round(value)) >= POSITION_RESET_MIN_DIFF / SQUARE_SIZE) return;
+
+    M_Y(position_) = round(M_Y(position_) / SQUARE_SIZE) * SQUARE_SIZE;
     cout << "Resetting Y" << endl;
 }
 
 void Position::reset_x() {
-    M_X(position_) = round(M_X(position_) / 2.0) * 2.0;
+    // It only resets if the position trying to reset is near the SQUARE_SIZE
+    double value = M_X(position_) / SQUARE_SIZE;
+    if (fabs(value - round(value)) >= POSITION_RESET_MIN_DIFF / SQUARE_SIZE) return;
+
+    M_X(position_) = round(M_X(position_) / SQUARE_SIZE) * SQUARE_SIZE;
     cout << "Resetting X" << endl;
 }
 

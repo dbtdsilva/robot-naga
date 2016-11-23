@@ -15,26 +15,11 @@
 #include "Sensors.h"
 #include "Position.h"
 #include "Map.h"
+#include "Consts.h"
 
 // Easier way to access the tuple from the motors speed
 #define M_MOTOR_LEFT(motors_tuple)      std::get<0>(motors_tuple)
 #define M_MOTOR_RIGHT(motors_tuple)     std::get<1>(motors_tuple)
-
-// Following defines are related with the calibration of the position, maximum angle to calibrate and maximum distance
-// between the difference from left and right obstacle sensors to calibrate
-#define POSITION_RESET_ANGLE    2.0
-#define POSITION_RESET_OBSTACLE 0.05
-// Basic parameters defined for the robot
-#define BASE_SPEED              0.13
-#define MAX_SPEED               0.15
-// Normalization factor used for the controller that rotates, smaller is faster to rotate and big is slower
-#define NORM_FACTOR             20.0
-#define OBSTACLE_LIMIT          0.4
-// Following parameters are related with the controller to follow a specific point
-#define INTEGRAL_CLIP           MAX_SPEED - BASE_SPEED
-#define KP                      0.2
-#define KD                      0.2
-#define KI                      0.0
 
 class RazerNaga : public QApplication {
     Q_OBJECT

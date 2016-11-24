@@ -20,7 +20,7 @@ RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host) :
 RazerNaga::RazerNaga(int &argc, char* argv[], int position, string host, vector<double> ir_sensor_angles) :
         QApplication(argc,argv), name_("RazerNaga"), grid_position_(position), host_(host),
         motor_speed_(0.0, 0.0), ir_sensor_angles_(ir_sensor_angles), state_(STOPPED),
-        calculated_path_reference_(map_.get_calculated_path()), position_cycles_reset(0)
+        calculated_path_reference_(map_.get_calculated_path()), position_cycles_reset(0), waiting_cycles(0)
 {
     if (InitRobot2(const_cast<char *>(name_.c_str()), grid_position_, &ir_sensor_angles[0],
                    const_cast<char *>(host_.c_str())) == -1) {
@@ -58,17 +58,29 @@ void RazerNaga::take_action() {
                 SetVisitingLed(true);
             } else {
                 if (calculated_path_reference_.size() == 0 ||
-                        sensors_.get_obstacle_sensor(1) < OBSTACLE_LIMIT || GetBumperSensor())
+                        sensors_.get_obstacle_sensor(1) < OBSTACLE_LIMIT || GetBumperSensor()) {
                     map_.set_target_nearest_exit();
+                    /*if (map_.is_explored()) {
+                        cout << "There is no possible way to find the target area." << endl;
+                        set_motors_speed(0,0);
+                        Finish();
+                    }*/
+                }
                 follow_path();
             }
             break;
         case EXPLORING_FINAL_PATH:
             SetVisitingLed(false);
             best_path = map_.is_best_path_discovered();
-            if (!map_.has_time(GetFinalTime() - GetTime()) || best_path) {
+            if (!map_.has_time(GetFinalTime() - GetTime())) {
                 map_.set_target_objective_area();
                 state_ = RETURN_TO_OBJECTIVE;
+            } else if (best_path) {
+                set_motors_speed(0, 0);
+                if (++waiting_cycles >= 10) {
+                    map_.set_target_objective_area();
+                    state_ = RETURN_TO_OBJECTIVE;
+                }
             } else {
                 if (calculated_path_reference_.size() == 0 ||
                         sensors_.get_obstacle_sensor(1) < OBSTACLE_LIMIT || GetBumperSensor()) {
@@ -160,11 +172,12 @@ void RazerNaga::follow_path() {
 bool RazerNaga::rotate_to_point(std::tuple<double, double>& point) {
     constexpr double NORMALIZE_FACTOR = 0.15 / 90.0;
     double speed, diff;
-    diff = normalize_angle(angle_between_two_points(position_.get_tuple(), point) - sensors_.get_compass());
+    cout << angle_between_two_points(position_.get_tuple(), point) << ", " << sensors_.get_compass() << endl;
+    diff = normalize_angle(angle_between_two_points(position_.get_tuple(), point) + sensors_.get_compass());
     speed = diff * NORMALIZE_FACTOR;
 
-    set_motors_speed(-speed, speed);
-    return fabs(diff) <=  ROTATE_ANGLE_MAX;
+    set_motors_speed(speed, -speed);
+    return fabs(diff) <= ROTATE_ANGLE_MAX;
 }
 
 void RazerNaga::retrieve_map() {
@@ -226,7 +239,7 @@ double RazerNaga::angle_between_two_points(const std::tuple<double, double>& sou
     } else { // tan(theta) = theta + K * M_PI
         value = atan(opposite / adjacent);
         if (adjacent < 0)
-            value += M_PI;
+            value -= M_PI;
     }
     return normalize_angle((value * 180.0) / M_PI);
 }

@@ -45,13 +45,16 @@ bool Map::has_time(const unsigned int& time) {
 }
 
 void Map::set_target_nearest_exit() {
-    for (int robot_size = 1; robot_size >= 0; robot_size--) {
-        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 2, robot_size);
+    for (int robot_size = 0; robot_size >= 0; robot_size--) {
+        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ + 2, robot_size);
         if (calculated_target_path_.size() != 0) break;
     }
     calculated_target_path_converted_.clear();
     calculated_target_path_converted_ = convert_trajectory_to_discrete(calculated_target_path_);
+}
 
+bool Map::is_explored() {
+    return calculated_target_path_.size() == 0;
 }
 
 void Map::set_target_objective_area() {

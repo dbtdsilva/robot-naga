@@ -34,6 +34,7 @@ public:
     std::vector<std::tuple<double, double>>& get_calculated_path();
     bool is_best_path_discovered();
     bool has_time(const unsigned int& time);
+    bool is_explored();
 
     PositionState get_position_state(const int& x, const int& y) const;
 

@@ -54,7 +54,7 @@ private:
     const int grid_position_;
     const std::string host_;
     const std::vector<double> ir_sensor_angles_;
-    int position_cycles_reset;
+    int position_cycles_reset, waiting_cycles;
     Map map_;
     Sensors sensors_;
     Position position_;

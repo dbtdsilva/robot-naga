@@ -38,15 +38,15 @@ bool Map::has_time(const unsigned int& time) {
     const double TIME_PER_CELL = 25;
     double required_cells_size = path_total_size / static_cast<double>(square_precision_);
     double current_cells_left = time / TIME_PER_CELL;
-    
+
     if (current_cells_left < required_cells_size)
         cout << "There is not enough time to explore! It must return now!" << endl;
     return current_cells_left >= required_cells_size;
 }
 
 void Map::set_target_nearest_exit() {
-    for (int robot_size = 0; robot_size >= 0; robot_size--) {
-        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 1.1, robot_size);
+    for (int robot_size = 1; robot_size >= 0; robot_size--) {
+        calculated_target_path_ = path_algorithm_->flood_fill(last_visited_pos_, square_precision_ * 2, robot_size);
         if (calculated_target_path_.size() != 0) break;
     }
     calculated_target_path_converted_.clear();

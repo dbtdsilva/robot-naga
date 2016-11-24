@@ -169,7 +169,6 @@ void RazerNaga::follow_path() {
 bool RazerNaga::rotate_to_point(std::tuple<double, double>& point) {
     constexpr double NORMALIZE_FACTOR = 0.15 / 90.0;
     double speed, diff;
-    cout << angle_between_two_points(position_.get_tuple(), point) << ", " << sensors_.get_compass() << endl;
     diff = normalize_angle(angle_between_two_points(position_.get_tuple(), point) + sensors_.get_compass());
     speed = diff * NORMALIZE_FACTOR;
 

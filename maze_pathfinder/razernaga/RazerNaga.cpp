@@ -60,11 +60,9 @@ void RazerNaga::take_action() {
                 if (calculated_path_reference_.size() == 0 ||
                         sensors_.get_obstacle_sensor(1) < OBSTACLE_LIMIT || GetBumperSensor()) {
                     map_.set_target_nearest_exit();
-                    /*if (map_.is_explored()) {
+                    if (map_.is_explored()) {
                         cout << "There is no possible way to find the target area." << endl;
-                        set_motors_speed(0,0);
-                        Finish();
-                    }*/
+                    }
                 }
                 follow_path();
             }
@@ -120,7 +118,6 @@ void RazerNaga::take_action() {
     if (sensors_.get_obstacle_sensor(1) <= 0.2 || GetBumperSensor())
         set_motors_speed(-0.1, -0.1);
 
-    //cout << sensors_ << endl;
     recalibrate_position();
     apply_motors_speed();
 }
@@ -223,7 +220,7 @@ void RazerNaga::set_motors_speed(const double& motor_left, const double& motor_r
 }
 void RazerNaga::apply_motors_speed() {
     DriveMotors(M_MOTOR_LEFT(motor_speed_), M_MOTOR_RIGHT(motor_speed_));
-    if (!GetBumperSensor())
+    if (!GetBumperSensor() && state_ != STOPPED)
         position_.update_position(sensors_.get_compass(), M_MOTOR_LEFT(motor_speed_), M_MOTOR_RIGHT(motor_speed_));
     cycle_ended();
 }

@@ -5,6 +5,8 @@
 #include <libRobSock/RobSock.h>
 #include <libRobSock/cmeasures.h>
 #include "Sensors.h"
+#include <limits>
+#include <cmath>
 
 using namespace std;
 
@@ -15,8 +17,13 @@ void Sensors::update_values() {
     ReadSensors();
 
     for (int obstacle_id = 0; obstacle_id < NUM_IR_SENSORS; obstacle_id++) {
-        if (IsObstacleReady(obstacle_id))
-            obstacles_[obstacle_id].update(1.0 / GetObstacleSensor(obstacle_id));
+        if (IsObstacleReady(obstacle_id)) {
+            if (GetObstacleSensor(obstacle_id) <= 0) {
+                obstacles_[obstacle_id].update(2.5);
+            } else {
+                obstacles_[obstacle_id].update(1.0 / GetObstacleSensor(obstacle_id));
+            }
+        }
     }
     if (IsCompassReady())
         compass_.update(GetCompassSensor());

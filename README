@@ -1,3 +1,4 @@
-This project includes 2 different subprojects:
-* Simulated agent (pathfinder) which has the objective to find the target and return to the initial position after (within a maze).
-* A real agent (microrato) that follows a line (that line might have several obstacles and track interruptions).
+The first project was developed under the folder "line_follower" and the report/presentation are in the folder "docs" with the prefix "line_follower" as well.
+The second project is under the folder "maze_pathfinder" and the report/presentation can be found in the folder "docs" with the prefix "maze_pathfinder".
+
+Let me know if you have any problems running it (dbtds@ua.pt).
